@@ -323,7 +323,7 @@
 
 <script>
 /* ============ PERFILES ============ */
-const VERSION='v0.3';
+const VERSION='v0.4';
 
 /* Diagnóstico: cualquier fallo silencioso se pinta en pantalla. No depende
    de ningún elemento del maquetado, se crea el suyo. */
@@ -346,12 +346,22 @@ window.addEventListener('unhandledrejection',e=>{
   const r=e.reason; diag('PROMESA SIN CAPTURAR: '+((r&&r.message)||r));
 });
 
-const PROFILES=[
-  { id:'diego', name:'Diego', ssid:'1pXXW1J9T4nVXRFXajFWRNHUEbcuGD2alM6UPQMiXPOs',
-    dias:['PULL 1','PUSH 1','LEG 1','PULL 2','PUSH 2','BRAZO','CADENA 1'] },
-  { id:'amara', name:'Amara', ssid:'1xJJWk0rjt_deDTNIBhHnrhHI0QGE2RVYMBrUCz5MXzs',
-    dias:['PIERNA 1','TORSO 1','GLÚTEO 1','DESCANSO 1','GLÚTEO 2','TORSO 2','PIERNA 2','DESCANSO 2'] }
-];
+/* Los perfiles no van en la app. Los da el script según el código de acceso:
+   nombre y pestañas de día, nunca identificadores de hoja. Se guardan en el
+   móvil para arrancar sin red. */
+const PERFK='tracker.perfiles.v1';
+const NADIE={id:'',name:'',dias:[]};
+let PROFILES=[];
+try{
+  const guardados=JSON.parse(localStorage.getItem(PERFK)||'[]');
+  if(Array.isArray(guardados)) PROFILES=guardados.filter(x=>x&&x.id);
+}catch(e){}
+function ponPerfiles(lista){
+  PROFILES=(lista||[]).filter(x=>x&&x.id).map(x=>(
+    {id:String(x.id), name:String(x.name||x.id), dias:(x.dias||[]).map(String)}));
+  try{ localStorage.setItem(PERFK,JSON.stringify(PROFILES)); }catch(e){}
+  P=PROFILES.find(x=>x.id===P.id)||PROFILES[0]||NADIE;
+}
 const NODAY=/^(LEYENDA|RESUMEN|GR[ÁA]FICAS?|NOTAS|PLANTILLA)/i;
 const MESES=['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
 
@@ -363,7 +373,7 @@ const colL=i=>{let s='',n=i;while(n>=0){s=String.fromCharCode(65+n%26)+s;n=Math.
 const hoyTxt=()=>{const d=new Date();return String(d.getDate())+MESES[d.getMonth()];};
 const LSK='tracker.queue.v2', SESSK='tracker.sesion.v1', ULTK='tracker.ultimo.v1', RESTK='tracker.rest.v1';
 
-let P=PROFILES[0], S=null, cur=null, draft=null, wStep=2.5, editIdx=null;
+let P=PROFILES[0]||NADIE, S=null, cur=null, draft=null, wStep=2.5, editIdx=null;
 let pickDay=0, pickRoll=null, days={}, rollsUsed={};
 let timer=null,tLeft=0,tTotal=0,tEnd=0,tOver=false,actx=null,wl=null;
 
@@ -443,18 +453,18 @@ function aplicaItem(rows,it){
   });
   if(it.date&&!it.clear&&rows[0]) poneCelda(rows[0],it.dateCol,it.date);
 }
-function aplicaCola(rows,ssid,day){
+function aplicaCola(rows,pid,day){
   const ahora=Date.now();
   recientes=recientes.filter(x=>ahora-x.t<FRESCO);
   recientes.map(x=>x.it).concat(queue()).forEach(it=>{
-    if(it.ssid===ssid&&it.day===day) aplicaItem(rows,it); });
+    if(it.pid===pid&&it.day===day) aplicaItem(rows,it); });
   return rows;
 }
 /* Lee un día de la hoja, le aplica lo pendiente y lo deja en la copia local. */
 async function traeDia(p,day){
   const rows=await readDay(day,p);
   if(!detect(rows)) throw new Error('sin cabeceras ROLL');
-  aplicaCola(rows,p.ssid,day);
+  aplicaCola(rows,p.id,day);
   const reg={rows:rows,ts:Date.now()};
   await dbSet(dkey(p.id,day),reg);
   return reg;
@@ -574,8 +584,7 @@ function parseSheet(rows,roll,L,day){
 }
 
 /* ============ PERFIL / DÍA / ROLL ============ */
-let ALLOWED=null;   /* null = todos; si no, lista de ids permitidos */
-const visibles=()=>ALLOWED?PROFILES.filter(p=>ALLOWED.indexOf(p.id)>=0):PROFILES;
+const visibles=()=>PROFILES;
 function renderProf(){
   const vs=visibles();
   if(vs.length&&!vs.some(p=>p.id===P.id)){ P=vs[0]; pickDay=0; pickRoll=null; days={}; rollsUsed={}; }
@@ -606,6 +615,7 @@ function renderPick(){
 const key=()=>P.id+'|'+((days[P.id]||[])[pickDay]||'');
 
 async function loadDays(){
+  if(!P.id){ renderPick(); return; }
   try{
     // Las pestañas de las dos hojas son conocidas: se usan de inmediato para
     // no depender de una llamada que puede tardar o colgarse.
@@ -1135,7 +1145,7 @@ function doLog(withTimer){
   renderEx();
   if(withTimer) startRest(e,s,idx);
   marcaUltimo();
-  const it={ ssid:P.ssid, day:S.day, row:s.row, c0:S.cc, c1:S.cc+L.stride-1,
+  const it={ pid:P.id, day:S.day, row:s.row, c0:S.cc, c1:S.cc+L.stride-1,
     values:vals, dateCol:S.cc+1, date:hoyTxt() };
   guardaLocal(it);
   const q=queue(); q.push(it);
@@ -1149,7 +1159,7 @@ function clearSet(){
   s.hist[S.roll-1]={ n:S.roll, w:'', r:'' };
   editIdx=null; draft=null;
   renderEx();
-  const it={ ssid:P.ssid, day:S.day, row:s.row, c0:S.cc, c1:S.cc+L.stride-1,
+  const it={ pid:P.id, day:S.day, row:s.row, c0:S.cc, c1:S.cc+L.stride-1,
     values:new Array(L.stride).fill(''), clear:true };
   guardaLocal(it);
   const q=queue(); q.push(it);
@@ -1367,20 +1377,11 @@ function señal(ms){
   setTimeout(()=>c.abort(),ms);
   return {signal:c.signal};
 }
-async function apiGet(params){
-  if(!CFG.url) throw new Error('falta la URL');
-  const u=new URL(CFG.url);
-  u.searchParams.set('token',CFG.token);
-  u.searchParams.set('ssid',P.ssid);
-  Object.keys(params).forEach(k=>u.searchParams.set(k,params[k]));
-  const r=await fetch(u.toString(),Object.assign({method:'GET',redirect:'follow'},señal(20000)));
-  if(!r.ok) throw new Error('HTTP '+r.status);
-  const j=await r.json();
-  if(j.error) throw new Error(j.error==='token'?'código incorrecto':j.error);
-  return j;
-}
-async function apiPost(body){
-  if(!CFG.url) throw new Error('falta la URL');
+/* Todas las llamadas van por POST con el código dentro del cuerpo: no
+   aparece en ninguna dirección. */
+async function api(body){
+  if(!CFG.url) throw new Error('falta la dirección del script');
+  if(!CFG.token) throw new Error('falta el código');
   const r=await fetch(CFG.url,Object.assign({ method:'POST', redirect:'follow',
     headers:{'Content-Type':'text/plain;charset=utf-8'},
     body:JSON.stringify(Object.assign({token:CFG.token},body)) },señal(20000)));
@@ -1389,10 +1390,18 @@ async function apiPost(body){
   if(j.error) throw new Error(j.error==='token'?'código incorrecto':j.error);
   return j;
 }
-async function listSheets(){ const j=await apiGet({action:'ping'}); return j.sheets||[]; }
-async function readDay(day,p){ const j=await apiGet({action:'load',day:day,ssid:(p||P).ssid}); return j.values||[]; }
+async function traePerfiles(){
+  const j=await api({action:'perfiles'});
+  if(!j.profiles||!j.profiles.length||typeof j.profiles[0]!=='object')
+    throw new Error('el script de la hoja es antiguo: hay que volver a implementarlo');
+  ponPerfiles(j.profiles);
+  return PROFILES;
+}
+async function listSheets(){ await traePerfiles(); renderProf(); return P.dias||[]; }
+async function readDay(day,p){ const j=await api({action:'load',perfil:(p||P).id,day:day}); return j.values||[]; }
 async function write(it){
-  await apiPost({ action:'write', ssid:it.ssid, day:it.day, row:it.row,
+  // `ssid` solo lo llevan series que quedaron en cola con la versión anterior
+  await api({ action:'write', perfil:it.pid, ssid:it.ssid, day:it.day, row:it.row,
     col:it.c0+1, values:it.values, date:it.date, clear:!!it.clear });
 }
 $('cfgLink').onclick=()=>{ cfgOpen=true; renderCfg(); };
@@ -1400,11 +1409,8 @@ $('bSaveCfg').onclick=async()=>{
   CFG.url=$('iUrl').value.trim()||SCRIPT_URL; CFG.token=$('iTok').value.trim(); saveCfg();
   $('cfgMsg').className='msg'; $('cfgMsg').innerHTML='<span class="spin"></span> Probando…';
   try{
-    const pf=await apiGet({action:'perfiles'});
-    ALLOWED=(pf&&pf.profiles&&pf.profiles.length)?pf.profiles:null;
-    renderProf();
-    const j=await apiGet({action:'ping'});
-    $('cfgMsg').textContent='Conectado a «'+(j.title||'?')+'» · '+((j.sheets||[]).length)+' pestañas.';
+    await traePerfiles();
+    $('cfgMsg').textContent='Conectado.';
     setSyn('ok','conectado'); cfgOpen=false; renderCfg(); days={}; rollsUsed={}; renderProf(); loadDays();
   }catch(e){
     $('cfgMsg').className='msg bad';
@@ -1412,17 +1418,24 @@ $('bSaveCfg').onclick=async()=>{
     setSyn('err','sin conexión');
   }
 };
+function arranca(){
+  if(!(CFG.url&&CFG.token)){ setSyn('','configura'); return; }
+  setSyn('','listo');
+  // Con perfiles guardados se entra al momento; loadDays ya los contrasta
+  // con el script por detrás. Sin ellos hay que pedirlos antes.
+  if(PROFILES.length){ renderProf(); loadDays(); return; }
+  setSyn('pend','conectando');
+  traePerfiles().then(()=>{ renderProf(); loadDays(); }).catch(e=>{
+    setSyn('err','sin conexión');
+    mostrarErrorDias('No he podido conectar con tus hojas.',(e&&e.message)||String(e));
+  });
+}
+reintentar=()=>{ if(PROFILES.length) reintentarDias(); else arranca(); };
 loadCfg(); renderCfg(); renderProf(); renderPick();
 $('sub').textContent='Elige perfil, día y ROLL · '+VERSION;
 if(queue().length){ setSyn('pend',queue().length+' pend.'); }
 retomaRest();
-if(CFG.url&&CFG.token){
-  setSyn('','listo');
-  apiGet({action:'perfiles'}).then(pf=>{
-    ALLOWED=(pf&&pf.profiles&&pf.profiles.length)?pf.profiles:null;
-    renderProf(); loadDays();
-  }).catch(()=>loadDays());
-} else setSyn('','configura');
+arranca();
 
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{ navigator.serviceWorker.register('./sw.js').catch(()=>{}); });
