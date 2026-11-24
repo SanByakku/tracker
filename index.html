@@ -1387,7 +1387,10 @@ async function api(body){
     body:JSON.stringify(Object.assign({token:CFG.token},body)) },señal(20000)));
   if(!r.ok) throw new Error('HTTP '+r.status);
   const j=await r.json();
-  if(j.error) throw new Error(j.error==='token'?'código incorrecto':j.error);
+  if(j.error){
+    if(/falta ssid/.test(j.error)) throw new Error('el script de la hoja sigue en la versión antigua: falta implementar la nueva');
+    throw new Error(j.error==='token'?'código incorrecto':j.error);
+  }
   return j;
 }
 async function traePerfiles(){
@@ -1414,7 +1417,7 @@ $('bSaveCfg').onclick=async()=>{
     setSyn('ok','conectado'); cfgOpen=false; renderCfg(); days={}; rollsUsed={}; renderProf(); loadDays();
   }catch(e){
     $('cfgMsg').className='msg bad';
-    $('cfgMsg').textContent='No conecta: '+(e.message||e)+'. Revisa que el código esté completo, sin espacios.';
+    $('cfgMsg').textContent='No conecta: '+(e.message||e)+(/código/.test(String(e.message))?'. Revisa que esté completo, sin espacios.':'.');
     setSyn('err','sin conexión');
   }
 };
