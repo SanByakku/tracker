@@ -355,7 +355,7 @@
 
 <script>
 /* ============ PERFILES ============ */
-const VERSION='v0.6.1';
+const VERSION='v0.6.2';
 
 /* Diagnóstico: cualquier fallo silencioso se pinta en pantalla. No depende
    de ningún elemento del maquetado, se crea el suyo. */
@@ -1421,17 +1421,17 @@ function renderDieta(){
   });
   const elegido=(dietSel()[P.id])||{}, claves=[];
   const linea=(x,b)=>{
-    const desc=x.d==='descanso', cls='dl'+(desc?' desc':'');
+    const cls='dl';
     const alt=alternativas(x.t);
     if(alt){
       const clave=b.n+'§'+x.d+'§'+alt.map(a=>a.e).join('/');
       let i=elegido[clave]; if(!(i>=0&&i<alt.length)) i=0;
       const k=claves.push(clave)-1;
-      return `<div class="${cls}">${desc?'<small>Día sin entrenamiento</small>':''}${esc(alt[i].t)}
+      return `<div class="${cls}">${esc(alt[i].t)}
         <div class="alts">${alt.map((a,j)=>`<button class="${j===i?'on':''}" data-ak="${k}" data-ai="${j}">${esc(a.e)}</button>`).join('')}</div></div>`;
     }
     const m=x.t.match(/^(Opción|Suplementación|Además)\s*:\s*(.+)$/);
-    const et=desc?'Día sin entrenamiento':(m?m[1]:'');
+    const et=m?m[1]:'';
     return `<div class="${cls}">${et?'<small>'+esc(et)+'</small>':''}${esc(m?m[2]:x.t)}</div>`;
   };
   $('dietBody').innerHTML=bloques.filter(b=>b.l.length).map(b=>{
