@@ -25,7 +25,7 @@
   .hide{display:none!important}
 
   .top{position:sticky;top:0;z-index:30;background:rgba(12,13,16,.94);backdrop-filter:blur(12px);
-    border-bottom:1px solid var(--line)}
+    border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top)}
   .top-in{display:flex;align-items:center;gap:10px;padding:11px 14px}
   .back{width:34px;height:34px;border-radius:10px;background:var(--panel2);display:grid;
     place-items:center;font-size:18px;flex:0 0 auto}
@@ -589,7 +589,7 @@ function renderPick(){
   const sd=ds.length?sugDia():-1;
   $('dayPick').innerHTML = ds.length
     ? ds.map((d,i)=>`<button class="pick ${pickDay===i?'on':''}" data-d="${i}">${esc(d)}${i===sd?'<span class="hoy">TOCA</span>':''}</button>`).join('')
-    : '<div class="msg">Cargando pestañas…</div>';
+    : '<div class="msg">'+(CFG.url&&CFG.token?'Cargando pestañas…':'Primero conecta con tus hojas en el recuadro de arriba.')+'</div>';
   [...$('dayPick').querySelectorAll('button')].forEach(b=>b.onclick=()=>{
     pickDay=+b.dataset.d; pickRoll=null; renderPick(); scanRolls(); });
   const nR=(rollsUsed[key()]&&rollsUsed[key()].n)||12;
