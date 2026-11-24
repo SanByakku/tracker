@@ -355,7 +355,7 @@
 
 <script>
 /* ============ PERFILES ============ */
-const VERSION='v0.6.2 beta';
+const VERSION='v0.6.3 beta';
 
 /* Diagnóstico: cualquier fallo silencioso se pinta en pantalla. No depende
    de ningún elemento del maquetado, se crea el suyo. */
@@ -1434,8 +1434,14 @@ function renderDieta(){
     const et=m?m[1]:'';
     return `<div class="${cls}">${et?'<small>'+esc(et)+'</small>':''}${esc(m?m[2]:x.t)}</div>`;
   };
+  // Todo lo que queda entre la primera y la última comida (el intraentreno,
+  // por ejemplo) se pinta como una comida más, línea a línea y sin plegar.
+  const esC=b=>/^COMIDA\b/i.test(b.n);
+  const idx=bloques.map((b,i)=>esC(b)?i:-1).filter(i=>i>=0);
+  const pri=idx.length?idx[0]:-1, ult=idx.length?idx[idx.length-1]:-1;
+  bloques.forEach((b,i)=>{ b.comida=i>=pri&&i<=ult&&pri>=0; });
   $('dietBody').innerHTML=bloques.filter(b=>b.l.length).map(b=>{
-    const comida=/^COMIDA\b/i.test(b.n), cab=`<h3>${esc(b.n)}</h3>`;
+    const comida=b.comida, cab=`<h3>${esc(b.n)}</h3>`;
     const cuando=b.c?`<div class="dc">${esc(b.c)}</div>`:'';
     const cuerpo=`<div class="dls">${b.l.map(x=>linea(x,b)).join('')}</div>`;
     // Los bloques largos que no son comidas (instrucciones, equivalencias) van plegados
