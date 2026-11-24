@@ -1,0 +1,1494 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="theme-color" content="#0c0d10">
+<title>Tracker de entrenamiento</title>
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png?v=2">
+<link rel="icon" href="./icon-192.png?v=2">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="XLIV beta">
+<meta name="mobile-web-app-capable" content="yes">
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  :root{--bg:#0c0d10;--panel:#15171c;--panel2:#1d2027;--line:#262a33;--txt:#eef0f4;
+    --dim:#8b92a1;--dim2:#5c636f;--acc:#d7ff3e;--accd:#2f3a12;--warn:#ffb340;--bad:#ff6b5e;
+    --ok:#4ade80;--blue:#60a5fa;--purp:#c084fc}
+  html,body{margin:0;background:var(--bg);color:var(--txt);font-variant-numeric:tabular-nums;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;overscroll-behavior:none}
+  body{max-width:540px;margin:0 auto;padding-bottom:110px}
+  .wrap{padding:0 14px}
+  button{font-family:inherit;border:0;background:none;color:inherit;cursor:pointer}
+  .hide{display:none!important}
+
+  .top{position:sticky;top:0;z-index:30;background:rgba(12,13,16,.94);backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top)}
+  .top-in{display:flex;align-items:center;gap:10px;padding:11px 14px}
+  .back{width:34px;height:34px;border-radius:10px;background:var(--panel2);display:grid;
+    place-items:center;font-size:18px;flex:0 0 auto}
+  .top h1{font-size:14.5px;font-weight:650;margin:0;letter-spacing:-.2px;line-height:1.25}
+  .top .sub{font-size:11px;color:var(--dim);margin-top:2px}
+  .syn{font-size:10px;padding:4px 8px;border-radius:7px;background:var(--panel2);color:var(--dim);
+    flex:0 0 auto;font-weight:650;letter-spacing:.2px}
+  .syn.ok{background:#15321f;color:var(--ok)} .syn.pend{background:#3a2e16;color:var(--warn)}
+  .syn.err{background:#3a1a16;color:var(--bad)}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0}
+  .lab{font-size:10px;color:var(--dim2);letter-spacing:.8px;text-transform:uppercase;font-weight:650;margin-bottom:8px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+  .pick{padding:12px 8px;border-radius:11px;background:var(--panel2);border:1px solid var(--line);
+    font-size:12.5px;font-weight:600;text-align:center}
+  .pick.on{background:var(--accd);border-color:#4e6318;color:var(--acc)}
+  .rolls{display:flex;gap:6px;overflow-x:auto;padding-bottom:3px;-webkit-overflow-scrolling:touch}
+  .rolls button{flex:0 0 auto;width:44px;padding:11px 0;border-radius:11px;background:var(--panel2);
+    border:1px solid var(--line);font-size:13px;font-weight:700;color:var(--dim)}
+  .rolls button.on{background:var(--accd);border-color:#4e6318;color:var(--acc)}
+  .rolls button.used{color:var(--txt);border-color:#3a414e}
+  .go{width:100%;padding:15px;border-radius:13px;background:var(--acc);color:#10140a;
+    font-size:15px;font-weight:750;margin-top:4px}
+  .go:disabled{opacity:.4}
+  .msg{font-size:11.5px;color:var(--dim);line-height:1.5;margin-top:10px}
+  .msg.bad{color:var(--bad)}
+
+  .meta{display:flex;gap:6px;flex-wrap:wrap;margin:13px 0 14px}
+  .chip{font-size:11px;color:var(--dim);background:var(--panel);border:1px solid var(--line);
+    padding:5px 9px;border-radius:999px}
+  .chip b{color:var(--txt);font-weight:600}
+
+  .gband{font-size:10.5px;color:var(--acc);letter-spacing:1px;font-weight:700;margin:16px 0 7px}
+  .excard{display:flex;align-items:center;gap:11px;background:var(--panel);border:1px solid var(--line);
+    border-radius:13px;padding:12px 13px;width:100%;text-align:left;margin-bottom:6px}
+  .excard:active{background:var(--panel2)} .excard.done{opacity:.5}
+  .excard .nm{font-size:13.5px;font-weight:600;line-height:1.3;letter-spacing:-.2px}
+  .excard .rx{font-size:11px;color:var(--dim);margin-top:3px}
+  .excard .grow{flex:1;min-width:0}
+  .ring{width:36px;height:36px;position:relative;flex:0 0 auto}
+  .ring svg{transform:rotate(-90deg)}
+  .ring span{position:absolute;inset:0;display:grid;place-items:center;font-size:10px;font-weight:700;color:var(--dim)}
+  .ring.full span{color:var(--acc)}
+
+  .rxbar{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:11px 6px;
+    margin:13px 0 4px;display:flex}
+  .rxbar div{flex:1;text-align:center;border-right:1px solid var(--line)}
+  .rxbar div:last-child{border:0}
+  .rxbar .k{font-size:9.5px;color:var(--dim2);letter-spacing:.6px;text-transform:uppercase}
+  .rxbar .v{font-size:15px;font-weight:700;margin-top:3px;letter-spacing:-.3px}
+  .nota{font-size:11.5px;color:var(--warn);background:#2a2012;border:1px solid #473518;
+    border-radius:11px;padding:9px 11px;margin:8px 0 0;line-height:1.4}
+
+  .seclab{font-size:10px;color:var(--dim2);letter-spacing:.8px;text-transform:uppercase;
+    margin:16px 0 7px;display:flex;justify-content:space-between;align-items:baseline;font-weight:650}
+  .set{display:flex;align-items:center;gap:9px;padding:10px 12px;border-radius:12px;
+    background:var(--panel);border:1px solid var(--line);margin-bottom:5px}
+  .set .n{width:20px;font-size:11.5px;color:var(--dim2);font-weight:700;flex:0 0 auto}
+  .set .tgt{font-size:11.5px;color:var(--dim2);flex:1;line-height:1.35}
+  .set .tgt em{font-style:normal;color:var(--dim)}
+  .set .val{font-size:14px;font-weight:650;text-align:right;letter-spacing:-.2px}
+  .set .val small{color:var(--dim);font-weight:500;font-size:11px}
+  .set.logged{background:var(--panel2);border-color:#2d323c}
+  .set.logged .n{color:var(--acc)}
+  .set .dev{font-size:9.5px;padding:2px 5px;border-radius:5px;margin-left:5px;font-weight:700}
+  .dev.up{background:#15321f;color:var(--ok)} .dev.down{background:#3a2016;color:var(--bad)}
+  .dev.rb{background:#152a3a;color:var(--blue)} .dev.ro{background:#3a2a12;color:var(--warn)}
+  .set .aj{font-size:10.5px;color:var(--purp);margin-top:3px}
+
+  .active{background:linear-gradient(180deg,#1b1f26,#15171c);border:1px solid #333a46;
+    border-radius:16px;padding:13px;margin-bottom:7px;box-shadow:0 8px 32px rgba(0,0,0,.45)}
+  .active .hd{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:11px;gap:8px}
+  .active .hd .t{font-size:12px;font-weight:700;letter-spacing:.2px;flex:0 0 auto}
+  .active .hd .t b{color:var(--acc)}
+  .active .hd .prev{font-size:11px;color:var(--dim);text-align:right;line-height:1.3}
+  .row{display:flex;gap:8px;margin-bottom:8px}
+  .field{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 6px;text-align:center}
+  .field .k{font-size:9px;color:var(--dim2);letter-spacing:.6px;text-transform:uppercase}
+  .field .ctl{display:flex;align-items:center;justify-content:space-between;margin-top:4px;gap:1px}
+  .field .ctl button{width:30px;height:30px;border-radius:8px;background:var(--panel2);font-size:18px;
+    font-weight:600;display:grid;place-items:center;line-height:1;flex:0 0 auto}
+  .field .ctl button:active{background:#2b303a}
+  .field input{width:100%;min-width:0;background:none;border:0;color:var(--txt);text-align:center;
+    font-size:20px;font-weight:700;letter-spacing:-.5px;font-family:inherit;padding:0;
+    font-variant-numeric:tabular-nums}
+  .field input:focus{outline:none;color:var(--acc)}
+  .field .u{font-size:9.5px;color:var(--dim2);margin-top:1px}
+  .steps{display:flex;gap:4px;justify-content:center;margin-bottom:9px}
+  .steps button{padding:5px 9px;border-radius:8px;background:var(--panel);border:1px solid var(--line);
+    font-size:10.5px;color:var(--dim);font-weight:650}
+  .steps button.on{background:var(--accd);border-color:#4e6318;color:var(--acc)}
+  .rirrow{display:flex;gap:5px;margin-bottom:9px}
+  .rirrow button{flex:1;padding:9px 0;border-radius:10px;background:var(--panel);
+    border:1px solid var(--line);font-size:12.5px;font-weight:650;color:var(--dim)}
+  .rirrow button.on{background:var(--accd);border-color:#4e6318;color:var(--acc)}
+  .ajin{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:11px;
+    padding:10px 11px;color:var(--txt);font-size:12px;font-family:inherit;margin-bottom:9px}
+  .ajin:focus{outline:none;border-color:#4e6318}
+  .logbtn{width:100%;padding:15px;border-radius:13px;background:var(--acc);color:#10140a;
+    font-size:15px;font-weight:750}
+  .logbtn:active{transform:scale(.985)}
+  .logbtn.sec{background:var(--panel2);color:var(--txt);font-size:12.5px;font-weight:600;padding:11px;margin-top:6px}
+  .bigbtn{width:100%;padding:14px;border-radius:13px;background:var(--panel2);border:1px solid var(--line);
+    font-size:13.5px;font-weight:650;margin-top:14px}
+
+  .hist{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-top:4px}
+  table{border-collapse:collapse;font-size:11.5px;width:100%}
+  th,td{padding:6px 8px;text-align:center;border-bottom:1px solid var(--line);white-space:nowrap}
+  th{color:var(--dim2);font-size:9.5px;letter-spacing:.5px;text-transform:uppercase;font-weight:650}
+  td.s{color:var(--dim2);text-align:left}
+
+  .rest{position:fixed;left:0;right:0;bottom:0;z-index:40;max-width:540px;margin:0 auto;
+    background:rgba(16,18,22,.97);backdrop-filter:blur(14px);border-top:1px solid #2b303a;
+    padding:11px 14px calc(11px + env(safe-area-inset-bottom));display:none}
+  .rest.on{display:block}
+  .rest .r1{display:flex;align-items:center;gap:11px}
+  .rest .big{font-size:26px;font-weight:750;letter-spacing:-1px;min-width:74px}
+  .rest .lb{flex:1;font-size:11px;color:var(--dim);line-height:1.35;min-width:0}
+  .rest .lb b{color:var(--txt);font-size:12px;display:block;font-weight:650;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .rest button{padding:9px 12px;border-radius:10px;background:var(--panel2);font-size:11.5px;font-weight:650;flex:0 0 auto}
+  .rest .bar{height:3px;background:var(--line);border-radius:2px;margin-top:9px;overflow:hidden}
+  .rest .bar i{display:block;height:100%;background:var(--acc);transition:width .3s linear}
+  .rest.over .big{color:var(--acc)}
+
+  .vrow{display:flex;align-items:center;gap:9px;margin-bottom:7px;font-size:12px}
+  .vrow .g{width:92px;color:var(--dim);flex:0 0 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .vrow .t{flex:1;height:6px;background:var(--panel2);border-radius:3px;overflow:hidden}
+  .vrow .t i{display:block;height:100%;background:var(--acc);border-radius:3px}
+  .vrow .s{width:32px;text-align:right;font-weight:700;flex:0 0 auto}
+  .note{font-size:10.5px;color:var(--dim2);line-height:1.5;margin-top:9px}
+  .spin{display:inline-block;width:13px;height:13px;border:2px solid var(--dim2);
+    border-top-color:var(--acc);border-radius:50%;animation:sp .7s linear infinite;vertical-align:-2px}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .prof{display:flex;gap:7px;margin-bottom:2px}
+  .prof button{flex:1;padding:13px 8px;border-radius:12px;background:var(--panel2);
+    border:1px solid var(--line);font-size:13.5px;font-weight:650}
+  .prof button.on{background:var(--accd);border-color:#4e6318;color:var(--acc)}
+  .gnote{font-size:11px;color:var(--dim);line-height:1.45;margin:-3px 0 8px;padding-left:1px}
+  .rirrow.wide button{font-size:11.5px;padding:9px 2px}
+  .set.tap{cursor:pointer}
+  .set.tap:active{background:#23272f}
+  .set .edit{font-size:9.5px;color:var(--dim2);letter-spacing:.4px;margin-top:2px}
+  .logbtn.danger{background:#3a1a16;color:var(--bad);font-size:12.5px;font-weight:650;padding:11px;margin-top:6px}
+  .wtxt{width:100%;background:var(--panel);border:1px dashed var(--line);border-radius:11px;
+    padding:9px 11px;color:var(--txt);font-size:12px;font-family:inherit;text-align:center;
+    margin-bottom:9px}
+  .wtxt::placeholder{color:var(--dim2)}
+  .wtxt:focus{outline:none;border-style:solid;border-color:#4e6318;color:var(--acc)}
+  .pendbar{display:none;margin:12px 14px 0;background:#2a2012;border:1px solid #473518;
+    border-radius:13px;padding:12px 13px}
+  .pendbar.on{display:block}
+  .pendbar .pb1{font-size:12.5px;color:var(--warn);line-height:1.4}
+  .pendbar .pb1 b{display:block;font-size:14px;color:var(--txt);font-weight:700;margin-bottom:2px}
+  .pendbar .pb2{display:flex;gap:7px;margin-top:10px}
+  .pendbar .pb2 button{flex:1;padding:10px;border-radius:10px;background:var(--panel2);
+    font-size:12px;font-weight:650}
+  .pendbar .pb2 .dz{background:#3a1a16;color:var(--bad)}
+  .syn{cursor:pointer}
+  .pick{position:relative}
+  .pick .hoy{position:absolute;top:-7px;right:-4px;background:var(--acc);color:#10140a;
+    font-size:8.5px;font-weight:800;padding:2px 6px;border-radius:999px;letter-spacing:.3px}
+  .sug{background:#1a2410;border:1px solid #3c4f1c;border-radius:11px;padding:9px 11px;
+    margin-bottom:9px;font-size:11.5px;color:#b9d96a;line-height:1.45}
+  .sug b{color:var(--acc);font-size:13px}
+  .sug button{margin-top:6px;font-size:10.5px;color:var(--dim);font-weight:650;
+    background:var(--panel2);padding:5px 9px;border-radius:8px}
+  .sumhead{display:flex;gap:8px;margin:14px 0 4px}
+  .sumhead div{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:13px;
+    padding:12px 10px;text-align:center}
+  .sumhead .k{font-size:9.5px;color:var(--dim2);letter-spacing:.6px;text-transform:uppercase}
+  .sumhead .v{font-size:19px;font-weight:750;margin-top:4px;letter-spacing:-.6px}
+  .sumhead .d{font-size:10.5px;margin-top:3px;font-weight:650}
+  .up{color:var(--ok)} .down{color:var(--bad)} .flat{color:var(--dim)}
+  .srow{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:11px;
+    background:var(--panel);border:1px solid var(--line);margin-bottom:5px;font-size:12.5px}
+  .srow .nm{flex:1;min-width:0;line-height:1.3}
+  .srow .nm small{display:block;color:var(--dim2);font-size:10.5px;margin-top:2px}
+  .srow .dd{font-weight:700;font-size:12.5px;flex:0 0 auto;text-align:right}
+  .errbox{background:#2a1512;border:1px solid #4a241e;border-radius:12px;padding:11px 12px;margin-top:10px}
+  .errbox b{display:block;font-size:12.5px;color:var(--bad);margin-bottom:4px}
+  .errbox span{display:block;font-size:11px;color:var(--dim);line-height:1.45;
+    word-break:break-word;font-family:ui-monospace,Menlo,monospace}
+  .errbox button{margin-top:9px;width:100%;padding:10px;border-radius:10px;
+    background:var(--panel2);font-size:12px;font-weight:650}
+  .inp{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:11px;
+    padding:11px 12px;color:var(--txt);font-size:12.5px;font-family:inherit;margin-bottom:8px}
+  .inp:focus{outline:none;border-color:#4e6318}
+  #cfgLink{color:var(--acc);cursor:pointer;font-weight:600;margin:12px 0 0}
+  .dev.pr{background:var(--accd);color:var(--acc)}
+  .avis{background:#2a2012;border:1px solid #473518;border-radius:12px;padding:11px 12px;
+    margin-bottom:8px;font-size:12px;color:var(--warn);line-height:1.45}
+  .avis b{display:block;color:var(--txt);font-size:13px;margin-bottom:3px}
+</style>
+</head>
+<body>
+
+<div class="top"><div class="top-in">
+  <button class="back hide" id="back">‹</button>
+  <div style="flex:1;min-width:0">
+    <h1 id="ttl">Tracker de entrenamiento · BETA</h1>
+    <div class="sub" id="sub">Elige perfil, día y ROLL</div>
+  </div>
+  <div class="syn" id="syn">—</div>
+</div></div>
+
+
+<div class="pendbar" id="pendBar">
+  <div class="pb1"><b id="pbN"></b><span id="pbTxt"></span></div>
+  <div class="pb2">
+    <button id="pbRetry">Reintentar ahora</button>
+    <button id="pbDrop" class="dz">Descartar</button>
+  </div>
+</div>
+<!-- PICKER -->
+<div id="vPick" class="wrap">
+  <div class="card" id="cfgBox">
+    <div class="lab">Entrar</div>
+    <button class="go hide" id="bGoogle" style="background:#fff;color:#1f1f1f;margin:0 0 12px">Entrar con Google</button>
+    <div class="msg hide" id="oCod" style="margin:0 0 8px">o con tu código personal:</div>
+    <input class="inp" id="iTok" placeholder="Pega aquí tu código" autocapitalize="off" autocorrect="off" spellcheck="false">
+    <button class="go" id="bSaveCfg">Entrar con código</button>
+    <div class="msg" id="cfgMsg"></div>
+    <details style="margin-top:10px"><summary class="msg" style="margin:0;cursor:pointer">Avanzado</summary>
+      <input class="inp" id="iUrl" style="margin-top:8px" placeholder="URL del script (…/exec)" autocapitalize="off" autocorrect="off" spellcheck="false">
+    </details>
+  </div>
+  <div class="msg" id="cfgLink">Sesión iniciada · cambiar</div>
+
+  <div class="card">
+    <div class="lab">Perfil</div>
+    <div class="prof" id="profPick"></div>
+  </div>
+
+  <div class="card">
+    <div class="lab">Día</div>
+    <div class="grid2" id="dayPick"></div>
+    <div class="errbox hide" id="dayErr">
+      <b>No he podido leer la lista de pestañas.</b>
+      <span id="dayErrTxt"></span>
+      <button id="bDayRetry">Reintentar</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="lab">ROLL (pasada del mesociclo)</div>
+    <div class="rolls" id="rollPick"></div>
+    <div class="msg" id="rollMsg">Los ROLL con datos aparecen en blanco.</div>
+  </div>
+  <button class="go" id="bLoad">Cargar sesión</button>
+  <div class="msg" id="pickMsg"></div>
+  <div class="msg" id="locMsg"></div>
+</div>
+
+<!-- SESSION -->
+<div id="vSess" class="wrap hide">
+  <div class="meta" id="sessMeta"></div>
+  <div id="exlist"></div>
+  <div class="card">
+    <div class="lab">Series efectivas · esta sesión</div>
+    <div id="volrows"></div>
+    <div class="note">Series con RIR ≤ 3, agrupadas por los bloques de tu hoja.</div>
+  </div>
+  <button class="bigbtn" id="bSum">Resumen de la sesión</button>
+  <button class="bigbtn" id="bReload">Recargar desde la hoja</button>
+  <button class="bigbtn" id="bPick">Cambiar día o ROLL</button>
+</div>
+
+<!-- EXERCISE -->
+<div id="vEx" class="wrap hide">
+  <div class="rxbar" id="rxbar"></div>
+  <div id="exNota"></div>
+  <div class="seclab"><span>Series</span><span id="exProg"></span></div>
+  <div id="sets"></div>
+  <div id="activeHost"></div>
+  <div class="card" id="histCard">
+    <div class="lab">Progresión por ROLL</div>
+    <div class="hist" id="histBox"></div>
+  </div>
+  <button class="bigbtn" id="bNext">Siguiente ejercicio ›</button>
+</div>
+
+<!-- RESUMEN -->
+<div id="vSum" class="wrap hide">
+  <div id="sumBody"></div>
+  <button class="bigbtn" id="bSumBack">Volver a la sesión</button>
+</div>
+
+<!-- REST -->
+<div class="rest" id="rest">
+  <div class="r1">
+    <div class="big" id="rTime">0:00</div>
+    <div class="lb"><b id="rNext"></b><span id="rLast"></span></div>
+    <button id="rSkip">Saltar</button>
+  </div>
+  <div class="bar"><i id="rBar"></i></div>
+</div>
+
+<script>
+/* ============ PERFILES ============ */
+const VERSION='v0.5 beta';
+
+/* Diagnóstico: cualquier fallo silencioso se pinta en pantalla. No depende
+   de ningún elemento del maquetado, se crea el suyo. */
+function diag(txt){
+  let d=document.getElementById('diagBox');
+  if(!d){
+    d=document.createElement('div');
+    d.id='diagBox';
+    d.style.cssText='position:fixed;left:8px;right:8px;bottom:8px;z-index:99;'
+      +'background:#2a1512;border:1px solid #4a241e;border-radius:12px;padding:10px 12px;'
+      +'font:11px ui-monospace,Menlo,monospace;color:#ff9c90;max-height:38vh;overflow:auto;'
+      +'white-space:pre-wrap;word-break:break-word';
+    d.onclick=()=>d.remove();
+    document.body.appendChild(d);
+  }
+  d.textContent=(d.textContent?d.textContent+'\n':'')+txt;
+}
+window.addEventListener('error',e=>diag('ERROR: '+(e.message||e)+(e.lineno?' (línea '+e.lineno+')':'')));
+window.addEventListener('unhandledrejection',e=>{
+  const r=e.reason; diag('PROMESA SIN CAPTURAR: '+((r&&r.message)||r));
+});
+
+/* Los perfiles no van en la app. Los da el script según el código de acceso:
+   nombre y pestañas de día, nunca identificadores de hoja. Se guardan en el
+   móvil para arrancar sin red. */
+const PERFK='trackerb.perfiles.v1';
+const NADIE={id:'',name:'',dias:[]};
+let PROFILES=[];
+try{
+  const guardados=JSON.parse(localStorage.getItem(PERFK)||'[]');
+  if(Array.isArray(guardados)) PROFILES=guardados.filter(x=>x&&x.id);
+}catch(e){}
+function ponPerfiles(lista){
+  PROFILES=(lista||[]).filter(x=>x&&x.id).map(x=>(
+    {id:String(x.id), name:String(x.name||x.id), dias:(x.dias||[]).map(String)}));
+  try{ localStorage.setItem(PERFK,JSON.stringify(PROFILES)); }catch(e){}
+  P=PROFILES.find(x=>x.id===P.id)||PROFILES[0]||NADIE;
+}
+const NODAY=/^(LEYENDA|RESUMEN|GR[ÁA]FICAS?|NOTAS|PLANTILLA)/i;
+const MESES=['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const numfmt=n=>(Math.round(n*100)/100).toString().replace('.',',');
+const hasVal=v=>v!==undefined&&v!==null&&String(v).trim()!=='';
+const colL=i=>{let s='',n=i;while(n>=0){s=String.fromCharCode(65+n%26)+s;n=Math.floor(n/26)-1;}return s;};
+const hoyTxt=()=>{const d=new Date();return String(d.getDate())+MESES[d.getMonth()];};
+const LSK='trackerb.queue.v2', SESSK='trackerb.sesion.v1', ULTK='trackerb.ultimo.v1', RESTK='trackerb.rest.v1';
+
+let P=PROFILES[0]||NADIE, S=null, cur=null, draft=null, wStep=2.5, editIdx=null;
+let pickDay=0, pickRoll=null, days={}, rollsUsed={};
+let timer=null,tLeft=0,tTotal=0,tEnd=0,tOver=false,actx=null,wl=null;
+
+/* Una promesa que no resuelve deja la app colgada: se le pone límite. */
+function conTiempo(p,ms,etiqueta){
+  let t;
+  const limite=new Promise((_,rej)=>{ t=setTimeout(()=>rej(
+    new Error('sin respuesta en '+Math.round(ms/1000)+' s ('+etiqueta+')')), ms); });
+  return Promise.race([p,limite]).finally(()=>clearTimeout(t));
+}
+let reintentar=null;
+function mostrarErrorDias(titulo,detalle){
+  const b=$('dayErr'); if(!b) return;
+  b.querySelector('b').textContent=titulo;
+  $('dayErrTxt').textContent=detalle||'';
+  b.classList.remove('hide');
+}
+/* ============ COPIA LOCAL (IndexedDB) ============ */
+/* Cada pestaña de día se guarda entera en el móvil, con sus 12 ROLL: es la
+   rutina y todo el histórico. La app lee de aquí primero y contrasta con la
+   hoja en segundo plano. Si IndexedDB no está, se usa memoria y la app
+   funciona como antes, solo que sin copia entre aperturas. */
+const DBN='tracker-db-beta', DBS='dias', FRESCO=60000, PREC=600000;
+const memDB={};
+let dbP=null;
+function abreDB(){
+  if(dbP) return dbP;
+  dbP=new Promise(res=>{
+    try{
+      if(!window.indexedDB){ res(null); return; }
+      const rq=window.indexedDB.open(DBN,1);
+      rq.onupgradeneeded=()=>{ rq.result.createObjectStore(DBS); };
+      rq.onsuccess=()=>res(rq.result);
+      rq.onerror=()=>res(null);
+      rq.onblocked=()=>res(null);
+    }catch(e){ res(null); }
+  });
+  return dbP;
+}
+async function dbGet(k){
+  const db=await abreDB();
+  if(!db) return memDB[k]||null;
+  return new Promise(res=>{
+    try{
+      const rq=db.transaction(DBS,'readonly').objectStore(DBS).get(k);
+      rq.onsuccess=()=>res(rq.result||memDB[k]||null);
+      rq.onerror=()=>res(memDB[k]||null);
+    }catch(e){ res(memDB[k]||null); }
+  });
+}
+async function dbSet(k,v){
+  memDB[k]=v;
+  const db=await abreDB();
+  if(!db) return;
+  return new Promise(res=>{
+    try{
+      const tx=db.transaction(DBS,'readwrite');
+      tx.objectStore(DBS).put(v,k);
+      tx.oncomplete=()=>res(); tx.onerror=()=>res(); tx.onabort=()=>res();
+    }catch(e){ res(); }
+  });
+}
+const dkey=(pid,day)=>pid+'|'+day;
+
+/* Lo que lee la hoja puede ir por detrás de lo que acabas de registrar: lo
+   pendiente de subir y lo subido en el último minuto se vuelve a aplicar
+   encima de cada lectura. Regla: la hoja manda, salvo en tus celdas recién
+   escritas. */
+let recientes=[];
+function poneCelda(R,c,v){ while(R.length<=c) R.push(''); R[c]=v; }
+function aplicaItem(rows,it){
+  const R=rows[it.row-1]; if(!R) return;
+  (it.values||[]).forEach((v,k)=>{
+    if(it.clear){ poneCelda(R,it.c0+k,''); return; }
+    if(v===null||v===undefined||v==='') return;
+    poneCelda(R,it.c0+k,typeof v==='number'?numfmt(v):String(v));
+  });
+  if(it.date&&!it.clear&&rows[0]) poneCelda(rows[0],it.dateCol,it.date);
+}
+function aplicaCola(rows,pid,day){
+  const ahora=Date.now();
+  recientes=recientes.filter(x=>ahora-x.t<FRESCO);
+  recientes.map(x=>x.it).concat(queue()).forEach(it=>{
+    if(it.pid===pid&&it.day===day) aplicaItem(rows,it); });
+  return rows;
+}
+/* Lee un día de la hoja, le aplica lo pendiente y lo deja en la copia local. */
+async function traeDia(p,day){
+  const rows=await readDay(day,p);
+  if(!detect(rows)) throw new Error('sin cabeceras ROLL');
+  aplicaCola(rows,p.id,day);
+  const reg={rows:rows,ts:Date.now()};
+  await dbSet(dkey(p.id,day),reg);
+  return reg;
+}
+/* Baja en segundo plano los días que falten o lleven más de 10 min sin
+   contrastar, para tener la rutina entera disponible sin cobertura. */
+let precargando=false;
+async function precarga(){
+  if(precargando) return;
+  precargando=true;
+  const p=P, ds=(days[p.id]||[]).slice();
+  try{
+    for(const day of ds){
+      if(P.id!==p.id) break;
+      if(S&&S.pid===p.id&&S.day===day&&enSesion()) continue;
+      const loc=await dbGet(dkey(p.id,day));
+      if(loc&&Date.now()-loc.ts<PREC) continue;
+      try{ await traeDia(p,day); }catch(e){ break; }
+    }
+  }finally{ precargando=false; }
+  if(P.id!==p.id){ setTimeout(precarga,300); return; }
+  estadoLocal();
+}
+async function estadoLocal(){
+  const p=P, ds=(days[p.id]||[]).slice();
+  let n=0;
+  for(const day of ds){ if(await dbGet(dkey(p.id,day))) n++; }
+  const e=$('locMsg');
+  if(!e||P.id!==p.id) return;
+  e.textContent = !ds.length ? ''
+    : (n>=ds.length ? 'Copia en el móvil: los '+n+' días con todo su histórico. Funciona sin cobertura.'
+                    : 'Copia en el móvil: '+n+' de '+ds.length+' días.');
+}
+function notaLocal(ts){
+  const v=$('notaLoc'); if(v) v.remove();
+  if(!ts) return;
+  const f=new Date(ts).toLocaleString('es-ES',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+  $('sessMeta').insertAdjacentHTML('afterend',
+    '<div class="nota" id="notaLoc">Sin conexión con la hoja. Copia del '+esc(f)
+    +'. Lo que registres se sube solo al recuperar cobertura.</div>');
+}
+
+/* Pantalla encendida mientras hay una sesión abierta. El sistema suelta el
+   bloqueo al salir de la app; se vuelve a pedir al regresar. */
+async function pideWL(){
+  try{
+    if(wl||!('wakeLock' in navigator)) return;
+    const w=await navigator.wakeLock.request('screen');
+    wl=w;
+    w.addEventListener('release',()=>{ if(wl===w) wl=null; });
+  }catch(e){ /* sin batería o sin soporte: se sigue sin él */ }
+}
+function sueltaWL(){
+  const w=wl; wl=null;
+  try{ if(w) w.release().catch(()=>{}); }catch(e){}
+}
+const enSesion=()=>!!S&&$('vPick').classList.contains('hide');
+function setSyn(cls,txt){ const e=$('syn'); e.className='syn '+(cls||''); e.textContent=txt; }
+
+/* ============ LAYOUT AUTODETECTADO ============ */
+/* Lee fila 1 (cabeceras ROLL n) y fila 2 (PESO/REPS/RIR/AJUSTE) y deduce
+   dónde empieza cada ROLL, cuántas columnas ocupa y qué campos tiene. */
+function detect(rows){
+  const r0=rows[0]||[], r1=rows[1]||[], pos=[];
+  for(let c=0;c<r0.length;c++){ if(/^\s*ROLL\s*\d+/i.test(String(r0[c]||''))) pos.push(c); }
+  if(!pos.length) return null;
+  const start=pos[0];
+  const stride=pos.length>1 ? pos[1]-pos[0] : 4;
+  const f={w:null,r:null,rir:null,aj:null};
+  for(let k=0;k<stride;k++){
+    const h=String(r1[start+k]||'').toUpperCase();
+    if(f.w===null&&/PESO/.test(h)) f.w=k;
+    else if(f.r===null&&/REPS/.test(h)) f.r=k;
+    else if(f.rir===null&&/RIR/.test(h)) f.rir=k;
+    else if(f.aj===null&&/AJUSTE/.test(h)) f.aj=k;
+  }
+  if(f.w===null) f.w=0;
+  if(f.r===null) f.r=Math.min(1,stride-1);
+  return { start:start, stride:stride, f:f, n:pos.length };
+}
+const rollCol=(L,n)=>L.start+(n-1)*L.stride;
+
+function parseRest(s){
+  const m=String(s||'').toLowerCase().match(/([\d.,]+)\s*(min|s)/);
+  if(!m) return 120;
+  const v=parseFloat(m[1].replace(',','.'));
+  return Math.round(m[2]==='min'?v*60:v);
+}
+function cellsAt(R,L,c){
+  const g=k=>k===null?undefined:R[c+k];
+  return { w:g(L.f.w), r:g(L.f.r), rir:g(L.f.rir), aj:g(L.f.aj) };
+}
+function parseSheet(rows,roll,L,day){
+  const banner=(rows[0]&&rows[0][0])||'';
+  const cc=rollCol(L,roll), pc=roll>1?rollCol(L,roll-1):null;
+  const ex=[]; let group='', gnote='', curEx=null;
+  for(let i=2;i<rows.length;i++){
+    const R=rows[i]||[];
+    const a=String(R[0]||'').trim(), cfg=String(R[1]||'').trim();
+    const reps=String(R[2]||'').trim(), rir=String(R[3]||'').trim();
+    const desc=String(R[4]||'').trim(), nota=String(R[5]||'').trim();
+    // Título de bloque: nombre en A y NADA de prescripción en la fila.
+    if(a!==''&&reps===''&&rir===''&&desc===''){
+      const p=a.split(/\s+[—–-]\s+/); group=p[0].trim(); gnote=p.slice(1).join(' — ').trim(); curEx=null;
+      continue;
+    }
+    // Fila de serie: basta con reps, RIR o descanso. En gomas y abdomen
+    // reps y RIR pueden ir vacíos, así que el descanso también la valida.
+    if(reps===''&&rir===''&&desc===''){ continue; }
+    if(a||!curEx){ curEx={name:a||'(sin nombre)',group:group,gnote:gnote,cfg:cfg,nota:nota,sets:[]}; ex.push(curEx); }
+    else if(nota&&!curEx.nota) curEx.nota=nota;
+    const hist=[]; for(let n=1;n<=L.n;n++) hist.push(Object.assign({n:n},cellsAt(R,L,rollCol(L,n))));
+    curEx.sets.push({ row:i+1, reps:reps, rir:rir, rest:parseRest(desc), descTxt:desc, nota:nota,
+      cur:cellsAt(R,L,cc), prev:pc!==null?cellsAt(R,L,pc):null, hist:hist });
+  }
+  return { banner:banner, ex:ex, roll:roll, L:L, day:day, cc:cc };
+}
+
+/* ============ PERFIL / DÍA / ROLL ============ */
+const visibles=()=>PROFILES;
+function renderProf(){
+  const vs=visibles();
+  if(vs.length&&!vs.some(p=>p.id===P.id)){ P=vs[0]; pickDay=0; pickRoll=null; days={}; rollsUsed={}; }
+  $('profPick').innerHTML=vs.map(p=>
+    `<button class="${P.id===p.id?'on':''}" data-p="${p.id}">${esc(p.name)}</button>`).join('');
+  [...$('profPick').children].forEach(b=>b.onclick=()=>{
+    P=PROFILES.find(x=>x.id===b.dataset.p); pickDay=0; pickRoll=null;
+    renderProf(); $('rollMsg').textContent=''; loadDays();
+  });
+}
+function renderPick(){
+  const ds=days[P.id]||[];
+  const sd=ds.length?sugDia():-1;
+  $('dayPick').innerHTML = ds.length
+    ? ds.map((d,i)=>`<button class="pick ${pickDay===i?'on':''}" data-d="${i}">${esc(d)}${i===sd?'<span class="hoy">TOCA</span>':''}</button>`).join('')
+    : '<div class="msg">'+(CFG.url&&CFG.token?'Cargando pestañas…':'Pega tu código de acceso en el recuadro de arriba.')+'</div>';
+  [...$('dayPick').querySelectorAll('button')].forEach(b=>b.onclick=()=>{
+    pickDay=+b.dataset.d; pickRoll=null; renderPick(); scanRolls(); });
+  const nR=(rollsUsed[key()]&&rollsUsed[key()].n)||12;
+  const used=(rollsUsed[key()]&&rollsUsed[key()].used)||[];
+  $('rollPick').innerHTML=Array.from({length:nR},(_,k)=>{
+    const n=k+1;
+    return `<button class="${pickRoll===n?'on':''} ${used.includes(n)?'used':''}" data-r="${n}">${n}</button>`;
+  }).join('');
+  [...$('rollPick').children].forEach(b=>b.onclick=()=>{ pickRoll=+b.dataset.r; renderPick(); });
+  $('bLoad').disabled=!pickRoll||!ds.length;
+}
+const key=()=>P.id+'|'+((days[P.id]||[])[pickDay]||'');
+
+async function loadDays(){
+  if(!P.id){ renderPick(); return; }
+  try{
+    // Las pestañas de las dos hojas son conocidas: se usan de inmediato para
+    // no depender de una llamada que puede tardar o colgarse.
+    if(!days[P.id]||!days[P.id].length) days[P.id]=(P.dias||[]).slice();
+    const caja=$('dayErr'); if(caja) caja.classList.add('hide');
+  }catch(err){ diag('loadDays (inicio): '+(err&&err.message||err)); }
+  if(days[P.id].length){
+    pickDay=sugDia(); setSyn('ok','listo'); renderPick(); scanRolls();
+    refrescarDias();                     // al margen, por si cambian
+    estadoLocal(); setTimeout(precarga,1200);
+    return;
+  }
+  setSyn('pend','leyendo');
+  try{
+    const all=await listSheets();
+    const list=(all||[]).filter(t=>t&&!NODAY.test(t));
+    if(!list.length) throw new Error('la hoja no devolvió ninguna pestaña');
+    days[P.id]=list; pickDay=sugDia(); setSyn('ok','ok'); renderPick(); scanRolls();
+  }catch(e){
+    setSyn('err','error');
+    mostrarErrorDias('No he podido leer la lista de pestañas.',(e&&e.message)||String(e));
+    renderPick();
+  }
+}
+/* Comprueba en segundo plano si la hoja tiene pestañas nuevas. Si falla,
+   no molesta: se sigue con la lista conocida. */
+async function refrescarDias(){
+  const id=P.id;
+  try{
+    const all=await listSheets();
+    const list=(all||[]).filter(t=>t&&!NODAY.test(t));
+    if(!list.length) return;
+    const antes=(days[id]||[]).join('|');
+    if(list.join('|')===antes) return;
+    days[id]=list;
+    if(P.id===id){ renderPick(); }
+  }catch(e){ /* la lista fija sigue valiendo */ }
+}
+function reintentarDias(){ delete days[P.id]; rollsUsed={}; loadDays(); }
+reintentar=reintentarDias;
+/* Calcula qué ROLLs tienen datos a partir de las filas de un día. */
+function usaRolls(k,rows){
+  const L=detect(rows); if(!L) return false;
+  // filas que son serie, para saber si un ROLL está completo o a medias
+  const filas=[];
+  for(let i=2;i<rows.length;i++){
+    const R=rows[i]||[];
+    const a=String(R[0]||'').trim(), rp=String(R[2]||'').trim();
+    const ri=String(R[3]||'').trim(), de=String(R[4]||'').trim();
+    if(a!==''&&rp===''&&ri===''&&de==='') continue;
+    if(rp===''&&ri===''&&de==='') continue;
+    filas.push(i);
+  }
+  const used=[], lleno={};
+  for(let n=1;n<=L.n;n++){
+    const c=rollCol(L,n)+L.f.w;
+    let j=0;
+    filas.forEach(i=>{ if(hasVal(rows[i]&&rows[i][c])) j++; });
+    lleno[n]=j;
+    if(j>0) used.push(n);
+  }
+  rollsUsed[k]={used:used,n:L.n,L:L,filas:filas.length,lleno:lleno};
+  return true;
+}
+async function scanRolls(){
+  const p=P, day=(days[p.id]||[])[pickDay]; if(!day) return;
+  const k=key();
+  const loc=await dbGet(dkey(p.id,day));
+  let mostrado=false;
+  if(loc&&usaRolls(k,loc.rows)&&key()===k){
+    mostrado=true; pickRoll=suggest(); msgRolls(); renderPick();
+    if(Date.now()-loc.ts<FRESCO) return;          // recién contrastado
+  } else if(key()===k) setSyn('pend','leyendo');
+  try{
+    const reg=await traeDia(p,day);
+    usaRolls(k,reg.rows);
+    if(key()!==k) return;
+    if(!mostrado||!pickRoll) pickRoll=suggest();
+    setSyn(queue().length?'pend':'ok',queue().length?queue().length+' pend.':'hoja ok');
+    msgRolls();
+  }catch(e){
+    if(key()!==k) return;
+    if(mostrado){ setSyn('pend','sin conexión'); return; }
+    setSyn('err','error');
+    $('rollMsg').textContent = /sin cabeceras/.test(String(e&&e.message))
+      ? 'No encuentro cabeceras «ROLL n» en esta pestaña.'
+      : 'No he podido leer la pestaña: '+((e&&e.message)||e);
+  }
+  renderPick();
+}
+function suggest(){
+  const r=rollsUsed[key()]; if(!r) return 1;
+  if(!r.used.length) return 1;
+  const max=Math.max.apply(null,r.used);
+  // Si ese ROLL está completo, el siguiente; si está a medias, se retoma.
+  return (r.lleno&&r.filas&&r.lleno[max]>=r.filas) ? Math.min(r.n,max+1) : max;
+}
+function msgRolls(){
+  const r=rollsUsed[key()]; if(!r) return;
+  const L=r.L, campos=['PESO','REPS'].concat(L.f.rir!==null?['RIR']:[]).concat(L.f.aj!==null?['AJUSTE']:[]);
+  let t;
+  if(!r.used.length) t='Ningún ROLL con datos. ';
+  else{
+    const max=Math.max.apply(null,r.used);
+    const completo=r.lleno&&r.filas&&r.lleno[max]>=r.filas;
+    t=`Con datos: ROLL ${r.used.join(', ')}. `
+      +(completo?`El ${max} está completo, sugerido el ${pickRoll}. `
+                :`El ${max} está a medias (${r.lleno[max]}/${r.filas}), sugerido retomarlo. `);
+  }
+  $('rollMsg').textContent=t+`${L.stride} col./ROLL: ${campos.join(' · ')}.`;
+}
+
+/* ============ CARGA DE SESIÓN ============ */
+try{ localStorage.removeItem(SESSK); }catch(e){}   // copia única de la v0.2
+function montaS(reg,p,day,roll){
+  const L=detect(reg.rows); if(!L) return null;
+  const s2=parseSheet(reg.rows,roll,L,day);
+  s2.rows=reg.rows; s2.ts=reg.ts; s2.pid=p.id;
+  return s2;
+}
+/* Llega una lectura nueva de la hoja con la sesión ya abierta. */
+function refrescaS(reg,p,day,roll){
+  if(!S||S.pid!==p.id||S.day!==day||S.roll!==roll) return;
+  const igual=JSON.stringify(S.rows)===JSON.stringify(reg.rows);
+  S.ts=reg.ts;
+  if(igual) return;
+  const s2=montaS(reg,p,day,roll); if(!s2) return;
+  S=s2;
+  if(!$('vSess').classList.contains('hide')) renderSess();
+  else if(!$('vSum').classList.contains('hide')) renderSum();
+  else if(!$('vEx').classList.contains('hide')){
+    if(cur!==null&&cur<S.ex.length){ if(draft&&$('iW')) readInputs(); renderEx(); }
+    else goSess();
+  }
+}
+async function loadSession(forzar){
+  const p=P, day=(days[p.id]||[])[pickDay], roll=pickRoll, k=key();
+  if(!day||!roll) return;
+  $('pickMsg').className='msg'; $('pickMsg').innerHTML='<span class="spin"></span> Abriendo…';
+  const loc=await dbGet(dkey(p.id,day));
+  const sLoc=loc?montaS(loc,p,day,roll):null;
+  if(sLoc){
+    S=sLoc; rollsUsed[k]=Object.assign(rollsUsed[k]||{used:[],n:S.L.n},{L:S.L,n:S.L.n});
+    $('pickMsg').textContent=''; goSess(); notaLocal(null);
+    if(forzar!==true&&Date.now()-loc.ts<FRESCO) return;
+    setSyn('pend','actualizando');
+  } else setSyn('pend','cargando');
+  try{
+    const reg=await traeDia(p,day);
+    if(sLoc) refrescaS(reg,p,day,roll);
+    else{
+      const s2=montaS(reg,p,day,roll);
+      if(!s2) throw new Error('sin cabeceras ROLL');
+      S=s2; rollsUsed[k]=Object.assign(rollsUsed[k]||{used:[],n:S.L.n},{L:S.L,n:S.L.n});
+      $('pickMsg').textContent=''; goSess();
+    }
+    notaLocal(null);
+    setSyn(queue().length?'pend':'ok',queue().length?queue().length+' pend.':'hoja ok');
+  }catch(e){
+    if(sLoc){ setSyn('pend','sin conexión'); if(S&&S.pid===p.id&&S.day===day) notaLocal(loc.ts); return; }
+    setSyn('err','error');
+    $('pickMsg').className='msg bad'; $('pickMsg').textContent='Error al cargar: '+(e.message||e)
+      +'. Aún no hay copia de este día en el móvil.';
+  }
+}
+/* Lo registrado se aplica también a la copia local, sin esperar a la hoja. */
+function guardaLocal(it){
+  if(!S||!S.rows) return;
+  aplicaItem(S.rows,it);
+  dbSet(dkey(S.pid,S.day),{rows:S.rows,ts:S.ts||0});
+  delete rollsUsed[S.pid+'|'+S.day];
+}
+
+/* ============ VISTA SESIÓN ============ */
+function goSess(){
+  cur=null; draft=null; editIdx=null;
+  $('vPick').classList.add('hide'); $('vEx').classList.add('hide');
+  $('vSum').classList.add('hide'); $('vSess').classList.remove('hide');
+  $('back').classList.add('hide');
+  $('ttl').textContent=S.banner||S.day;
+  $('sub').textContent=`${P.name} · ${S.day} · ROLL ${S.roll}`;
+  renderSess(); window.scrollTo(0,0);
+  pideWL();
+}
+function marcaUltimo(){
+  try{ localStorage.setItem(ULTK,JSON.stringify(
+    {p:P.id, day:S.day, roll:S.roll, ts:Date.now()})); }catch(e){}
+}
+/* Día que tocaría: el siguiente del orden de pestañas tras el último
+   registrado. Si ya entrenaste hoy, se queda en ese mismo. */
+function sugDia(){
+  try{
+    const ds=days[P.id]||[]; if(!ds.length) return 0;
+    let u=null; try{ u=JSON.parse(localStorage.getItem(ULTK)||'null'); }catch(e){}
+    if(!u||u.p!==P.id) return 0;
+    const i=ds.indexOf(u.day); if(i<0) return 0;
+    const hoy=new Date(), d=new Date(u.ts);
+    return hoy.toDateString()===d.toDateString() ? i : (i+1)%ds.length;
+  }catch(e){ return 0; }
+}
+const doneCount=e=>e.sets.filter(s=>hasVal(s.cur.w)||hasVal(s.cur.r)).length;
+function renderSess(){
+  let html='', g=null;
+  S.ex.forEach((e,i)=>{
+    if(e.group!==g){ g=e.group;
+      if(g){ html+=`<div class="gband">${esc(g)}</div>`;
+        if(e.gnote) html+=`<div class="gnote">${esc(e.gnote)}</div>`; } }
+    const d=doneCount(e), t=e.sets.length, pct=t?Math.min(1,d/t):0, C=2*Math.PI*14.5;
+    html+=`<button class="excard ${d>=t?'done':''}" data-i="${i}">
+      <div class="grow"><div class="nm">${esc(e.name)}</div>
+      <div class="rx">${t} series · ${esc(e.sets.map(s=>s.reps).join('/'))} reps · RIR ${esc(e.sets.map(s=>s.rir).join('/'))}</div></div>
+      <div class="ring ${pct>=1?'full':''}"><svg width="36" height="36">
+        <circle cx="18" cy="18" r="14.5" fill="none" stroke="#262a33" stroke-width="3"/>
+        <circle cx="18" cy="18" r="14.5" fill="none" stroke="${pct>=1?'#d7ff3e':'#6b7280'}" stroke-width="3"
+          stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-pct)}"/></svg>
+        <span>${d}/${t}</span></div></button>`;
+  });
+  $('exlist').innerHTML=html;
+  [...document.querySelectorAll('.excard')].forEach(b=>b.onclick=()=>openEx(+b.dataset.i));
+
+  let tot=0, ton=0, grp={};
+  S.ex.forEach(e=>e.sets.forEach(s=>{
+    if(!hasVal(s.cur.r)&&!hasVal(s.cur.w)) return;
+    tot++;
+    const w=parseFloat(String(s.cur.w).replace(',','.')), rr=parseInt(s.cur.r);
+    if(!isNaN(w)&&!isNaN(rr)) ton+=w*rr;
+    const rv=parseFloat(String(hasVal(s.cur.rir)?s.cur.rir:s.rir).replace(',','.'));
+    if(isNaN(rv)||rv<=3) grp[e.group||'—']=(grp[e.group||'—']||0)+1;
+  }));
+  $('sessMeta').innerHTML=`<span class="chip">ROLL <b>${S.roll}</b></span>
+    <span class="chip">Series <b>${tot}</b></span>
+    <span class="chip">Tonelaje <b>${numfmt(Math.round(ton))} kg</b></span>`;
+  const keys=Object.keys(grp), max=Math.max.apply(null,[4].concat(keys.map(k=>grp[k])));
+  $('volrows').innerHTML=keys.length?keys.map(k=>
+    `<div class="vrow"><div class="g">${esc(k)}</div><div class="t"><i style="width:${grp[k]/max*100}%"></i></div>
+     <div class="s">${grp[k]}</div></div>`).join('')
+    :'<div class="note">Aún no has registrado series en este ROLL.</div>';
+}
+
+/* ============ SUGERENCIA DE CARGA ============ */
+/* Doble progresión mecánica: solo mira reps y RIR del ROLL anterior de la
+   misma fila contra lo prescrito. No sustituye al criterio del entrenador. */
+function incremento(w){ return w<12 ? 1 : (w<80 ? 2.5 : 5); }
+function sugerencia(s){
+  if(!s.prev||!hasVal(s.prev.w)) return null;
+  const wt=String(s.prev.w).trim().replace(/\s/g,'');
+  if(!esNum(wt)) return null;                       // gomas, peso corporal
+  const w=parseFloat(wt.replace(',','.'));
+  const pr=parseInt(s.prev.r), tr=parseInt(String(s.reps).trim());
+  if(isNaN(pr)||isNaN(tr)) return null;             // objetivo al fallo
+  const pri=parseFloat(String(s.prev.rir).replace(',','.'));
+  const tri=parseFloat(String(s.rir).replace(',','.'));
+  const dR=pr-tr, dI=(!isNaN(pri)&&!isNaN(tri))?pri-tri:0;
+  const inc=incremento(w), red=n=>Math.round(n*100)/100;
+  if(dR>=0&&dI>=0){
+    const salto=(dR>=2||dI>=2)?2:1;
+    const motivo = dR>0
+      ? '+'+dR+' reps sobre objetivo'+(dI>0?' y RIR '+dI+' de margen':'')
+      : (dI>0?'objetivo cerrado con RIR '+dI+' de margen':'objetivo cerrado');
+    return { w:red(w+inc*salto), prev:w, motivo:motivo, dir:'up' };
+  }
+  if(dR<=-2||dI<=-2){
+    return { w:red(Math.max(0,w-inc)), prev:w,
+      motivo:(dR<0?Math.abs(dR)+' reps por debajo del objetivo':'RIR por debajo del objetivo'), dir:'down' };
+  }
+  return { w:w, prev:w, motivo:'a falta de cerrar el rango, misma carga', dir:'same' };
+}
+
+/* ============ RÉCORDS Y VALIDACIÓN ============ */
+function numDe(v){
+  if(!hasVal(v)) return null;
+  const t=String(v).trim().replace(/\s/g,'');
+  return esNum(t)?parseFloat(t.replace(',','.')):null;
+}
+/* Récord frente a todo lo registrado en ROLLs anteriores de este ejercicio.
+   'peso': más carga que nunca. 'reps': más reps que nunca con esa carga o
+   una mayor. Se calcula al vuelo: no se guarda nada en la hoja. */
+function recordDe(e,s){
+  const c=s.cur; if(!c) return null;
+  const w=numDe(c.w), r=parseInt(c.r);
+  if(w===null||w<=0||isNaN(r)||r<1) return null;
+  let maxW=null, maxR=null;
+  e.sets.forEach(x=>x.hist.forEach(h=>{
+    if(h.n>=S.roll) return;
+    const hw=numDe(h.w), hr=parseInt(h.r);
+    if(hw===null||isNaN(hr)||hr<1) return;
+    if(maxW===null||hw>maxW) maxW=hw;
+    if(hw>=w&&(maxR===null||hr>maxR)) maxR=hr;
+  }));
+  if(maxW===null) return null;
+  if(w>maxW) return 'peso';
+  if(maxR!==null&&r>maxR) return 'reps';
+  return null;
+}
+/* Entradas muy fuera de lo esperado: se pide confirmación antes de escribir.
+   Referencia de peso: ROLL anterior de la misma fila; si no hay, la serie
+   anterior de hoy. Solo números: gomas y peso corporal no se validan. */
+function avisos(e,idx){
+  const s=e.sets[idx], out=[];
+  const w=numDe(draft.w);
+  if(w!==null){
+    let ref=s.prev?numDe(s.prev.w):null;
+    if(ref===null) for(let k=idx-1;k>=0;k--){ ref=numDe(e.sets[k].cur.w); if(ref!==null) break; }
+    if(w>500) out.push('Peso de '+numfmt(w)+' kg.');
+    else if(ref!==null&&ref>0&&Math.abs(w-ref)>=5&&(w>ref*1.5||w<ref*0.5))
+      out.push('Peso de '+numfmt(w)+' kg, frente a '+numfmt(ref)+' kg de referencia.');
+    else if(w===0&&ref!==null&&ref>0) out.push('Peso de 0 kg, frente a '+numfmt(ref)+' kg de referencia.');
+  }
+  const rt=String(draft.r).trim();
+  if(/^\d+$/.test(rt)){
+    const r=parseInt(rt,10);
+    const pr=s.prev?parseInt(s.prev.r):NaN, tr=parseInt(s.reps);
+    const ref=!isNaN(pr)?pr:tr;
+    if(r===0) out.push('0 repeticiones.');
+    else if(r>100||(!isNaN(ref)&&ref>0&&r>Math.max(ref*2,ref+10)))
+      out.push(r+' repeticiones'+(!isNaN(ref)&&ref>0?', frente a '+ref+' de referencia.':'.'));
+  } else if(rt===''&&w!==null){
+    out.push('Repeticiones vacías.');
+  }
+  return out.join(' ');
+}
+
+/* ============ VISTA EJERCICIO ============ */
+function openEx(i){
+  cur=i; draft=null; editIdx=null;
+  const e=S.ex[i];
+  $('vSess').classList.add('hide'); $('vEx').classList.remove('hide'); $('back').classList.remove('hide');
+  $('ttl').textContent=e.name;
+  $('sub').textContent=`${e.group||S.day} · ROLL ${S.roll}`;
+  $('rxbar').innerHTML=`
+    <div><div class="k">Series</div><div class="v">${e.sets.length}</div></div>
+    <div><div class="k">Reps</div><div class="v">${esc(e.sets.map(s=>s.reps).join('/'))}</div></div>
+    <div><div class="k">RIR</div><div class="v">${esc(e.sets.map(s=>s.rir).join('/'))}</div></div>
+    <div><div class="k">Desc.</div><div class="v">${esc(e.sets[0].descTxt||'—')}</div></div>`;
+  const n=[e.cfg?'Config: '+e.cfg:'', e.nota, e.gnote].filter(Boolean).join(' · ');
+  $('exNota').innerHTML=n?`<div class="nota">${esc(n)}</div>`:'';
+  renderEx(); window.scrollTo(0,0);
+}
+const nextSet=e=>e.sets.findIndex(s=>!hasVal(s.cur.w)&&!hasVal(s.cur.r));
+function mkDraft(e,idx){
+  const s=e.sets[idx];
+  // Si la serie ya tiene datos en este ROLL, se edita lo que hay
+  if(hasVal(s.cur.w)||hasVal(s.cur.r)){
+    let wv=s.cur.w;
+    const wt=String(wv).trim().replace(/\s/g,'');
+    if(esNum(wt)) wv=parseFloat(wt.replace(',','.'));
+    return { w:wv, r:hasVal(s.cur.r)?String(s.cur.r):'',
+      rir:hasVal(s.cur.rir)?s.cur.rir:'', aj:hasVal(s.cur.aj)?String(s.cur.aj):'' };
+  }
+  let w=s.prev&&hasVal(s.prev.w)?s.prev.w:'';
+  if(!hasVal(w)) for(let k=idx-1;k>=0;k--) if(hasVal(e.sets[k].cur.w)){ w=e.sets[k].cur.w; break; }
+  if(!hasVal(w)) w=0;
+  const wt0=String(w).trim().replace(/\s/g,'');
+  if(esNum(wt0)) w=parseFloat(wt0.replace(',','.'));
+  const sug=sugerencia(s);
+  if(sug) w=sug.w;
+  let r=s.prev&&hasVal(s.prev.r)?String(s.prev.r):s.reps;
+  if(!hasVal(r)) r='';
+  let ri=parseFloat(String(s.rir).replace(',','.'));
+  const rirVal=isNaN(ri)?(S.L.f.rir!==null?s.rir:''):ri;
+  return { w:w, r:r, rir:rirVal, aj:'', sug:sug };
+}
+function devTags(s,v){
+  let out='';
+  const tr=parseInt(s.reps), rr=parseInt(v.r);
+  if(!isNaN(tr)&&!isNaN(rr)&&/^\d+$/.test(String(s.reps).trim())){
+    const d=rr-tr;
+    if(d>0) out+='<span class="dev up">+'+d+'</span>';
+    else if(d<0) out+='<span class="dev down">'+d+'</span>';
+  }
+  const t0=parseFloat(String(s.rir).replace(',','.')), r0=parseFloat(String(v.rir).replace(',','.'));
+  if(!isNaN(t0)&&!isNaN(r0)){
+    if(r0>t0) out+='<span class="dev rb">RIR ↑</span>';
+    else if(r0<t0) out+='<span class="dev ro">RIR ↓</span>';
+  }
+  return out;
+}
+function renderEx(){
+  const e=S.ex[cur], L=S.L, idx=(editIdx!==null?editIdx:nextSet(e));
+  $('exProg').textContent=`${doneCount(e)} de ${e.sets.length}`;
+  $('sets').innerHTML=e.sets.map((s,i)=>{
+    if(i===idx) return '';
+    const logged=hasVal(s.cur.w)||hasVal(s.cur.r);
+    const prev=s.prev&&hasVal(s.prev.w)
+      ? `<em>ROLL ${S.roll-1}</em> ${esc(s.prev.w)}×${esc(s.prev.r)}${hasVal(s.prev.rir)?' @'+esc(s.prev.rir):''}` : '';
+    const tgt=`obj. ${esc(s.reps)}${hasVal(s.rir)?' @RIR '+esc(s.rir):''}`;
+    if(logged) return `<div class="set logged tap" data-edit="${i}"><div class="n">${i+1}</div>
+      <div class="tgt">${tgt}${prev?'<br>'+prev:''}
+      ${hasVal(s.cur.aj)?'<div class="aj">'+esc(s.cur.aj)+'</div>':''}</div>
+      <div class="val">${esc(s.cur.w)} <small>kg</small> × ${esc(s.cur.r)}
+      ${hasVal(s.cur.rir)?'<small>@'+esc(s.cur.rir)+'</small>':''}${devTags(s,s.cur)}${recordDe(e,s)?'<span class="dev pr">RÉCORD</span>':''}
+      <div class="edit">editar</div></div></div>`;
+    return `<div class="set tap" data-edit="${i}"><div class="n">${i+1}</div>
+      <div class="tgt">${tgt}${prev?'<br>'+prev:''}</div>
+      <div class="val" style="color:var(--dim2);font-size:12px">pendiente</div></div>`;
+  }).join('');
+  [...document.querySelectorAll('[data-edit]')].forEach(b=>b.onclick=()=>{
+    editIdx=+b.dataset.edit; draft=null; renderEx();
+    const a=$('activeHost'); if(a&&a.scrollIntoView) a.scrollIntoView({block:'center',behavior:'smooth'});
+  });
+  renderHist(e);
+
+  if(idx<0){ $('activeHost').innerHTML=`<div class="set" style="justify-content:center;color:var(--dim);
+    font-size:12.5px;padding:16px">Ejercicio completado en este ROLL</div>`; return; }
+  const s=e.sets[idx];
+  if(!draft) draft=mkDraft(e,idx);
+  const editando=(editIdx!==null);
+  // El peso va al campo numérico si es número, y al de texto si no lo es
+  const wEsNum = (typeof draft.w==='number') || esNum(String(draft.w).trim().replace(/\s/g,''));
+  const wNum = wEsNum ? (typeof draft.w==='number'?numfmt(draft.w):draft.w) : '';
+  const wTxt = wEsNum ? '' : String(draft.w||'');
+  const pv=s.prev&&hasVal(s.prev.w)
+    ? `ROLL ${S.roll-1}: ${esc(s.prev.w)} kg × ${esc(s.prev.r)}${hasVal(s.prev.rir)?' @RIR '+esc(s.prev.rir):''}`
+    : 'sin ROLL anterior';
+  const rirBlock = L.f.rir!==null ? `<div class="rirrow wide">${
+    [0,1,2,3,4,'RP','Fallo'].map(v=>`<button data-rir="${esc(v)}" class="${String(draft.rir)===String(v)?'on':''}">${typeof v==='number'?'RIR '+v:v}</button>`).join('')
+  }</div>` : '';
+  const ajBlock = L.f.aj!==null
+    ? `<input class="ajin" id="iA" placeholder="Ajuste — RP 12+4 · drop 8/8/7 · molestia…" value="${esc(draft.aj)}">` : '';
+  $('activeHost').innerHTML=`<div class="active">
+    <div class="hd"><div class="t">${editando?'Editando serie':'Serie'} <b>${idx+1}</b>/${e.sets.length} · fila ${s.row}</div>
+      <div class="prev">obj. ${esc(s.reps)}${hasVal(s.rir)?' @RIR '+esc(s.rir):''}<br>${pv}</div></div>
+    <div class="row">
+      <div class="field"><div class="k">Peso</div><div class="ctl">
+        <button data-a="w-">−</button><input id="iW" inputmode="decimal" value="${esc(wNum)}"><button data-a="w+">+</button></div>
+        <div class="u">kg</div></div>
+      <div class="field"><div class="k">Reps</div><div class="ctl">
+        <button data-a="r-">−</button><input id="iR" inputmode="text" value="${esc(draft.r)}"><button data-a="r+">+</button></div>
+        <div class="u">obj. ${esc(s.reps)}</div></div>
+    </div>
+    <input class="wtxt" id="iWT" type="text" inputmode="text" autocapitalize="none" autocorrect="off"
+      spellcheck="false" placeholder="o peso en texto — goma roja, peso corporal…" value="${esc(wTxt)}">
+    ${draft.sug&&draft.sug.dir!=='same'&&!editando ? `<div class="sug">
+       Sugerido <b>${numfmt(draft.sug.w)} kg</b> · ${esc(draft.sug.motivo)}
+       <button data-prev="${draft.sug.prev}">usar ${numfmt(draft.sug.prev)} kg del ROLL ${S.roll-1}</button>
+     </div>` : ''}
+    <div class="steps">${[1.25,2.5,5,10].map(v=>`<button data-st="${v}" class="${wStep===v?'on':''}">±${numfmt(v)}</button>`).join('')}</div>
+    ${rirBlock}${ajBlock}
+    ${draft.aviso
+      ? `<div class="avis"><b>¿Seguro? Se sale de lo esperado</b>${esc(draft.aviso)}</div>
+         <button class="logbtn" id="bAvSi">Sí, registrar así</button>
+         <button class="logbtn sec" id="bAvNo">Corregir</button>`
+      : editando
+      ? `<button class="logbtn" id="bLog">Guardar cambios</button>
+         <button class="logbtn sec" id="bCancel">Cancelar</button>
+         <button class="logbtn danger" id="bClear">Borrar esta serie</button>`
+      : `<button class="logbtn" id="bLog">Registrar y descansar ${s.rest}s</button>
+         <button class="logbtn sec" id="bLogNo">Registrar sin temporizador</button>`}
+  </div>`;
+  [...document.querySelectorAll('.ctl button')].forEach(b=>b.onclick=()=>{
+    const a=b.dataset.a;
+    if(a==='w+'||a==='w-'){ const t=$('iWT'); if(t) t.value=''; }   // ± = kilos
+    readInputs();
+    const r=parseInt(draft.r);
+    const ws=String(draft.w).trim().replace(/\s/g,'');
+    const w=esNum(ws)?parseFloat(ws.replace(',','.')):NaN;
+    if(a==='w+') draft.w=(isNaN(w)?0:w)+wStep;
+    if(a==='w-') draft.w=Math.max(0,(isNaN(w)?0:w)-wStep);
+    if(a==='r+'&&!isNaN(r)) draft.r=String(r+1);
+    if(a==='r-'&&!isNaN(r)) draft.r=String(Math.max(1,r-1));
+    const wi=$('iW'), ri=$('iR');
+    if(wi) wi.value=typeof draft.w==='number'?numfmt(draft.w):draft.w;
+    if(ri) ri.value=draft.r; });
+  // Al tocar un campo se selecciona todo: escribir reemplaza, no concatena
+  ['iW','iR','iWT'].forEach(id=>{ const el=$(id); if(!el) return;
+    el.onfocus=()=>{ try{ el.select(); }catch(e){} }; });
+  [...document.querySelectorAll('[data-prev]')].forEach(b=>b.onclick=()=>{
+    readInputs(); draft.w=parseFloat(b.dataset.prev); draft.sug=null; renderEx(); });
+  [...document.querySelectorAll('[data-st]')].forEach(b=>b.onclick=()=>{ readInputs(); wStep=parseFloat(b.dataset.st); renderEx(); });
+  [...document.querySelectorAll('[data-rir]')].forEach(b=>b.onclick=()=>{
+    readInputs(); const v=b.dataset.rir; draft.rir=/^\d+$/.test(v)?+v:v; renderEx(); });
+  if(draft.aviso){
+    $('bAvSi').onclick=()=>{ draft.avisoOk=draft.aviso; doLog(!!draft.avisoT); };
+    $('bAvNo').onclick=()=>{ draft.aviso=null; renderEx(); const i=$('iW'); if(i) i.focus(); };
+  } else if(editando){
+    $('bLog').onclick=()=>doLog(false);
+    $('bCancel').onclick=()=>{ editIdx=null; draft=null; renderEx(); };
+    $('bClear').onclick=clearSet;
+  } else {
+    $('bLog').onclick=()=>doLog(true);
+    $('bLogNo').onclick=()=>doLog(false);
+  }
+}
+function esNum(t){ return /^\d+([.,]\d+)?$/.test(t); }
+function readInputs(){
+  const w=$('iW'), r=$('iR'), a=$('iA');
+  const wt=$('iWT'), txt=wt?wt.value.trim():'';
+  if(txt!==''){
+    const tn=txt.replace(/\s/g,'');
+    draft.w = esNum(tn) ? parseFloat(tn.replace(',','.')) : txt;
+  } else if(w){
+    const raw=w.value.trim(), t=raw.replace(/\s/g,'');
+    draft.w = (t!==''&&esNum(t)) ? parseFloat(t.replace(',','.')) : raw;
+  }
+  if(r) draft.r=r.value.trim();
+  if(a) draft.aj=a.value.trim();
+}
+function renderHist(e){
+  const L=S.L, rolls=[];
+  for(let n=1;n<=L.n;n++) if(e.sets.some(s=>hasVal(s.hist[n-1].w))) rolls.push(n);
+  if(!rolls.length){ $('histCard').classList.add('hide'); return; }
+  $('histCard').classList.remove('hide');
+  let h='<table><thead><tr><th>Serie</th>'+rolls.map(n=>`<th>R${n}</th>`).join('')+'</tr></thead><tbody>';
+  e.sets.forEach((s,i)=>{ h+=`<tr><td class="s">${i+1}</td>`+rolls.map(n=>{
+    const c=s.hist[n-1]; return `<td>${hasVal(c.w)?esc(c.w)+'×'+esc(c.r):'—'}</td>`; }).join('')+'</tr>'; });
+  $('histBox').innerHTML=h+'</tbody></table>';
+}
+
+/* ============ REGISTRO + COLA ============ */
+function doLog(withTimer){
+  readInputs();
+  const e=S.ex[cur], L=S.L, idx=(editIdx!==null?editIdx:nextSet(e));
+  if(idx<0) return;
+  const s=e.sets[idx];
+  const av=avisos(e,idx);
+  if(av&&av!==draft.avisoOk){ draft.aviso=av; draft.avisoT=withTimer; renderEx(); return; }
+  const vals=new Array(L.stride).fill(null);
+  vals[L.f.w]=typeof draft.w==='number'?draft.w:String(draft.w);
+  vals[L.f.r]=/^\d+$/.test(String(draft.r).trim())?parseInt(draft.r,10):String(draft.r);
+  if(L.f.rir!==null&&hasVal(draft.rir)) vals[L.f.rir]=draft.rir;
+  if(L.f.aj!==null&&hasVal(draft.aj)) vals[L.f.aj]=draft.aj;
+  s.cur={ w:vals[L.f.w], r:vals[L.f.r],
+    rir:L.f.rir!==null?vals[L.f.rir]:undefined, aj:L.f.aj!==null?vals[L.f.aj]:undefined };
+  s.hist[S.roll-1]=Object.assign({n:S.roll},s.cur);
+  draft=null; editIdx=null;
+  if(navigator.vibrate) navigator.vibrate(recordDe(e,s)?[30,50,30,50,80]:18);
+  renderEx();
+  if(withTimer) startRest(e,s,idx);
+  marcaUltimo();
+  const it={ pid:P.id, day:S.day, row:s.row, c0:S.cc, c1:S.cc+L.stride-1,
+    values:vals, dateCol:S.cc+1, date:hoyTxt() };
+  guardaLocal(it);
+  const q=queue(); q.push(it);
+  setQueue(q); flush();
+}
+function clearSet(){
+  const e=S.ex[cur], L=S.L, idx=editIdx;
+  if(idx===null) return;
+  const s=e.sets[idx];
+  s.cur={ w:'', r:'', rir:undefined, aj:undefined };
+  s.hist[S.roll-1]={ n:S.roll, w:'', r:'' };
+  editIdx=null; draft=null;
+  renderEx();
+  const it={ pid:P.id, day:S.day, row:s.row, c0:S.cc, c1:S.cc+L.stride-1,
+    values:new Array(L.stride).fill(''), clear:true };
+  guardaLocal(it);
+  const q=queue(); q.push(it);
+  setQueue(q); flush();
+}
+function queue(){ try{ return JSON.parse(localStorage.getItem(LSK)||'[]'); }catch(e){ return []; } }
+function setQueue(q){ try{ localStorage.setItem(LSK,JSON.stringify(q)); }catch(e){}
+  try{ refrescaPend(); }catch(e){} }
+let flushing=false;
+async function flush(){
+  if(flushing) return;
+  if(!queue().length){ setSyn('ok','en la hoja'); return; }
+  flushing=true;
+  while(queue().length){
+    setSyn('pend',queue().length+' pend.');
+    const it=queue()[0];
+    try{
+      await write(it);
+      recientes.push({it:it,t:Date.now()});
+      const q=queue(); q.shift(); setQueue(q);
+    }catch(err){ flushing=false; setSyn('err',queue().length+' sin subir'); return; }
+  }
+  flushing=false; setSyn('ok','en la hoja');
+  try{ refrescaPend(); }catch(e){}
+}
+window.addEventListener('online',flush);
+setInterval(()=>{ if(queue().length&&!flushing) flush(); },20000);
+
+/* ============ TEMPORIZADOR ============ */
+function startRest(e,s,idx){
+  tTotal=s.rest||120; tEnd=Date.now()+tTotal*1000; tOver=false;
+  const n=idx+2, rec=recordDe(e,s);
+  const last=`Registrado ${s.cur.w} kg × ${s.cur.r}`+(rec?' · récord de '+rec:'');
+  const next=n<=e.sets.length
+    ? `Siguiente: serie ${n} · obj. ${e.sets[idx+1].reps}${hasVal(e.sets[idx+1].rir)?' @RIR '+e.sets[idx+1].rir:''}`
+    : 'Ejercicio completado';
+  try{ localStorage.setItem(RESTK,JSON.stringify({end:tEnd,total:tTotal,last:last,next:next})); }catch(err){}
+  pintaRest(last,next);
+}
+function pintaRest(last,next){
+  $('rLast').textContent=last; $('rNext').textContent=next;
+  $('rest').classList.add('on'); $('rest').classList.remove('over');
+  clearInterval(timer); timer=setInterval(tick,1000); tick();
+}
+/* El tiempo sale de la hora de fin, no de contar ticks: aunque el sistema
+   congele la app con la pantalla bloqueada, al volver marca lo correcto. */
+function tick(){
+  tLeft=Math.round((tEnd-Date.now())/1000);
+  const m=Math.floor(Math.abs(tLeft)/60), sc=Math.abs(tLeft)%60;
+  $('rTime').textContent=(tLeft<0?'+':'')+m+':'+String(sc).padStart(2,'0');
+  $('rBar').style.width=Math.max(0,Math.min(100,tLeft/tTotal*100))+'%';
+  if(tLeft<=0&&!tOver){ tOver=true; $('rest').classList.add('over'); beep();
+    if(navigator.vibrate) navigator.vibrate([90,70,90]); }
+  if(tLeft<-300) stopRest();
+}
+function stopRest(){
+  clearInterval(timer); timer=null; $('rest').classList.remove('on');
+  try{ localStorage.removeItem(RESTK); }catch(err){}
+}
+/* Si la app se cerró o recargó con un descanso en marcha, se retoma. */
+function retomaRest(){
+  let c=null; try{ c=JSON.parse(localStorage.getItem(RESTK)||'null'); }catch(err){}
+  if(!c||!c.end||!c.total) return;
+  if(Date.now()>c.end+300000){ try{ localStorage.removeItem(RESTK); }catch(err){} return; }
+  tEnd=c.end; tTotal=c.total; tOver=false;
+  pintaRest(c.last||'',c.next||'');
+}
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden) return;
+  if(timer) tick();
+  if(enSesion()) pideWL();
+});
+function beep(){ try{
+  actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+  [0,.18].forEach(t=>{ const o=actx.createOscillator(), g=actx.createGain();
+    o.frequency.value=880; o.connect(g); g.connect(actx.destination);
+    g.gain.setValueAtTime(.0001,actx.currentTime+t);
+    g.gain.exponentialRampToValueAtTime(.25,actx.currentTime+t+.01);
+    g.gain.exponentialRampToValueAtTime(.0001,actx.currentTime+t+.13);
+    o.start(actx.currentTime+t); o.stop(actx.currentTime+t+.15); });
+}catch(e){} }
+
+/* ============ RESUMEN DE LA SESIÓN ============ */
+function tonSet(c){
+  if(!c) return 0;
+  const w=parseFloat(String(c.w).replace(',','.')), r=parseInt(c.r);
+  return (!isNaN(w)&&!isNaN(r))?w*r:0;
+}
+function pct(a,b){ return b>0 ? Math.round((a-b)/b*100) : null; }
+function marca(d){ return d===null?'flat':(d>0?'up':(d<0?'down':'flat')); }
+function signo(d){ return d===null?'—':(d>0?'+'+d+'%':d+'%'); }
+function renderSum(){
+  let tc=0,tp=0,hechas=0,total=0,mejor=0,peor=0,nRec=0,filas='';
+  S.ex.forEach(e=>{
+    let a=0,b=0,h=0,conPrev=false;
+    e.sets.forEach(s=>{
+      total++;
+      if(hasVal(s.cur.w)||hasVal(s.cur.r)){ h++; a+=tonSet(s.cur); if(recordDe(e,s)) nRec++; }
+      if(s.prev&&hasVal(s.prev.w)){ conPrev=true; b+=tonSet(s.prev); }
+    });
+    tc+=a; tp+=b; hechas+=h;
+    if(!h) { filas+=`<div class="srow"><div class="nm">${esc(e.name)}
+      <small>sin registrar</small></div><div class="dd flat">—</div></div>`; return; }
+    const d=conPrev?pct(a,b):null;
+    if(d!==null&&d>0) mejor++; if(d!==null&&d<0) peor++;
+    filas+=`<div class="srow"><div class="nm">${esc(e.name)}
+      <small>${h}/${e.sets.length} series · ${numfmt(Math.round(a))} kg${conPrev?' vs '+numfmt(Math.round(b))+' kg':''}</small></div>
+      <div class="dd ${marca(d)}">${conPrev?signo(d):'nuevo'}</div></div>`;
+  });
+  const dTon=tp>0?pct(tc,tp):null;
+  const ef={};
+  S.ex.forEach(e=>e.sets.forEach(s=>{
+    if(!hasVal(s.cur.r)&&!hasVal(s.cur.w)) return;
+    const rv=parseFloat(String(hasVal(s.cur.rir)?s.cur.rir:s.rir).replace(',','.'));
+    if(isNaN(rv)||rv<=3) ef[e.group||'—']=(ef[e.group||'—']||0)+1;
+  }));
+  const keys=Object.keys(ef), max=Math.max.apply(null,[4].concat(keys.map(k=>ef[k])));
+  $('sumBody').innerHTML=`
+    <div class="sumhead">
+      <div><div class="k">Tonelaje</div><div class="v">${numfmt(Math.round(tc))}</div>
+        <div class="d ${marca(dTon)}">${tp>0?signo(dTon)+' vs ROLL '+(S.roll-1):'sin ROLL anterior'}</div></div>
+      <div><div class="k">Series</div><div class="v">${hechas}/${total}</div>
+        <div class="d flat">${hechas>=total?'completa':'incompleta'}</div></div>
+      <div><div class="k">Récords</div><div class="v">${nRec}</div>
+        <div class="d ${nRec?'up':'flat'}">${nRec?'sobre ROLLs previos':'ninguno hoy'}</div></div>
+    </div>
+    ${tp>0?`<div class="card"><div class="lab">Frente al ROLL ${S.roll-1}</div>
+      <div style="font-size:12.5px;line-height:1.5;color:var(--dim)">
+        Subiste en <b style="color:var(--ok)">${mejor}</b> ejercicio${mejor===1?'':'s'} y
+        bajaste en <b style="color:var(--bad)">${peor}</b>.</div></div>`:''}
+    <div class="seclab">Por ejercicio</div>
+    ${filas}
+    ${keys.length?`<div class="card"><div class="lab">Series efectivas por bloque</div>
+      ${keys.map(k=>`<div class="vrow"><div class="g">${esc(k)}</div>
+        <div class="t"><i style="width:${ef[k]/max*100}%"></i></div>
+        <div class="s">${ef[k]}</div></div>`).join('')}</div>`:''}`;
+}
+function goSum(){
+  $('vSess').classList.add('hide'); $('vEx').classList.add('hide'); $('vSum').classList.remove('hide');
+  $('back').classList.add('hide');
+  $('ttl').textContent='Resumen'; $('sub').textContent=`${P.name} · ${S.day} · ROLL ${S.roll}`;
+  renderSum(); window.scrollTo(0,0);
+}
+
+/* ============ COLA PENDIENTE ============ */
+function renderPend(){
+  const q=queue(), bar=$('pendBar');
+  if(!bar) return;
+  if(!q.length){ bar.classList.remove('on'); return; }
+  const dias=[...new Set(q.map(it=>it.day))].join(', ');
+  $('pbN').textContent=q.length+(q.length===1?' serie sin subir':' series sin subir');
+  $('pbTxt').textContent='Se reintentará sola cada poco. Si ya no la quieres en la hoja '
+    +'('+dias+'), descártala: si no, acabará escribiéndose.';
+  bar.classList.add('on');
+}
+/* El panel de pendientes solo se abre tocando la etiqueta de estado. Si ya
+   está abierto se mantiene al día; nunca aparece solo. */
+function refrescaPend(){
+  const bar=$('pendBar');
+  if(bar&&bar.classList.contains('on')) renderPend();
+}
+function dropQueue(){
+  setQueue([]); flushing=false;
+  setSyn('','listo'); renderPend();
+}
+$('syn').onclick=()=>{
+  const bar=$('pendBar');
+  if(!queue().length){ setSyn(queue().length?'pend':'ok','en la hoja'); return; }
+  bar.classList.contains('on') ? bar.classList.remove('on') : renderPend();
+};
+$('pbRetry').onclick=()=>{ flushing=false; flush().then(renderPend).catch(renderPend); };
+$('pbDrop').onclick=dropQueue;
+
+/* ============ NAVEGACIÓN ============ */
+$('back').onclick=goSess;
+$('bLoad').onclick=()=>loadSession(false);
+$('bReload').onclick=()=>loadSession(true);
+$('rSkip').onclick=stopRest;
+$('bNext').onclick=()=>{ if(cur<S.ex.length-1) openEx(cur+1); else goSess(); };
+$('bDayRetry').onclick=()=>{ (reintentar||reintentarDias)(); };
+$('bSum').onclick=goSum;
+$('bSumBack').onclick=()=>{ $('vSum').classList.add('hide'); goSess(); };
+$('bPick').onclick=()=>{ $('vSess').classList.add('hide'); $('vEx').classList.add('hide');
+  $('vPick').classList.remove('hide'); $('back').classList.add('hide');
+  $('ttl').textContent='Tracker de entrenamiento';
+  $('sub').textContent='Elige perfil, día y ROLL · '+VERSION;
+  sueltaWL();
+  renderProf(); renderPick(); scanRolls(); estadoLocal(); };
+
+/* ============ TRANSPORTE: Apps Script (sin Claude) ============ */
+const CFGK='trackerb.cfg.v2', NONK='trackerb.nonce.v1';
+/* ID de cliente de Google. No es secreto. Vacío = sin botón de Google. */
+const GOOGLE_CLIENT_ID='733763071154-5id7uqgltb2s088ovbq5u22ga2eqlnnu.apps.googleusercontent.com';
+/* La dirección del script va dentro de la app: no es secreta, sin código no
+   devuelve nada. Así solo hay que pegar el código personal. */
+const SCRIPT_URL='https://script.google.com/macros/s/AKfycbxLbXuwiPnS8Elwh8zuNQfr3HW7qco38SfwF-5bHnSv-Xy6gL7-1ibtFTnbZOy88ab7/exec';
+let CFG={url:'',token:''}, cfgOpen=false;
+function loadCfg(){ try{ CFG=JSON.parse(localStorage.getItem(CFGK)||'{}')||{}; }catch(e){ CFG={}; }
+  CFG.url=CFG.url||SCRIPT_URL; CFG.token=CFG.token||'';
+  // Enlace personal: …/tracker/#c=CODIGO deja la app conectada al abrirlo.
+  // Va en la almohadilla para que el código no viaje al servidor de la página.
+  try{
+    const m=(location.hash||'').match(/^#c=([\w-]{6,80})$/);
+    if(m){ CFG.token=m[1]; saveCfg(); history.replaceState(null,'',location.pathname); }
+  }catch(e){}
+}
+function saveCfg(){ try{ localStorage.setItem(CFGK,JSON.stringify(CFG)); }catch(e){} }
+function renderCfg(){
+  const ok=!!(CFG.url&&CFG.token);
+  $('cfgBox').className=(ok&&!cfgOpen)?'card hide':'card';
+  $('cfgLink').className=(ok&&!cfgOpen)?'msg':'msg hide';
+  if(!(ok&&!cfgOpen)){ $('iUrl').value=CFG.url; $('iTok').value=CFG.token; }
+}
+function señal(ms){
+  if(typeof AbortController==='undefined') return {};
+  const c=new AbortController();
+  setTimeout(()=>c.abort(),ms);
+  return {signal:c.signal};
+}
+/* Todas las llamadas van por POST con el código dentro del cuerpo: no
+   aparece en ninguna dirección. */
+async function api(body){
+  if(!CFG.token) throw new Error('falta iniciar sesión');
+  return llama(Object.assign({token:CFG.token},body));
+}
+async function llama(body){
+  if(!CFG.url) throw new Error('falta la dirección del script');
+  const r=await fetch(CFG.url,Object.assign({ method:'POST', redirect:'follow',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body:JSON.stringify(body) },señal(20000)));
+  if(!r.ok) throw new Error('HTTP '+r.status);
+  const j=await r.json();
+  if(j.error){
+    if(/falta ssid/.test(j.error)) throw new Error('el script de la hoja sigue en la versión antigua: falta implementar la nueva');
+    throw new Error(j.error==='token'?(String(body.token||'').indexOf('s-')===0?'la sesión ya no es válida: vuelve a entrar':'código incorrecto'):j.error);
+  }
+  return j;
+}
+async function traePerfiles(){
+  const j=await api({action:'perfiles'});
+  if(!j.profiles||!j.profiles.length||typeof j.profiles[0]!=='object')
+    throw new Error('el script de la hoja es antiguo: hay que volver a implementarlo');
+  ponPerfiles(j.profiles);
+  return PROFILES;
+}
+async function listSheets(){ await traePerfiles(); renderProf(); return P.dias||[]; }
+async function readDay(day,p){ const j=await api({action:'load',perfil:(p||P).id,day:day}); return j.values||[]; }
+async function write(it){
+  // `ssid` solo lo llevan series que quedaron en cola con la versión anterior
+  await api({ action:'write', perfil:it.pid, ssid:it.ssid, day:it.day, row:it.row,
+    col:it.c0+1, values:it.values, date:it.date, clear:!!it.clear });
+}
+$('cfgLink').onclick=()=>{ cfgOpen=true; renderCfg(); $('iTok').value=String(CFG.token).indexOf('s-')===0?'':CFG.token; };
+$('bSaveCfg').onclick=async()=>{
+  CFG.url=$('iUrl').value.trim()||SCRIPT_URL; CFG.token=$('iTok').value.trim(); saveCfg();
+  $('cfgMsg').className='msg'; $('cfgMsg').innerHTML='<span class="spin"></span> Probando…';
+  try{
+    await traePerfiles();
+    $('cfgMsg').textContent='Conectado.';
+    setSyn('ok','conectado'); cfgOpen=false; renderCfg(); days={}; rollsUsed={}; renderProf(); loadDays();
+  }catch(e){
+    $('cfgMsg').className='msg bad';
+    $('cfgMsg').textContent='No conecta: '+(e.message||e)+(/código/.test(String(e.message))?'. Revisa que esté completo, sin espacios.':'.');
+    setSyn('err','sin conexión');
+  }
+};
+/* ============ ENTRAR CON GOOGLE ============ */
+/* Flujo por redirección, el único que Safari de iOS admite: se va a Google,
+   y Google devuelve a esta misma página con un token en la almohadilla. El
+   script lo comprueba con Google, mira que el correo esté autorizado y abre
+   una sesión propia; el token de Google no se guarda. */
+const vuelta=()=>new URL('./',location.href).href;
+function urlGoogle(){
+  const nonce=Array.from(crypto.getRandomValues(new Uint8Array(16)),b=>b.toString(16).padStart(2,'0')).join('');
+  try{ localStorage.setItem(NONK,nonce); }catch(e){}
+  return 'https://accounts.google.com/o/oauth2/v2/auth?client_id='+encodeURIComponent(GOOGLE_CLIENT_ID)
+    +'&redirect_uri='+encodeURIComponent(vuelta())+'&response_type=id_token&scope=openid%20email'
+    +'&nonce='+nonce+'&prompt=select_account';
+}
+function renderGoogle(){
+  const si=!!GOOGLE_CLIENT_ID;
+  $('bGoogle').classList.toggle('hide',!si); $('oCod').classList.toggle('hide',!si);
+}
+$('bGoogle').onclick=()=>{ location.href=urlGoogle(); };
+/* ¿Venimos de vuelta de Google? Devuelve true si hay que esperar a la sesión. */
+function vueltaDeGoogle(){
+  const h=new URLSearchParams((location.hash||'').replace(/^#/,''));
+  const idt=h.get('id_token'), err=h.get('error');
+  if(!idt&&!err) return false;
+  try{ history.replaceState(null,'',location.pathname); }catch(e){}
+  const falla=t=>{ cfgOpen=true; renderCfg(); $('cfgMsg').className='msg bad';
+    $('cfgMsg').textContent='No se pudo entrar con Google: '+t+'.'; setSyn('err','sin sesión'); };
+  if(err){ falla(err==='access_denied'?'cancelado':err); return true; }
+  let nonce=''; try{ nonce=localStorage.getItem(NONK)||''; localStorage.removeItem(NONK); }catch(e){}
+  $('cfgMsg').className='msg'; $('cfgMsg').innerHTML='<span class="spin"></span> Entrando…';
+  llama({action:'google',id_token:idt}).then(j=>{
+    if(!j.session) throw new Error('el script no devolvió sesión');
+    if(nonce&&j.nonce!==nonce) throw new Error('la respuesta no corresponde a este intento');
+    CFG.token=j.session; saveCfg(); PROFILES=[]; P=NADIE;
+    try{ localStorage.removeItem(PERFK); }catch(e){}
+    $('cfgMsg').textContent=''; cfgOpen=false; renderCfg(); days={}; rollsUsed={}; arranca();
+  }).catch(e=>falla((e&&e.message)||String(e)));
+  return true;
+}
+function arranca(){
+  if(!(CFG.url&&CFG.token)){ setSyn('','configura'); return; }
+  setSyn('','listo');
+  // Con perfiles guardados se entra al momento; loadDays ya los contrasta
+  // con el script por detrás. Sin ellos hay que pedirlos antes.
+  if(PROFILES.length){ renderProf(); loadDays(); return; }
+  setSyn('pend','conectando');
+  traePerfiles().then(()=>{ renderProf(); loadDays(); }).catch(e=>{
+    setSyn('err','sin conexión');
+    mostrarErrorDias('No he podido conectar con tus hojas.',(e&&e.message)||String(e));
+  });
+}
+reintentar=()=>{ if(PROFILES.length) reintentarDias(); else arranca(); };
+loadCfg(); renderCfg(); renderGoogle(); renderProf(); renderPick();
+$('sub').textContent='Elige perfil, día y ROLL · '+VERSION;
+if(queue().length){ setSyn('pend',queue().length+' pend.'); }
+retomaRest();
+if(!vueltaDeGoogle()) arranca();
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{ navigator.serviceWorker.register('./sw.js').catch(()=>{}); });
+}
+
+</script>
+</body>
+</html>
