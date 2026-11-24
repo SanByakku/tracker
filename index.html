@@ -228,6 +228,16 @@
   .dl small{display:block;font-size:9.5px;letter-spacing:.7px;text-transform:uppercase;color:var(--dim2);
     font-weight:700;margin-bottom:2px}
   .dl.desc{color:var(--warn)} .dl.desc small{color:var(--warn);opacity:.8}
+  .dlr{display:flex;align-items:baseline;gap:10px}
+  .dlr>span:first-child{flex:1;min-width:0}
+  .kc{flex:0 0 auto;font-size:11px;font-weight:650;color:var(--dim);white-space:nowrap}
+  .kc.nd{color:var(--dim2);font-weight:500}
+  .dhead{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+  .dhead .kt{font-size:12px;font-weight:750;color:var(--txt);white-space:nowrap}
+  .ktot{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:10px 0;
+    display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+  .ktot b{font-size:20px;font-weight:800;letter-spacing:-.5px}
+  .ktot span{font-size:11px;color:var(--dim);line-height:1.4;text-align:right}
   .alts{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
   .alts button{padding:7px 11px;border-radius:999px;background:var(--panel2);border:1px solid var(--line);
     font-size:11.5px;font-weight:650;color:var(--dim);line-height:1.2}
@@ -355,7 +365,7 @@
 
 <script>
 /* ============ PERFILES ============ */
-const VERSION='v0.6.3';
+const VERSION='v0.7';
 
 /* Diagnóstico: cualquier fallo silencioso se pinta en pantalla. No depende
    de ningún elemento del maquetado, se crea el suyo. */
@@ -1354,6 +1364,42 @@ function alternativas(t){
 }
 /* Lo elegido se recuerda por perfil. La clave usa el bloque y las etiquetas,
    no las cantidades: si la dieta cambia de gramos, la elección se conserva. */
+/* ---- Calorías ----
+   La tabla de alimentos va en la propia pestaña _DIETA, en filas cuyo BLOQUE
+   es «@kcal»:  @kcal | alias; alias; … | kcal | 100 g · 100 ml · unidad
+   Son las de cada persona (sus marcas), y se editan en la hoja. */
+const sinTilde=t=>String(t).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+function tablaKcal(rows){
+  const out=[];
+  rows.forEach(r=>{
+    if(String(r[0]||'').trim().toLowerCase()!=='@kcal') return;
+    const k=parseFloat(String(r[2]||'').replace(',','.')); if(isNaN(k)) return;
+    const por=/unidad/i.test(String(r[3]||''))?'u':'c';
+    String(r[1]||'').split(';').map(a=>sinTilde(a).trim()).filter(Boolean).forEach(a=>out.push({a:a,k:k,por:por}));
+  });
+  return out.sort((x,y)=>y.a.length-x.a.length);       // el alias más largo gana
+}
+/* kcal de una línea ya resuelta (la opción elegida). Devuelve:
+   null  → no es una cantidad de alimento (no cuenta ni avisa)
+   {k:n} → calculado      {k:null} → hay cantidad pero el alimento no está en la tabla */
+function kcalLinea(texto,tabla){
+  let t=String(texto).replace(/^[^:\d]{1,40}:\s*(?=\d)/,'');
+  if(!/^\d/.test(t)) return null;
+  let total=0, falta=false, algo=false;
+  t.split(/\s+y\s+(?=\d)/).forEach(seg=>{
+    const m=seg.match(/^(\d+(?:[.,]\d+)?)\s*(gramos?|g|ml|mg|mcg|iu|ui)?\b\s*(?:de\s+)?(.*)$/i);
+    if(!m) return;
+    const q=parseFloat(m[1].replace(',','.')), u=(m[2]||'').toLowerCase();
+    if(u==='mg'||u==='mcg'||u==='iu'||u==='ui'){ algo=true; return; }      // suplementos: 0 kcal
+    const f=sinTilde(m[3]).trim();
+    const al=tabla.find(x=>f.indexOf(x.a)===0);
+    if(!al){ if(u) falta=true; return; }
+    algo=true; total+=al.por==='u'?q*al.k:q*al.k/100;
+  });
+  if(falta) return {k:null};
+  return algo?{k:total}:null;
+}
+const kfmt=n=>Math.round(n).toLocaleString('es-ES');
 function dietSel(){ try{ return JSON.parse(localStorage.getItem(DIETSEL)||'{}')||{}; }catch(e){ return {}; } }
 function ponDietSel(clave,i){
   const todo=dietSel(); const mio=todo[P.id]||(todo[P.id]={});
@@ -1411,15 +1457,25 @@ function renderDieta(){
     return;
   }
   // Bloques en el orden de la hoja; un bloque es una racha de filas con el mismo nombre
+  const tabla=tablaKcal(dietRows);
   const bloques=[]; let act=null;
   dietRows.forEach(r=>{
     const n=String(r[0]||'').trim(), c=String(r[1]||'').trim(), t=String(r[2]||'').trim();
     const d=String(r[3]||'').trim().toLowerCase();
-    if(!t) return;
+    if(!t||n.charAt(0)==='@') return;                  // las filas @… son datos, no dieta
     if(!act||act.n!==n){ act={n:n,c:c,l:[]}; bloques.push(act); }
     if(d===''||d===modo) act.l.push({t:t,d:d});
   });
   const elegido=(dietSel()[P.id])||{}, claves=[];
+  // kcal de una línea; va sumando en el bloque
+  const kc=(txt,b)=>{
+    if(!tabla.length||!b.comida) return '';
+    const r=kcalLinea(txt,tabla);
+    if(!r) return '';
+    if(r.k===null){ b.sin=(b.sin||0)+1; return '<span class="kc nd">sin dato</span>'; }
+    b.kcal=(b.kcal||0)+r.k;
+    return r.k>0?`<span class="kc">${kfmt(r.k)} kcal</span>`:'';
+  };
   const linea=(x,b)=>{
     const cls='dl';
     const alt=alternativas(x.t);
@@ -1427,28 +1483,38 @@ function renderDieta(){
       const clave=b.n+'§'+x.d+'§'+alt.map(a=>a.e).join('/');
       let i=elegido[clave]; if(!(i>=0&&i<alt.length)) i=0;
       const k=claves.push(clave)-1;
-      return `<div class="${cls}">${esc(alt[i].t)}
+      return `<div class="${cls}"><div class="dlr"><span>${esc(alt[i].t)}</span>${kc(alt[i].t,b)}</div>
         <div class="alts">${alt.map((a,j)=>`<button class="${j===i?'on':''}" data-ak="${k}" data-ai="${j}">${esc(a.e)}</button>`).join('')}</div></div>`;
     }
     const m=x.t.match(/^(Opción|Suplementación|Además)\s*:\s*(.+)$/);
     const et=m?m[1]:'';
-    return `<div class="${cls}">${et?'<small>'+esc(et)+'</small>':''}${esc(m?m[2]:x.t)}</div>`;
+    return `<div class="${cls}">${et?'<small>'+esc(et)+'</small>':''}<div class="dlr"><span>${esc(m?m[2]:x.t)}</span>${kc(m?m[2]:x.t,b)}</div></div>`;
   };
   // Todo lo que queda entre la primera y la última comida (el intraentreno,
   // por ejemplo) se pinta como una comida más, línea a línea y sin plegar.
   const esC=b=>/^COMIDA\b/i.test(b.n);
   const idx=bloques.map((b,i)=>esC(b)?i:-1).filter(i=>i>=0);
   const pri=idx.length?idx[0]:-1, ult=idx.length?idx[idx.length-1]:-1;
-  bloques.forEach((b,i)=>{ b.comida=i>=pri&&i<=ult&&pri>=0; });
-  $('dietBody').innerHTML=bloques.filter(b=>b.l.length).map(b=>{
-    const comida=b.comida, cab=`<h3>${esc(b.n)}</h3>`;
-    const cuando=b.c?`<div class="dc">${esc(b.c)}</div>`:'';
+  // Todo lo que va hasta la última comida (antes de la comida 1, intraentreno…)
+  // se pinta como una comida: línea a línea y sin plegar. Lo de después
+  // (instrucciones, equivalencias) sí se pliega si es largo.
+  bloques.forEach((b,i)=>{ b.comida=ult>=0&&i<=ult; });
+  let dia=0, sinDato=0;
+  const tarjetas=bloques.filter(b=>b.l.length).map(b=>{
+    const comida=b.comida;
     const cuerpo=`<div class="dls">${b.l.map(x=>linea(x,b)).join('')}</div>`;
+    dia+=b.kcal||0; sinDato+=b.sin||0;
+    const tot=(tabla.length&&comida&&b.kcal>0)?`<span class="kt">≈ ${kfmt(b.kcal)} kcal</span>`:'';
+    const cab=`<div class="dhead"><h3>${esc(b.n)}</h3>${tot}</div>`;
+    const cuando=b.c?`<div class="dc">${esc(b.c)}</div>`:'';
     // Los bloques largos que no son comidas (instrucciones, equivalencias) van plegados
     if(!comida&&b.l.length>3)
-      return `<details class="dcard"><summary>${cab}<span>${b.l.length} puntos ▾</span></summary>${cuando}${cuerpo}</details>`;
+      return `<details class="dcard"><summary><h3>${esc(b.n)}</h3><span>${b.l.length} puntos ▾</span></summary>${cuando}${cuerpo}</details>`;
     return `<div class="dcard${comida?' meal':''}">${cab}${cuando}${cuerpo}</div>`;
   }).join('');
+  const total=(tabla.length&&dia>0)?`<div class="ktot"><div><b>≈ ${kfmt(dia)}</b> kcal</div>
+    <span>${modo==='entreno'?'Día de entreno':'Día de descanso'}, con lo que tienes elegido.<br>Sin fruta ni verdura.${sinDato?' '+sinDato+(sinDato===1?' línea sin dato.':' líneas sin dato.'):''}</span></div>`:'';
+  $('dietBody').innerHTML=total+tarjetas;
   [...$('dietBody').querySelectorAll('[data-ak]')].forEach(bt=>bt.onclick=()=>ponDietSel(claves[+bt.dataset.ak],+bt.dataset.ai));
 }
 
