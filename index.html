@@ -26,11 +26,13 @@
 
   .top{position:sticky;top:0;z-index:30;background:rgba(12,13,16,.94);backdrop-filter:blur(12px);
     border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top)}
-  .top-in{display:flex;align-items:center;gap:10px;padding:11px 14px}
+  .top-in{padding:8px 14px 14px}
+  .toprow{display:flex;align-items:center;justify-content:space-between;min-height:30px}
+  .ttlbox{text-align:center;margin-top:5px}
   .back{width:34px;height:34px;border-radius:10px;background:var(--panel2);display:grid;
     place-items:center;font-size:18px;flex:0 0 auto}
-  .top h1{font-size:14.5px;font-weight:650;margin:0;letter-spacing:-.2px;line-height:1.25}
-  .top .sub{font-size:11px;color:var(--dim);margin-top:2px}
+  .top h1{font-size:21px;font-weight:800;margin:0;letter-spacing:-.4px;line-height:1.2;text-wrap:balance}
+  .top .sub{font-size:12.5px;color:var(--dim);margin-top:4px}
   .syn{font-size:10px;padding:4px 8px;border-radius:7px;background:var(--panel2);color:var(--dim);
     flex:0 0 auto;font-weight:650;letter-spacing:.2px}
   .syn.ok{background:#15321f;color:var(--ok)} .syn.pend{background:#3a2e16;color:var(--warn)}
@@ -224,12 +226,14 @@
 <body>
 
 <div class="top"><div class="top-in">
-  <button class="back hide" id="back">‹</button>
-  <div style="flex:1;min-width:0">
+  <div class="toprow">
+    <button class="back hide" id="back">‹</button><span></span>
+    <div class="syn" id="syn">—</div>
+  </div>
+  <div class="ttlbox">
     <h1 id="ttl">Tracker de entrenamiento</h1>
     <div class="sub" id="sub">Elige perfil, día y ROLL</div>
   </div>
-  <div class="syn" id="syn">—</div>
 </div></div>
 
 
@@ -325,7 +329,7 @@
 
 <script>
 /* ============ PERFILES ============ */
-const VERSION='v0.5';
+const VERSION='v0.5.1';
 
 /* Diagnóstico: cualquier fallo silencioso se pinta en pantalla. No depende
    de ningún elemento del maquetado, se crea el suyo. */
