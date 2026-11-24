@@ -243,13 +243,15 @@
 <!-- PICKER -->
 <div id="vPick" class="wrap">
   <div class="card" id="cfgBox">
-    <div class="lab">Conexión con las hojas</div>
-    <input class="inp" id="iUrl" placeholder="URL de la aplicación web (…/exec)" autocapitalize="off" autocorrect="off" spellcheck="false">
-    <input class="inp" id="iTok" placeholder="Token" autocapitalize="off" autocorrect="off" spellcheck="false">
-    <button class="go" id="bSaveCfg">Guardar y probar</button>
+    <div class="lab">Código de acceso</div>
+    <input class="inp" id="iTok" placeholder="Pega aquí tu código" autocapitalize="off" autocorrect="off" spellcheck="false">
+    <button class="go" id="bSaveCfg">Entrar</button>
     <div class="msg" id="cfgMsg"></div>
+    <details style="margin-top:10px"><summary class="msg" style="margin:0;cursor:pointer">Avanzado</summary>
+      <input class="inp" id="iUrl" style="margin-top:8px" placeholder="URL del script (…/exec)" autocapitalize="off" autocorrect="off" spellcheck="false">
+    </details>
   </div>
-  <div class="msg" id="cfgLink">Conexión guardada · cambiar</div>
+  <div class="msg" id="cfgLink">Código guardado · cambiar</div>
 
   <div class="card">
     <div class="lab">Perfil</div>
@@ -589,7 +591,7 @@ function renderPick(){
   const sd=ds.length?sugDia():-1;
   $('dayPick').innerHTML = ds.length
     ? ds.map((d,i)=>`<button class="pick ${pickDay===i?'on':''}" data-d="${i}">${esc(d)}${i===sd?'<span class="hoy">TOCA</span>':''}</button>`).join('')
-    : '<div class="msg">'+(CFG.url&&CFG.token?'Cargando pestañas…':'Primero conecta con tus hojas en el recuadro de arriba.')+'</div>';
+    : '<div class="msg">'+(CFG.url&&CFG.token?'Cargando pestañas…':'Pega tu código de acceso en el recuadro de arriba.')+'</div>';
   [...$('dayPick').querySelectorAll('button')].forEach(b=>b.onclick=()=>{
     pickDay=+b.dataset.d; pickRoll=null; renderPick(); scanRolls(); });
   const nR=(rollsUsed[key()]&&rollsUsed[key()].n)||12;
@@ -1339,9 +1341,19 @@ $('bPick').onclick=()=>{ $('vSess').classList.add('hide'); $('vEx').classList.ad
 
 /* ============ TRANSPORTE: Apps Script (sin Claude) ============ */
 const CFGK='tracker.cfg.v2';
+/* La dirección del script va dentro de la app: no es secreta, sin código no
+   devuelve nada. Así solo hay que pegar el código personal. */
+const SCRIPT_URL='https://script.google.com/macros/s/AKfycbx6PJsA1zB6GVDyw3nAVmk4aC-GZn5GRINBC6KTp3QKhKZMJUsozZJ19TQQ-f36k4Z0/exec';
 let CFG={url:'',token:''}, cfgOpen=false;
 function loadCfg(){ try{ CFG=JSON.parse(localStorage.getItem(CFGK)||'{}')||{}; }catch(e){ CFG={}; }
-  CFG.url=CFG.url||''; CFG.token=CFG.token||''; }
+  CFG.url=CFG.url||SCRIPT_URL; CFG.token=CFG.token||'';
+  // Enlace personal: …/tracker/#c=CODIGO deja la app conectada al abrirlo.
+  // Va en la almohadilla para que el código no viaje al servidor de la página.
+  try{
+    const m=(location.hash||'').match(/^#c=([\w-]{6,80})$/);
+    if(m){ CFG.token=m[1]; saveCfg(); history.replaceState(null,'',location.pathname); }
+  }catch(e){}
+}
 function saveCfg(){ try{ localStorage.setItem(CFGK,JSON.stringify(CFG)); }catch(e){} }
 function renderCfg(){
   const ok=!!(CFG.url&&CFG.token);
@@ -1364,7 +1376,7 @@ async function apiGet(params){
   const r=await fetch(u.toString(),Object.assign({method:'GET',redirect:'follow'},señal(20000)));
   if(!r.ok) throw new Error('HTTP '+r.status);
   const j=await r.json();
-  if(j.error) throw new Error(j.error==='token'?'token incorrecto':j.error);
+  if(j.error) throw new Error(j.error==='token'?'código incorrecto':j.error);
   return j;
 }
 async function apiPost(body){
@@ -1374,7 +1386,7 @@ async function apiPost(body){
     body:JSON.stringify(Object.assign({token:CFG.token},body)) },señal(20000)));
   if(!r.ok) throw new Error('HTTP '+r.status);
   const j=await r.json();
-  if(j.error) throw new Error(j.error==='token'?'token incorrecto':j.error);
+  if(j.error) throw new Error(j.error==='token'?'código incorrecto':j.error);
   return j;
 }
 async function listSheets(){ const j=await apiGet({action:'ping'}); return j.sheets||[]; }
@@ -1385,7 +1397,7 @@ async function write(it){
 }
 $('cfgLink').onclick=()=>{ cfgOpen=true; renderCfg(); };
 $('bSaveCfg').onclick=async()=>{
-  CFG.url=$('iUrl').value.trim(); CFG.token=$('iTok').value.trim(); saveCfg();
+  CFG.url=$('iUrl').value.trim()||SCRIPT_URL; CFG.token=$('iTok').value.trim(); saveCfg();
   $('cfgMsg').className='msg'; $('cfgMsg').innerHTML='<span class="spin"></span> Probando…';
   try{
     const pf=await apiGet({action:'perfiles'});
@@ -1396,7 +1408,7 @@ $('bSaveCfg').onclick=async()=>{
     setSyn('ok','conectado'); cfgOpen=false; renderCfg(); days={}; rollsUsed={}; renderProf(); loadDays();
   }catch(e){
     $('cfgMsg').className='msg bad';
-    $('cfgMsg').textContent='No conecta: '+(e.message||e)+'. Comprueba que la URL acabe en /exec, que el token coincida y que la implementación esté como «Cualquier usuario».';
+    $('cfgMsg').textContent='No conecta: '+(e.message||e)+'. Revisa que el código esté completo, sin espacios.';
     setSyn('err','sin conexión');
   }
 };
