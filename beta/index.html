@@ -243,6 +243,13 @@
     font-size:11.5px;font-weight:650;color:var(--dim);line-height:1.2}
   .alts button.on{background:var(--accd);border-color:#4e6318;color:var(--acc)}
   .dl.desc .alts button.on{background:#3a2e16;border-color:#6b5320;color:var(--warn)}
+  .eqw{overflow-x:auto;margin-top:10px}
+  table.eq{border-collapse:collapse;width:100%;font-size:12.5px}
+  table.eq th,table.eq td{padding:7px 6px;border-top:1px solid var(--line);text-align:right;white-space:nowrap}
+  table.eq thead th{border-top:0;color:var(--acc);font-size:11px;letter-spacing:.8px;font-weight:800}
+  table.eq tbody th{text-align:left;font-weight:600;white-space:normal}
+  table.eq td{font-variant-numeric:tabular-nums}
+  .cardio{font-size:13.5px;line-height:1.45}
   details.dcard summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:baseline}
   details.dcard summary::-webkit-details-marker{display:none}
   details.dcard summary span{font-size:11px;color:var(--dim2);font-weight:650}
@@ -316,6 +323,7 @@
 <div id="vSess" class="wrap hide">
   <div class="meta" id="sessMeta"></div>
   <div id="exlist"></div>
+  <div id="cardioBox"></div>
   <div class="card">
     <div class="lab">Series efectivas · esta sesión</div>
     <div id="volrows"></div>
@@ -365,7 +373,7 @@
 
 <script>
 /* ============ PERFILES ============ */
-const VERSION='v0.7 beta';
+const VERSION='v0.8 beta';
 
 /* Diagnóstico: cualquier fallo silencioso se pinta en pantalla. No depende
    de ningún elemento del maquetado, se crea el suyo. */
@@ -842,6 +850,7 @@ function goSess(){
   $('ttl').textContent=S.banner||S.day;
   $('sub').textContent=`${P.name} · ${S.day} · ROLL ${S.roll}`;
   renderSess(); window.scrollTo(0,0);
+  pintaCardio();
   pideWL();
 }
 function marcaUltimo(){
@@ -1400,6 +1409,49 @@ function kcalLinea(texto,tabla){
   return algo?{k:total}:null;
 }
 const kfmt=n=>Math.round(n).toLocaleString('es-ES');
+/* Tabla de equivalencias: sale de las propias comidas. Cuenta toda línea con
+   alternativas que tenga la opción «Arroz»; una columna por comida, una fila
+   por alimento, con la cantidad que la hoja da a cada uno. */
+function tablaEquiv(bloques){
+  const cols=[], filas=[], celda={};
+  bloques.forEach(b=>b.l.forEach(x=>{
+    const alt=alternativas(x.t);
+    if(!alt||!alt.some(a=>/^arroz$/i.test(a.e))) return;
+    const m0=b.n.match(/^COMIDA\s+(\S+)/i), col=m0?'C'+m0[1]:b.n;
+    if(cols.indexOf(col)<0) cols.push(col);
+    alt.forEach(a=>{
+      const m=a.t.match(/(\d+(?:[.,]\d+)?)\s*(gramos?|g|ml)\b/i); if(!m) return;
+      if(filas.indexOf(a.e)<0) filas.push(a.e);
+      celda[a.e+'§'+col]=m[1]+' '+(/^ml$/i.test(m[2])?'ml':'g');
+    });
+  }));
+  if(!cols.length) return '';
+  const i=filas.findIndex(c=>/^arroz$/i.test(c)); if(i>0) filas.unshift(filas.splice(i,1)[0]);
+  return '<div class="eqw"><table class="eq"><thead><tr><th></th>'+cols.map(c=>'<th>'+esc(c)+'</th>').join('')+'</tr></thead><tbody>'
+    +filas.map(f=>'<tr><th>'+esc(f)+'</th>'+cols.map(c=>'<td>'+esc(celda[f+'§'+c]||'—')+'</td>').join('')+'</tr>').join('')
+    +'</tbody></table></div>';
+}
+/* El cardio se escribe en la pestaña de dieta (bloque «Cardio») pero se
+   enseña al final de cada día de entrenamiento, no en la pantalla de dieta. */
+const esCardio=n=>/^cardio$/i.test(String(n||'').trim());
+const dietMem={};
+async function pintaCardio(){
+  const p=P, box=$('cardioBox'); if(!box||!p.id) return;
+  const pinta=rows=>{
+    if(P.id!==p.id) return;
+    const l=(rows||[]).filter(r=>esCardio(r[0])&&String(r[2]||'').trim()).map(r=>String(r[2]).trim());
+    box.innerHTML=l.length?'<div class="gband">Cardio</div><div class="card cardio">'+l.map(t=>'<div>'+esc(t)+'</div>').join('')+'</div>':'';
+  };
+  if(dietMem[p.id]){ pinta(dietMem[p.id]); return; }
+  box.innerHTML='';
+  try{ const loc=await dbGet(dkey(p.id,'_DIETA')); if(loc&&loc.rows) pinta(loc.rows); }catch(e){}
+  try{
+    const j=await api({action:'dieta',perfil:p.id});
+    const rows=(j.rows||[]).filter(r=>r&&String(r[2]||'').trim()!=='');
+    await dbSet(dkey(p.id,'_DIETA'),{rows:rows,ts:Date.now()});
+    dietMem[p.id]=rows; pinta(rows);
+  }catch(e){}
+}
 function dietSel(){ try{ return JSON.parse(localStorage.getItem(DIETSEL)||'{}')||{}; }catch(e){ return {}; } }
 function ponDietSel(clave,i){
   const todo=dietSel(); const mio=todo[P.id]||(todo[P.id]={});
@@ -1431,7 +1483,7 @@ async function goDieta(desde){
   try{
     const j=await api({action:'dieta',perfil:p.id});
     const rows=(j.rows||[]).filter(r=>r&&String(r[2]||'').trim()!=='');
-    await dbSet(dkey(p.id,'_DIETA'),{rows:rows,ts:Date.now()});
+    await dbSet(dkey(p.id,'_DIETA'),{rows:rows,ts:Date.now()}); dietMem[p.id]=rows;
     if(sigue()){ dietRows=rows; renderDieta(); }
   }catch(e){
     if(sigue()&&!dietRows){
@@ -1462,7 +1514,7 @@ function renderDieta(){
   dietRows.forEach(r=>{
     const n=String(r[0]||'').trim(), c=String(r[1]||'').trim(), t=String(r[2]||'').trim();
     const d=String(r[3]||'').trim().toLowerCase();
-    if(!t||n.charAt(0)==='@') return;                  // las filas @… son datos, no dieta
+    if(!t||n.charAt(0)==='@'||esCardio(n)) return;     // @… son datos; el cardio va en el entrenamiento
     if(!act||act.n!==n){ act={n:n,c:c,l:[]}; bloques.push(act); }
     if(d===''||d===modo) act.l.push({t:t,d:d});
   });
@@ -1502,13 +1554,14 @@ function renderDieta(){
   let dia=0, sinDato=0;
   const tarjetas=bloques.filter(b=>b.l.length).map(b=>{
     const comida=b.comida;
-    const cuerpo=`<div class="dls">${b.l.map(x=>linea(x,b)).join('')}</div>`;
+    const eq=/^equivalencias/i.test(b.n)?tablaEquiv(bloques):'';
+    const cuerpo=eq+`<div class="dls">${b.l.map(x=>linea(x,b)).join('')}</div>`;
     dia+=b.kcal||0; sinDato+=b.sin||0;
     const tot=(tabla.length&&comida&&b.kcal>0)?`<span class="kt">≈ ${kfmt(b.kcal)} kcal</span>`:'';
     const cab=`<div class="dhead"><h3>${esc(b.n)}</h3>${tot}</div>`;
     const cuando=b.c?`<div class="dc">${esc(b.c)}</div>`:'';
     // Los bloques largos que no son comidas (instrucciones, equivalencias) van plegados
-    if(!comida&&b.l.length>3)
+    if(!comida&&!eq&&b.l.length>3)
       return `<details class="dcard"><summary><h3>${esc(b.n)}</h3><span>${b.l.length} puntos ▾</span></summary>${cuando}${cuerpo}</details>`;
     return `<div class="dcard${comida?' meal':''}">${cab}${cuando}${cuerpo}</div>`;
   }).join('');
