@@ -218,6 +218,24 @@
   .inp:focus{outline:none;border-color:#4e6318}
   #cfgLink{color:var(--acc);cursor:pointer;font-weight:600;margin:12px 0 0}
   .dev.pr{background:var(--accd);color:var(--acc)}
+  .dcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:13px 14px;margin:10px 0}
+  .dcard h3{margin:0;font-size:14.5px;font-weight:700;letter-spacing:-.1px}
+  .dcard.meal{border-color:#333a46}
+  .dcard.meal h3{color:var(--acc);font-size:12.5px;letter-spacing:1.1px;font-weight:800}
+  .dcard .dc{font-size:11.5px;color:var(--dim);margin-top:4px;line-height:1.4}
+  .dcard .dls{margin-top:8px}
+  .dl{font-size:13.5px;line-height:1.45;padding:9px 0;border-top:1px solid var(--line)}
+  .dl small{display:block;font-size:9.5px;letter-spacing:.7px;text-transform:uppercase;color:var(--dim2);
+    font-weight:700;margin-bottom:2px}
+  .dl.desc{color:var(--warn)} .dl.desc small{color:var(--warn);opacity:.8}
+  .alts{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+  .alts button{padding:7px 11px;border-radius:999px;background:var(--panel2);border:1px solid var(--line);
+    font-size:11.5px;font-weight:650;color:var(--dim);line-height:1.2}
+  .alts button.on{background:var(--accd);border-color:#4e6318;color:var(--acc)}
+  .dl.desc .alts button.on{background:#3a2e16;border-color:#6b5320;color:var(--warn)}
+  details.dcard summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:baseline}
+  details.dcard summary::-webkit-details-marker{display:none}
+  details.dcard summary span{font-size:11px;color:var(--dim2);font-weight:650}
   .avis{background:#2a2012;border:1px solid #473518;border-radius:12px;padding:11px 12px;
     margin-bottom:8px;font-size:12px;color:var(--warn);line-height:1.45}
   .avis b{display:block;color:var(--txt);font-size:13px;margin-bottom:3px}
@@ -279,6 +297,7 @@
     <div class="msg" id="rollMsg">Los ROLL con datos aparecen en blanco.</div>
   </div>
   <button class="go" id="bLoad">Cargar sesión</button>
+  <button class="bigbtn" id="bDieta" style="margin-top:10px">Dieta</button>
   <div class="msg" id="pickMsg"></div>
   <div class="msg" id="locMsg"></div>
 </div>
@@ -293,6 +312,7 @@
     <div class="note">Series con RIR ≤ 3, agrupadas por los bloques de tu hoja.</div>
   </div>
   <button class="bigbtn" id="bSum">Resumen de la sesión</button>
+  <button class="bigbtn" id="bDieta2">Dieta</button>
   <button class="bigbtn" id="bReload">Recargar desde la hoja</button>
   <button class="bigbtn" id="bPick">Cambiar día o ROLL</button>
 </div>
@@ -309,6 +329,12 @@
     <div class="hist" id="histBox"></div>
   </div>
   <button class="bigbtn" id="bNext">Siguiente ejercicio ›</button>
+</div>
+
+<!-- DIETA -->
+<div id="vDiet" class="wrap hide">
+  <div class="prof" id="dietModo" style="margin-top:14px"></div>
+  <div id="dietBody"></div>
 </div>
 
 <!-- RESUMEN -->
@@ -329,7 +355,7 @@
 
 <script>
 /* ============ PERFILES ============ */
-const VERSION='v0.5.1';
+const VERSION='v0.6.1';
 
 /* Diagnóstico: cualquier fallo silencioso se pinta en pantalla. No depende
    de ningún elemento del maquetado, se crea el suyo. */
@@ -374,6 +400,8 @@ const MESES=['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','
 const $=id=>document.getElementById(id);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const numfmt=n=>(Math.round(n*100)/100).toString().replace('.',',');
+/* Un peso recién registrado es un número: se pinta con coma, como en la hoja */
+const pesoTxt=v=>typeof v==='number'?numfmt(v):v;
 const hasVal=v=>v!==undefined&&v!==null&&String(v).trim()!=='';
 const colL=i=>{let s='',n=i;while(n>=0){s=String.fromCharCode(65+n%26)+s;n=Math.floor(n/26)-1;}return s;};
 const hoyTxt=()=>{const d=new Date();return String(d.getDate())+MESES[d.getMonth()];};
@@ -798,7 +826,7 @@ function guardaLocal(it){
 /* ============ VISTA SESIÓN ============ */
 function goSess(){
   cur=null; draft=null; editIdx=null;
-  $('vPick').classList.add('hide'); $('vEx').classList.add('hide');
+  $('vPick').classList.add('hide'); $('vEx').classList.add('hide'); $('vDiet').classList.add('hide');
   $('vSum').classList.add('hide'); $('vSess').classList.remove('hide');
   $('back').classList.add('hide');
   $('ttl').textContent=S.banner||S.day;
@@ -1011,7 +1039,7 @@ function renderEx(){
     if(logged) return `<div class="set logged tap" data-edit="${i}"><div class="n">${i+1}</div>
       <div class="tgt">${tgt}${prev?'<br>'+prev:''}
       ${hasVal(s.cur.aj)?'<div class="aj">'+esc(s.cur.aj)+'</div>':''}</div>
-      <div class="val">${esc(s.cur.w)} <small>kg</small> × ${esc(s.cur.r)}
+      <div class="val">${esc(pesoTxt(s.cur.w))} <small>kg</small> × ${esc(s.cur.r)}
       ${hasVal(s.cur.rir)?'<small>@'+esc(s.cur.rir)+'</small>':''}${devTags(s,s.cur)}${recordDe(e,s)?'<span class="dev pr">RÉCORD</span>':''}
       <div class="edit">editar</div></div></div>`;
     return `<div class="set tap" data-edit="${i}"><div class="n">${i+1}</div>
@@ -1198,7 +1226,7 @@ setInterval(()=>{ if(queue().length&&!flushing) flush(); },20000);
 function startRest(e,s,idx){
   tTotal=s.rest||120; tEnd=Date.now()+tTotal*1000; tOver=false;
   const n=idx+2, rec=recordDe(e,s);
-  const last=`Registrado ${s.cur.w} kg × ${s.cur.r}`+(rec?' · récord de '+rec:'');
+  const last=`Registrado ${pesoTxt(s.cur.w)} kg × ${s.cur.r}`+(rec?' · récord de '+rec:'');
   const next=n<=e.sets.length
     ? `Siguiente: serie ${n} · obj. ${e.sets[idx+1].reps}${hasVal(e.sets[idx+1].rir)?' @RIR '+e.sets[idx+1].rir:''}`
     : 'Ejercicio completado';
@@ -1310,6 +1338,114 @@ function goSum(){
   renderSum(); window.scrollTo(0,0);
 }
 
+/* ============ DIETA ============ */
+/* Se lee de la pestaña _DIETA de la hoja de cada perfil (BLOQUE | CUÁNDO |
+   TEXTO | DÍA) y se guarda en el móvil. La app no lleva ninguna dieta dentro.
+   DÍA vacío = siempre; «entreno» o «descanso» = solo ese tipo de día. */
+const DIETK='tracker.dietmodo.v1', DIETSEL='tracker.dietsel.v1';
+/* Alternativas de una línea:  Etiqueta = texto | Etiqueta = texto | …
+   Devuelve null si la línea no tiene alternativas. */
+function alternativas(t){
+  if(t.indexOf(' | ')<0) return null;
+  return t.split(' | ').map(x=>{
+    const m=x.match(/^\s*([^=|]{1,40}?)\s+=\s+(.+?)\s*$/);
+    return m?{e:m[1].trim(),t:m[2]}:{e:x.trim(),t:x.trim()};
+  });
+}
+/* Lo elegido se recuerda por perfil. La clave usa el bloque y las etiquetas,
+   no las cantidades: si la dieta cambia de gramos, la elección se conserva. */
+function dietSel(){ try{ return JSON.parse(localStorage.getItem(DIETSEL)||'{}')||{}; }catch(e){ return {}; } }
+function ponDietSel(clave,i){
+  const todo=dietSel(); const mio=todo[P.id]||(todo[P.id]={});
+  mio[clave]=i;
+  try{ localStorage.setItem(DIETSEL,JSON.stringify(todo)); }catch(e){}
+  renderDieta();
+}
+let dietRows=null, dietDe='', dietVolver='pick', dietErr='';
+const hoyClave=()=>{ const d=new Date(); return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); };
+function dietModo(){
+  try{ const m=JSON.parse(localStorage.getItem(DIETK)||'null');
+    if(m&&m.d===hoyClave()&&m.p===P.id&&(m.m==='entreno'||m.m==='descanso')) return m.m; }catch(e){}
+  return 'entreno';
+}
+function ponDietModo(m){
+  try{ localStorage.setItem(DIETK,JSON.stringify({d:hoyClave(),p:P.id,m:m})); }catch(e){}
+  renderDieta();
+}
+async function goDieta(desde){
+  const p=P; if(!p.id) return;
+  dietVolver=desde; dietRows=null; dietDe=p.id; dietErr='';
+  ['vPick','vSess','vEx','vSum'].forEach(v=>$(v).classList.add('hide'));
+  $('vDiet').classList.remove('hide'); $('back').classList.remove('hide');
+  $('ttl').textContent='Dieta'; $('sub').textContent=p.name;
+  renderDieta(); window.scrollTo(0,0);
+  const sigue=()=>dietDe===p.id&&!$('vDiet').classList.contains('hide');
+  const loc=await dbGet(dkey(p.id,'_DIETA'));
+  if(loc&&loc.rows&&sigue()){ dietRows=loc.rows; renderDieta(); }
+  try{
+    const j=await api({action:'dieta',perfil:p.id});
+    const rows=(j.rows||[]).filter(r=>r&&String(r[2]||'').trim()!=='');
+    await dbSet(dkey(p.id,'_DIETA'),{rows:rows,ts:Date.now()});
+    if(sigue()){ dietRows=rows; renderDieta(); }
+  }catch(e){
+    if(sigue()&&!dietRows){
+      const m=(e&&e.message)||String(e);
+      dietErr=/no_sheet|^action$/.test(m)?'el script de la hoja aún no sabe leer dietas: falta implementar su última versión':m;
+      dietRows=[]; renderDieta();
+    }
+  }
+}
+function salDieta(){
+  $('vDiet').classList.add('hide');
+  if(dietVolver==='sess'&&S) goSess(); else $('bPick').click();
+}
+function renderDieta(){
+  const modo=dietModo();
+  $('dietModo').innerHTML=[['entreno','Hoy entreno'],['descanso','Hoy descanso']].map(x=>
+    `<button class="${modo===x[0]?'on':''}" data-m="${x[0]}">${x[1]}</button>`).join('');
+  [...$('dietModo').children].forEach(b=>b.onclick=()=>ponDietModo(b.dataset.m));
+  if(dietRows===null){ $('dietBody').innerHTML='<div class="msg"><span class="spin"></span> Cargando dieta…</div>'; return; }
+  if(!dietRows.length){
+    $('dietBody').innerHTML='<div class="card"><div class="msg'+(dietErr?' bad':'')+'" style="margin:0">'
+      +(dietErr?'No he podido leer la dieta: '+esc(dietErr)+'.':'No hay dieta cargada para este perfil.')+'</div></div>';
+    return;
+  }
+  // Bloques en el orden de la hoja; un bloque es una racha de filas con el mismo nombre
+  const bloques=[]; let act=null;
+  dietRows.forEach(r=>{
+    const n=String(r[0]||'').trim(), c=String(r[1]||'').trim(), t=String(r[2]||'').trim();
+    const d=String(r[3]||'').trim().toLowerCase();
+    if(!t) return;
+    if(!act||act.n!==n){ act={n:n,c:c,l:[]}; bloques.push(act); }
+    if(d===''||d===modo) act.l.push({t:t,d:d});
+  });
+  const elegido=(dietSel()[P.id])||{}, claves=[];
+  const linea=(x,b)=>{
+    const desc=x.d==='descanso', cls='dl'+(desc?' desc':'');
+    const alt=alternativas(x.t);
+    if(alt){
+      const clave=b.n+'§'+x.d+'§'+alt.map(a=>a.e).join('/');
+      let i=elegido[clave]; if(!(i>=0&&i<alt.length)) i=0;
+      const k=claves.push(clave)-1;
+      return `<div class="${cls}">${desc?'<small>Día sin entrenamiento</small>':''}${esc(alt[i].t)}
+        <div class="alts">${alt.map((a,j)=>`<button class="${j===i?'on':''}" data-ak="${k}" data-ai="${j}">${esc(a.e)}</button>`).join('')}</div></div>`;
+    }
+    const m=x.t.match(/^(Opción|Suplementación|Además)\s*:\s*(.+)$/);
+    const et=desc?'Día sin entrenamiento':(m?m[1]:'');
+    return `<div class="${cls}">${et?'<small>'+esc(et)+'</small>':''}${esc(m?m[2]:x.t)}</div>`;
+  };
+  $('dietBody').innerHTML=bloques.filter(b=>b.l.length).map(b=>{
+    const comida=/^COMIDA\b/i.test(b.n), cab=`<h3>${esc(b.n)}</h3>`;
+    const cuando=b.c?`<div class="dc">${esc(b.c)}</div>`:'';
+    const cuerpo=`<div class="dls">${b.l.map(x=>linea(x,b)).join('')}</div>`;
+    // Los bloques largos que no son comidas (instrucciones, equivalencias) van plegados
+    if(!comida&&b.l.length>3)
+      return `<details class="dcard"><summary>${cab}<span>${b.l.length} puntos ▾</span></summary>${cuando}${cuerpo}</details>`;
+    return `<div class="dcard${comida?' meal':''}">${cab}${cuando}${cuerpo}</div>`;
+  }).join('');
+  [...$('dietBody').querySelectorAll('[data-ak]')].forEach(bt=>bt.onclick=()=>ponDietSel(claves[+bt.dataset.ak],+bt.dataset.ai));
+}
+
 /* ============ COLA PENDIENTE ============ */
 function renderPend(){
   const q=queue(), bar=$('pendBar');
@@ -1340,7 +1476,9 @@ $('pbRetry').onclick=()=>{ flushing=false; flush().then(renderPend).catch(render
 $('pbDrop').onclick=dropQueue;
 
 /* ============ NAVEGACIÓN ============ */
-$('back').onclick=goSess;
+$('back').onclick=()=>{ if(!$('vDiet').classList.contains('hide')) salDieta(); else goSess(); };
+$('bDieta').onclick=()=>goDieta('pick');
+$('bDieta2').onclick=()=>goDieta('sess');
 $('bLoad').onclick=()=>loadSession(false);
 $('bReload').onclick=()=>loadSession(true);
 $('rSkip').onclick=stopRest;
