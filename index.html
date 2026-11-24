@@ -243,15 +243,17 @@
 <!-- PICKER -->
 <div id="vPick" class="wrap">
   <div class="card" id="cfgBox">
-    <div class="lab">Código de acceso</div>
+    <div class="lab">Entrar</div>
+    <button class="go hide" id="bGoogle" style="background:#fff;color:#1f1f1f;margin:0 0 12px">Entrar con Google</button>
+    <div class="msg hide" id="oCod" style="margin:0 0 8px">o con tu código personal:</div>
     <input class="inp" id="iTok" placeholder="Pega aquí tu código" autocapitalize="off" autocorrect="off" spellcheck="false">
-    <button class="go" id="bSaveCfg">Entrar</button>
+    <button class="go" id="bSaveCfg">Entrar con código</button>
     <div class="msg" id="cfgMsg"></div>
     <details style="margin-top:10px"><summary class="msg" style="margin:0;cursor:pointer">Avanzado</summary>
       <input class="inp" id="iUrl" style="margin-top:8px" placeholder="URL del script (…/exec)" autocapitalize="off" autocorrect="off" spellcheck="false">
     </details>
   </div>
-  <div class="msg" id="cfgLink">Código guardado · cambiar</div>
+  <div class="msg" id="cfgLink">Sesión iniciada · cambiar</div>
 
   <div class="card">
     <div class="lab">Perfil</div>
@@ -323,7 +325,7 @@
 
 <script>
 /* ============ PERFILES ============ */
-const VERSION='v0.4';
+const VERSION='v0.5';
 
 /* Diagnóstico: cualquier fallo silencioso se pinta en pantalla. No depende
    de ningún elemento del maquetado, se crea el suyo. */
@@ -1350,7 +1352,9 @@ $('bPick').onclick=()=>{ $('vSess').classList.add('hide'); $('vEx').classList.ad
   renderProf(); renderPick(); scanRolls(); estadoLocal(); };
 
 /* ============ TRANSPORTE: Apps Script (sin Claude) ============ */
-const CFGK='tracker.cfg.v2';
+const CFGK='tracker.cfg.v2', NONK='tracker.nonce.v1';
+/* ID de cliente de Google. No es secreto. Vacío = sin botón de Google. */
+const GOOGLE_CLIENT_ID='733763071154-5id7uqgltb2s088ovbq5u22ga2eqlnnu.apps.googleusercontent.com';
 /* La dirección del script va dentro de la app: no es secreta, sin código no
    devuelve nada. Así solo hay que pegar el código personal. */
 const SCRIPT_URL='https://script.google.com/macros/s/AKfycbx6PJsA1zB6GVDyw3nAVmk4aC-GZn5GRINBC6KTp3QKhKZMJUsozZJ19TQQ-f36k4Z0/exec';
@@ -1380,16 +1384,19 @@ function señal(ms){
 /* Todas las llamadas van por POST con el código dentro del cuerpo: no
    aparece en ninguna dirección. */
 async function api(body){
+  if(!CFG.token) throw new Error('falta iniciar sesión');
+  return llama(Object.assign({token:CFG.token},body));
+}
+async function llama(body){
   if(!CFG.url) throw new Error('falta la dirección del script');
-  if(!CFG.token) throw new Error('falta el código');
   const r=await fetch(CFG.url,Object.assign({ method:'POST', redirect:'follow',
     headers:{'Content-Type':'text/plain;charset=utf-8'},
-    body:JSON.stringify(Object.assign({token:CFG.token},body)) },señal(20000)));
+    body:JSON.stringify(body) },señal(20000)));
   if(!r.ok) throw new Error('HTTP '+r.status);
   const j=await r.json();
   if(j.error){
     if(/falta ssid/.test(j.error)) throw new Error('el script de la hoja sigue en la versión antigua: falta implementar la nueva');
-    throw new Error(j.error==='token'?'código incorrecto':j.error);
+    throw new Error(j.error==='token'?(String(body.token||'').indexOf('s-')===0?'la sesión ya no es válida: vuelve a entrar':'código incorrecto'):j.error);
   }
   return j;
 }
@@ -1407,7 +1414,7 @@ async function write(it){
   await api({ action:'write', perfil:it.pid, ssid:it.ssid, day:it.day, row:it.row,
     col:it.c0+1, values:it.values, date:it.date, clear:!!it.clear });
 }
-$('cfgLink').onclick=()=>{ cfgOpen=true; renderCfg(); };
+$('cfgLink').onclick=()=>{ cfgOpen=true; renderCfg(); $('iTok').value=String(CFG.token).indexOf('s-')===0?'':CFG.token; };
 $('bSaveCfg').onclick=async()=>{
   CFG.url=$('iUrl').value.trim()||SCRIPT_URL; CFG.token=$('iTok').value.trim(); saveCfg();
   $('cfgMsg').className='msg'; $('cfgMsg').innerHTML='<span class="spin"></span> Probando…';
@@ -1421,6 +1428,44 @@ $('bSaveCfg').onclick=async()=>{
     setSyn('err','sin conexión');
   }
 };
+/* ============ ENTRAR CON GOOGLE ============ */
+/* Flujo por redirección, el único que Safari de iOS admite: se va a Google,
+   y Google devuelve a esta misma página con un token en la almohadilla. El
+   script lo comprueba con Google, mira que el correo esté autorizado y abre
+   una sesión propia; el token de Google no se guarda. */
+const vuelta=()=>new URL('./',location.href).href;
+function urlGoogle(){
+  const nonce=Array.from(crypto.getRandomValues(new Uint8Array(16)),b=>b.toString(16).padStart(2,'0')).join('');
+  try{ localStorage.setItem(NONK,nonce); }catch(e){}
+  return 'https://accounts.google.com/o/oauth2/v2/auth?client_id='+encodeURIComponent(GOOGLE_CLIENT_ID)
+    +'&redirect_uri='+encodeURIComponent(vuelta())+'&response_type=id_token&scope=openid%20email'
+    +'&nonce='+nonce+'&prompt=select_account';
+}
+function renderGoogle(){
+  const si=!!GOOGLE_CLIENT_ID;
+  $('bGoogle').classList.toggle('hide',!si); $('oCod').classList.toggle('hide',!si);
+}
+$('bGoogle').onclick=()=>{ location.href=urlGoogle(); };
+/* ¿Venimos de vuelta de Google? Devuelve true si hay que esperar a la sesión. */
+function vueltaDeGoogle(){
+  const h=new URLSearchParams((location.hash||'').replace(/^#/,''));
+  const idt=h.get('id_token'), err=h.get('error');
+  if(!idt&&!err) return false;
+  try{ history.replaceState(null,'',location.pathname); }catch(e){}
+  const falla=t=>{ cfgOpen=true; renderCfg(); $('cfgMsg').className='msg bad';
+    $('cfgMsg').textContent='No se pudo entrar con Google: '+t+'.'; setSyn('err','sin sesión'); };
+  if(err){ falla(err==='access_denied'?'cancelado':err); return true; }
+  let nonce=''; try{ nonce=localStorage.getItem(NONK)||''; localStorage.removeItem(NONK); }catch(e){}
+  $('cfgMsg').className='msg'; $('cfgMsg').innerHTML='<span class="spin"></span> Entrando…';
+  llama({action:'google',id_token:idt}).then(j=>{
+    if(!j.session) throw new Error('el script no devolvió sesión');
+    if(nonce&&j.nonce!==nonce) throw new Error('la respuesta no corresponde a este intento');
+    CFG.token=j.session; saveCfg(); PROFILES=[]; P=NADIE;
+    try{ localStorage.removeItem(PERFK); }catch(e){}
+    $('cfgMsg').textContent=''; cfgOpen=false; renderCfg(); days={}; rollsUsed={}; arranca();
+  }).catch(e=>falla((e&&e.message)||String(e)));
+  return true;
+}
 function arranca(){
   if(!(CFG.url&&CFG.token)){ setSyn('','configura'); return; }
   setSyn('','listo');
@@ -1434,11 +1479,11 @@ function arranca(){
   });
 }
 reintentar=()=>{ if(PROFILES.length) reintentarDias(); else arranca(); };
-loadCfg(); renderCfg(); renderProf(); renderPick();
+loadCfg(); renderCfg(); renderGoogle(); renderProf(); renderPick();
 $('sub').textContent='Elige perfil, día y ROLL · '+VERSION;
 if(queue().length){ setSyn('pend',queue().length+' pend.'); }
 retomaRest();
-arranca();
+if(!vueltaDeGoogle()) arranca();
 
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{ navigator.serviceWorker.register('./sw.js').catch(()=>{}); });
