@@ -420,7 +420,6 @@
     <div class="hist" id="histBox"></div>
   </div>
   <button class="bigbtn" id="bNext">Siguiente ejercicio ›</button>
-  <button class="bigbtn" id="bGrande" style="margin-top:8px"></button>
 </div>
 
 <!-- DIETA -->
@@ -452,10 +451,10 @@
   <div class="bar"><i id="rBar"></i></div>
 </div>
 
-<script type="application/json" id="cambiosData">[{"v": "v0.14.1", "f": "25/11/2026", "c": ["Cabecera de la pantalla inicial más limpia: nombre, versión y estado de la conexión."]}, {"v": "v0.14", "f": "25/11/2026", "c": ["Aviso de versión nueva con botón para actualizar, sin tener que cerrar la app.", "Novedades de cada versión, aquí mismo.", "Series de aproximación antes de la primera serie de cada ejercicio."]}, {"v": "v0.13", "f": "25/11/2026", "c": ["Pedido de suplementación para 15 días, 1 mes o 2 meses.", "Los alimentos que se compran con ese pedido van en su lista."]}, {"v": "v0.12", "f": "25/11/2026", "c": ["Lista de la compra en dos: suplementación y compra semanal.", "Total del día de la dieta con los macros en tres casillas."]}, {"v": "v0.11", "f": "25/11/2026", "c": ["La sugerencia de carga propone peso y repeticiones.", "Calculadora de discos por lado.", "Comparar dos ROLL de un ejercicio, serie a serie.", "Lista de la compra desde la dieta.", "Botón «igual que la serie anterior» y botones grandes."]}, {"v": "v0.10", "f": "25/11/2026", "c": ["Pantalla de progreso y récords por ROLL.", "Evolución de cada ejercicio con su gráfica.", "Aviso de fin de descanso con preaviso a 10 segundos."]}, {"v": "v0.9", "f": "24/11/2026", "c": ["Macros por comida y del día.", "La fruta y la verdura entran en el cálculo.", "La suplementación se distingue con otro fondo."]}, {"v": "v0.8", "f": "24/11/2026", "c": ["Tabla de equivalencias de hidratos.", "El cardio aparece al final de cada día de entrenamiento."]}, {"v": "v0.7", "f": "24/11/2026", "c": ["Calorías por línea, por comida y del día."]}, {"v": "v0.6", "f": "24/11/2026", "c": ["Dieta en la app, con alternativas por comida y día de entreno o descanso."]}, {"v": "v0.5", "f": "24/11/2026", "c": ["Entrada con Google."]}]</script>
+<script type="application/json" id="cambiosData">[{"v": "v0.15", "f": "25/11/2026", "c": ["Los botones grandes de la serie quedan fijos para todos."]}, {"v": "v0.14.1", "f": "25/11/2026", "c": ["Cabecera de la pantalla inicial más limpia: nombre, versión y estado de la conexión."]}, {"v": "v0.14", "f": "25/11/2026", "c": ["Aviso de versión nueva con botón para actualizar, sin tener que cerrar la app.", "Novedades de cada versión, aquí mismo.", "Series de aproximación antes de la primera serie de cada ejercicio."]}, {"v": "v0.13", "f": "25/11/2026", "c": ["Pedido de suplementación para 15 días, 1 mes o 2 meses.", "Los alimentos que se compran con ese pedido van en su lista."]}, {"v": "v0.12", "f": "25/11/2026", "c": ["Lista de la compra en dos: suplementación y compra semanal.", "Total del día de la dieta con los macros en tres casillas."]}, {"v": "v0.11", "f": "25/11/2026", "c": ["La sugerencia de carga propone peso y repeticiones.", "Calculadora de discos por lado.", "Comparar dos ROLL de un ejercicio, serie a serie.", "Lista de la compra desde la dieta.", "Botón «igual que la serie anterior» y botones grandes."]}, {"v": "v0.10", "f": "25/11/2026", "c": ["Pantalla de progreso y récords por ROLL.", "Evolución de cada ejercicio con su gráfica.", "Aviso de fin de descanso con preaviso a 10 segundos."]}, {"v": "v0.9", "f": "24/11/2026", "c": ["Macros por comida y del día.", "La fruta y la verdura entran en el cálculo.", "La suplementación se distingue con otro fondo."]}, {"v": "v0.8", "f": "24/11/2026", "c": ["Tabla de equivalencias de hidratos.", "El cardio aparece al final de cada día de entrenamiento."]}, {"v": "v0.7", "f": "24/11/2026", "c": ["Calorías por línea, por comida y del día."]}, {"v": "v0.6", "f": "24/11/2026", "c": ["Dieta en la app, con alternativas por comida y día de entreno o descanso."]}, {"v": "v0.5", "f": "24/11/2026", "c": ["Entrada con Google."]}]</script>
 <script>
 /* ============ PERFILES ============ */
-const VERSION='v0.14.1 beta';
+const VERSION='v0.15 beta';
 
 /* Diagnóstico: cualquier fallo silencioso se pinta en pantalla. No depende
    de ningún elemento del maquetado, se crea el suyo. */
@@ -1265,7 +1264,7 @@ function renderHist(e){
 
 /* ============ AYUDAS EN LA SERIE ============ */
 /* Calculadora de discos: qué poner en cada lado de la barra */
-const DISCK='trackerb.discos.v1', GRANDEK='trackerb.grande.v1';
+const DISCK='trackerb.discos.v1';
 const DISCOS=[25,20,15,10,5,2.5,1.25], BARRAS=[20,15,10,7.5];
 function discCfg(){ try{ const c=JSON.parse(localStorage.getItem(DISCK)||'{}')||{}; return {on:!!c.on,barra:BARRAS.indexOf(c.barra)>=0?c.barra:20}; }catch(e){ return {on:false,barra:20}; } }
 function ponDiscCfg(c){ try{ localStorage.setItem(DISCK,JSON.stringify(c)); }catch(e){} }
@@ -1337,12 +1336,8 @@ function aproxHtml(wv){
     return '<div class="ar"><b>'+numfmt(x.w)+' kg × '+x.r+'</b><span>'+x.p+' %'+(lado?' · '+lado:'')+'</span></div>';
   }).join('')+'<div style="margin-top:6px">Lejos del fallo y con descansos cortos. No se registran.</div></div>';
 }
-/* Botones grandes: para manejar la serie con una mano */
-function grande(){ try{ return localStorage.getItem(GRANDEK)==='1'; }catch(e){ return false; } }
-function pintaGrande(){ const on=grande(); document.body.classList.toggle('grande',on);
-  const b=$('bGrande'); if(b) b.textContent='Botones grandes: '+(on?'sí':'no'); }
-$('bGrande').onclick=()=>{ try{ localStorage.setItem(GRANDEK,grande()?'0':'1'); }catch(e){} pintaGrande(); };
-pintaGrande();
+/* Botones grandes en la serie, para manejarla con una mano */
+document.body.classList.add('grande');   // siempre: más cómodo y accesible, sin opción a reducirlos
 /* Comparar dos ROLL de un ejercicio, serie a serie */
 let cmpDe='', cmpA=null, cmpB=null;
 function renderCmp(e){
