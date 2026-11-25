@@ -488,11 +488,11 @@
   <div class="bar"><i id="rBar"></i></div>
 </div>
 
-<script type="application/json" id="cambiosData">[{"v": "v1.1", "f": "25/11/2026", "c": ["Gimnasio de hoy: «el de siempre» u «otro». Se guarda junto a la fecha del ROLL y las comparaciones usan solo sesiones del mismo gimnasio.", "Los descansos se calculan con la fecha de cada sesión guardada en la hoja.", "La pantalla inicial indica qué día y qué ROLL toca según el orden de la hoja; si se salta un día, lo propone el primero para volver al orden.", "En la lista del día, cada ejercicio muestra sus técnicas (rest pause, drop set, EMOM, mini series, parciales, cadencia) y en qué series.", "Código de colores en peso, repeticiones y RIR según el objetivo y el ROLL anterior.", "Técnicas (rest pause, drop set, mini series, parciales, EMOM, cadencia) con su explicación, su registro y su cuenta atrás.", "La sugerencia indica si toca subir, mantener o bajar, y usa la serie anterior si no hay ROLL previo.", "Pantalla de progreso y récords por ROLL, con evolución y gráfica de cada ejercicio.", "Comparar dos ROLL de un ejercicio, serie a serie.", "La sugerencia de carga propone peso y repeticiones.", "Series de aproximación antes de la primera serie.", "Calculadora de discos (20, 10, 5, 2,5 y 1,25 kg, barra de 20) y saltos de 2,5 kg con mancuernas.", "Aviso de fin de descanso con preaviso a 10 segundos.", "Botones grandes en la serie y «igual que la serie anterior».", "Lista de la compra: compra semanal y pedido de suplementación para 15 días, 1 o 2 meses.", "Total del día de la dieta con los macros en tres casillas.", "Aviso de versión nueva con botón de actualizar y esta lista de novedades.", "Cabecera de la pantalla inicial más limpia."]}, {"v": "v1.0", "f": "24/11/2026", "c": ["App instalable, con copia en el móvil y sincronización con la hoja.", "Entrada con Google.", "Dieta con alternativas por comida y día de entreno o descanso.", "Calorías y macros por línea, por comida y del día, con fruta y verdura.", "Tabla de equivalencias de hidratos y suplementación destacada.", "El cardio aparece al final de cada día de entrenamiento."]}]</script>
+<script type="application/json" id="cambiosData">[{"v": "v1.1", "f": "25/11/2026", "c": ["Gimnasio de hoy: se elige entre los de tu lista u «otro». Se guarda junto a la fecha del ROLL y las comparaciones usan solo sesiones del mismo gimnasio.", "Los descansos se calculan con la fecha de cada sesión guardada en la hoja.", "La pantalla inicial indica qué día y qué ROLL toca según el orden de la hoja; si se salta un día, lo propone el primero para volver al orden.", "En la lista del día, cada ejercicio muestra sus técnicas (rest pause, drop set, EMOM, mini series, parciales, cadencia) y en qué series.", "Código de colores en peso, repeticiones y RIR según el objetivo y el ROLL anterior.", "Técnicas (rest pause, drop set, mini series, parciales, EMOM, cadencia) con su explicación, su registro y su cuenta atrás.", "La sugerencia indica si toca subir, mantener o bajar, y usa la serie anterior si no hay ROLL previo.", "Pantalla de progreso y récords por ROLL, con evolución y gráfica de cada ejercicio.", "Comparar dos ROLL de un ejercicio, serie a serie.", "La sugerencia de carga propone peso y repeticiones.", "Series de aproximación antes de la primera serie.", "Calculadora de discos (20, 10, 5, 2,5 y 1,25 kg, barra de 20) y saltos de 2,5 kg con mancuernas.", "Aviso de fin de descanso con preaviso a 10 segundos.", "Botones grandes en la serie y «igual que la serie anterior».", "Lista de la compra: compra semanal y pedido de suplementación para 15 días, 1 o 2 meses.", "Total del día de la dieta con los macros en tres casillas.", "Aviso de versión nueva con botón de actualizar y esta lista de novedades.", "Cabecera de la pantalla inicial más limpia."]}, {"v": "v1.0", "f": "24/11/2026", "c": ["App instalable, con copia en el móvil y sincronización con la hoja.", "Entrada con Google.", "Dieta con alternativas por comida y día de entreno o descanso.", "Calorías y macros por línea, por comida y del día, con fruta y verdura.", "Tabla de equivalencias de hidratos y suplementación destacada.", "El cardio aparece al final de cada día de entrenamiento."]}]</script>
 <script>
 /* ============ PERFILES ============ */
 const VERSION='v1.1 beta';
-const BUILD=6;   // sube en cada publicación dentro de la misma versión: es lo que detecta el aviso de actualización
+const BUILD=7;   // sube en cada publicación dentro de la misma versión: es lo que detecta el aviso de actualización
 
 /* Diagnóstico: cualquier fallo silencioso se pinta en pantalla. No depende
    de ningún elemento del maquetado, se crea el suyo. */
@@ -558,7 +558,21 @@ function fechaTs(txt){
   return d.getTime();
 }
 const GYMK='trackerb.gym.v1', GYMDEF='otro gym';
-const gymIgual=(a,b)=>String(a||'').trim().toLowerCase()===String(b||'').trim().toLowerCase();
+/* Lista de gimnasios del perfil: fila «Gimnasios» de la pestaña LEYENDA,
+   separados por «·». El primero es el habitual. */
+const GYMSK='trackerb.gyms.v1';
+function gymLista(){ try{ const o=JSON.parse(localStorage.getItem(GYMSK)||'{}')||{}; return Array.isArray(o[P.id])?o[P.id]:[]; }catch(e){ return []; } }
+const gymHab=()=>gymLista()[0]||'';
+const gymNorm=x=>(String(x||'').trim()||gymHab()).toLowerCase();
+const gymIgual=(a,b)=>gymNorm(a)===gymNorm(b);
+function gymsDe(rows){
+  for(const R of rows||[]){
+    if(/^gimnasios?$/i.test(String((R||[])[0]||'').trim())){
+      const out=String(R[1]||'').split(/[·,;|]/).map(x=>x.trim().slice(0,24)).filter(Boolean);
+      return out.filter((x,i)=>out.findIndex(y=>y.toLowerCase()===x.toLowerCase())===i);
+    } }
+  return [];
+}
 function gymPref(){ try{ const o=JSON.parse(localStorage.getItem(GYMK)||'{}')||{}; return String(o[P.id]||''); }catch(e){ return ''; } }
 function gymGuarda(g){ try{ const o=JSON.parse(localStorage.getItem(GYMK)||'{}')||{}; o[P.id]=g; localStorage.setItem(GYMK,JSON.stringify(o)); }catch(e){} }
 const fechaCelda=()=>hoyTxt()+(S&&S.gym?' · '+S.gym:'');
@@ -933,7 +947,7 @@ function montaS(reg,p,day,roll){
   for(let n=1;n<=L.n;n++) s2.gyms[n]=gymDe((reg.rows[0]||[])[rollCol(L,n)+1]);
   const mia=S&&S.pid===p.id&&S.day===day&&S.roll===roll&&S.gymSet;
   s2.gymSet=!!mia;
-  s2.gym=mia?S.gym:(s2.gyms[roll].f?s2.gyms[roll].g:gymPref());
+  s2.gym=mia?S.gym:((s2.gyms[roll].f?s2.gyms[roll].g:gymPref())||gymHab());
   fijaPrev(s2);
   return s2;
 }
@@ -951,14 +965,26 @@ function fijaPrev(X){
 }
 function pintaGym(){
   const c=$('gymBox'); if(!c||!S) return;
-  const otro=!!S.gym;
-  c.innerHTML='<div class="lab">Gimnasio de hoy</div><div class="g2">'
-    +'<button id="gHab" class="'+(otro?'':'on')+'">El de siempre</button>'
-    +'<button id="gOtro" class="'+(otro?'on':'')+'">Otro</button></div>'
-    +(otro?'<input id="gNom" maxlength="24" placeholder="Nombre del gimnasio (opcional)" value="'+esc(gymIgual(S.gym,GYMDEF)?'':S.gym)+'">'
-          +'<div class="gn">Se guarda junto a la fecha del ROLL. La sugerencia y los colores comparan solo con sesiones hechas en este mismo gimnasio.</div>':'');
-  $('gHab').onclick=()=>ponGym('');
-  $('gOtro').onclick=()=>{ if(!S.gym) ponGym(GYMDEF); };
+  const L=gymLista();
+  if(!L.length){
+    const otro=!!S.gym;
+    c.innerHTML='<div class="lab">Gimnasio de hoy</div><div class="g2">'
+      +'<button id="gHab" class="'+(otro?'':'on')+'">El de siempre</button>'
+      +'<button id="gOtro" class="'+(otro?'on':'')+'">Otro</button></div>'
+      +(otro?'<input id="gNom" maxlength="24" placeholder="Nombre del gimnasio (opcional)" value="'+esc(gymIgual(S.gym,GYMDEF)?'':S.gym)+'">'
+            +'<div class="gn">Se guarda junto a la fecha del ROLL. La sugerencia y los colores comparan solo con sesiones hechas en este mismo gimnasio.</div>':'');
+    $('gHab').onclick=()=>ponGym('');
+    $('gOtro').onclick=()=>{ if(!S.gym) ponGym(GYMDEF); };
+  } else {
+    const en=L.findIndex(x=>gymIgual(x,S.gym)), otro=en<0;
+    c.innerHTML='<div class="lab">Gimnasio de hoy</div><div class="g2">'
+      +L.map((x,i)=>'<button data-g="'+i+'" class="'+(i===en?'on':'')+'">'+esc(x)+'</button>').join('')
+      +'<button id="gOtro" class="'+(otro?'on':'')+'">Otro</button></div>'
+      +(otro?'<input id="gNom" maxlength="24" placeholder="Nombre del gimnasio (opcional)" value="'+esc(gymIgual(S.gym,GYMDEF)?'':S.gym)+'">':'')
+      +(en!==0?'<div class="gn">La sugerencia y los colores comparan solo con sesiones hechas en este mismo gimnasio.</div>':'');
+    [...c.querySelectorAll('[data-g]')].forEach(b=>b.onclick=()=>ponGym(L[+b.dataset.g]));
+    $('gOtro').onclick=()=>{ if(!otro) ponGym(GYMDEF); };
+  }
   if($('gNom')) $('gNom').onchange=()=>ponGym(String($('gNom').value).replace(/[·|]/g,' ').replace(/\s+/g,' ').trim().slice(0,24)||GYMDEF);
 }
 function ponGym(g){
@@ -1092,7 +1118,10 @@ async function cargaCiclo(){
   const p=P; if(!p.id||cicloVisto[p.id]) return;
   cicloVisto[p.id]=true;
   try{
-    const sp=splitDe(await readDay('LEYENDA',p));
+    const ley=await readDay('LEYENDA',p), sp=splitDe(ley);
+    try{ const g=JSON.parse(localStorage.getItem(GYMSK)||'{}')||{}; const gl=gymsDe(ley);
+      if(gl.length) g[p.id]=gl; else delete g[p.id];
+      localStorage.setItem(GYMSK,JSON.stringify(g)); }catch(e){}
     let o={}; try{ o=JSON.parse(localStorage.getItem(CICLOK)||'{}')||{}; }catch(e){}
     if(sp) o[p.id]=sp; else delete o[p.id];
     localStorage.setItem(CICLOK,JSON.stringify(o));
