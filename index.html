@@ -258,6 +258,8 @@
   .pendbar .pb2 .dz{background:#3a1a16;color:var(--bad)}
   .syn{cursor:pointer}
   .pick{position:relative}
+  .autoN{font-size:12px;color:var(--mut);margin:-4px 4px 12px;line-height:1.35}
+  #bAuto.conf{border-color:#ffb066;color:#ffb066}
   .gym{padding:12px 14px}
   .gym .g2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
   .gym .g2 button{min-height:46px;border-radius:12px;border:1px solid #2a2f3a;background:#1c2029;color:var(--tx,#e8eaf0);font-size:15px;font-weight:600}
@@ -436,6 +438,8 @@
   </div>
   <button class="bigbtn" id="bSum">Resumen de la sesión</button>
   <button class="bigbtn" id="bDieta2">Dieta</button>
+  <button class="bigbtn hide" id="bAuto"></button>
+  <div class="autoN hide" id="autoN"></div>
   <button class="bigbtn" id="bReload">Recargar desde la hoja</button>
   <button class="bigbtn" id="bPick">Cambiar día o ROLL</button>
 </div>
@@ -492,11 +496,11 @@
   <div class="bar"><i id="rBar"></i></div>
 </div>
 
-<script type="application/json" id="cambiosData">[{"v": "v1.1", "f": "25/11/2026", "c": ["Gimnasio de hoy: se elige entre los de tu lista u «otro». Se guarda junto a la fecha del ROLL y las comparaciones usan solo sesiones del mismo gimnasio.", "Los descansos se calculan con la fecha de cada sesión guardada en la hoja.", "La pantalla inicial indica qué día y qué ROLL toca según el orden de la hoja; si se salta un día, lo propone el primero para volver al orden.", "En la lista del día, cada ejercicio muestra sus técnicas (rest pause, drop set, EMOM, mini series, parciales, cadencia) y en qué series.", "Código de colores en peso, repeticiones y RIR según el objetivo y el ROLL anterior.", "Técnicas (rest pause, drop set, mini series, parciales, EMOM, cadencia) con su explicación, su registro y su cuenta atrás.", "La sugerencia indica si toca subir, mantener o bajar, y usa la serie anterior si no hay ROLL previo.", "Pantalla de progreso y récords por ROLL, con evolución y gráfica de cada ejercicio.", "Comparar dos ROLL de un ejercicio, serie a serie.", "La sugerencia de carga propone peso y repeticiones.", "Series de aproximación antes de la primera serie.", "Calculadora de discos (20, 10, 5, 2,5 y 1,25 kg, barra de 20) y saltos de 2,5 kg con mancuernas.", "Aviso de fin de descanso con preaviso a 10 segundos.", "Botones grandes en la serie y «igual que la serie anterior».", "Lista de la compra: compra semanal y pedido de suplementación para 15 días, 1 o 2 meses.", "Total del día de la dieta con los macros en tres casillas.", "Aviso de versión nueva con botón de actualizar y esta lista de novedades.", "Cabecera de la pantalla inicial más limpia."]}, {"v": "v1.0", "f": "24/11/2026", "c": ["App instalable, con copia en el móvil y sincronización con la hoja.", "Entrada con Google.", "Dieta con alternativas por comida y día de entreno o descanso.", "Calorías y macros por línea, por comida y del día, con fruta y verdura.", "Tabla de equivalencias de hidratos y suplementación destacada.", "El cardio aparece al final de cada día de entrenamiento."]}]</script>
+<script type="application/json" id="cambiosData">[{"v": "v1.1", "f": "25/11/2026", "c": ["Los récords y las mejores marcas cuentan solo las sesiones del gimnasio habitual.", "Autorrellenar: copia en las series sin registrar los valores del ROLL anterior del mismo gimnasio.", "Al volver a la app se vuelve a leer la hoja, por si se ha escrito en ella a mano.", "Gimnasio de hoy: se elige entre los de tu lista u «otro». Se guarda junto a la fecha del ROLL y las comparaciones usan solo sesiones del mismo gimnasio.", "Los descansos se calculan con la fecha de cada sesión guardada en la hoja.", "La pantalla inicial indica qué día y qué ROLL toca según el orden de la hoja; si se salta un día, lo propone el primero para volver al orden.", "En la lista del día, cada ejercicio muestra sus técnicas (rest pause, drop set, EMOM, mini series, parciales, cadencia) y en qué series.", "Código de colores en peso, repeticiones y RIR según el objetivo y el ROLL anterior.", "Técnicas (rest pause, drop set, mini series, parciales, EMOM, cadencia) con su explicación, su registro y su cuenta atrás.", "La sugerencia indica si toca subir, mantener o bajar, y usa la serie anterior si no hay ROLL previo.", "Pantalla de progreso y récords por ROLL, con evolución y gráfica de cada ejercicio.", "Comparar dos ROLL de un ejercicio, serie a serie.", "La sugerencia de carga propone peso y repeticiones.", "Series de aproximación antes de la primera serie.", "Calculadora de discos (20, 10, 5, 2,5 y 1,25 kg, barra de 20) y saltos de 2,5 kg con mancuernas.", "Aviso de fin de descanso con preaviso a 10 segundos.", "Botones grandes en la serie y «igual que la serie anterior».", "Lista de la compra: compra semanal y pedido de suplementación para 15 días, 1 o 2 meses.", "Total del día de la dieta con los macros en tres casillas.", "Aviso de versión nueva con botón de actualizar y esta lista de novedades.", "Cabecera de la pantalla inicial más limpia."]}, {"v": "v1.0", "f": "24/11/2026", "c": ["App instalable, con copia en el móvil y sincronización con la hoja.", "Entrada con Google.", "Dieta con alternativas por comida y día de entreno o descanso.", "Calorías y macros por línea, por comida y del día, con fruta y verdura.", "Tabla de equivalencias de hidratos y suplementación destacada.", "El cardio aparece al final de cada día de entrenamiento."]}]</script>
 <script>
 /* ============ PERFILES ============ */
 const VERSION='v1.1';
-const BUILD=8;   // sube en cada publicación dentro de la misma versión: es lo que detecta el aviso de actualización
+const BUILD=10;   // sube en cada publicación dentro de la misma versión: es lo que detecta el aviso de actualización
 
 /* Diagnóstico: cualquier fallo silencioso se pinta en pantalla. No depende
    de ningún elemento del maquetado, se crea el suyo. */
@@ -681,7 +685,7 @@ async function traeDia(p,day){
 /* Baja en segundo plano los días que falten o lleven más de 10 min sin
    contrastar, para tener la rutina entera disponible sin cobertura. */
 let precargando=false;
-async function precarga(){
+async function precarga(rapido){
   if(precargando) return;
   precargando=true;
   const p=P, ds=(days[p.id]||[]).slice();
@@ -690,7 +694,7 @@ async function precarga(){
       if(P.id!==p.id) break;
       if(S&&S.pid===p.id&&S.day===day&&enSesion()) continue;
       const loc=await dbGet(dkey(p.id,day));
-      if(loc&&Date.now()-loc.ts<PREC) continue;
+      if(loc&&Date.now()-loc.ts<(rapido===true?60000:PREC)) continue;
       try{ await traeDia(p,day); }catch(e){ break; }
     }
   }finally{ precargando=false; }
@@ -952,6 +956,7 @@ function montaS(reg,p,day,roll){
   const mia=S&&S.pid===p.id&&S.day===day&&S.roll===roll&&S.gymSet;
   s2.gymSet=!!mia;
   s2.gym=mia?S.gym:((s2.gyms[roll].f?s2.gyms[roll].g:gymPref())||gymHab());
+  s2.gyms[roll]={f:s2.gyms[roll].f,g:s2.gym};
   fijaPrev(s2);
   return s2;
 }
@@ -966,6 +971,56 @@ function fijaPrev(X){
       s.prev=Object.assign({},h); break;
     }
   }));
+}
+/* Autorrellenar: copia en las series sin registrar los valores del ROLL de
+   referencia (el anterior hecho en el mismo gimnasio). No pisa nada. */
+function autoPend(){
+  const out=[]; if(!S) return out;
+  S.ex.forEach(e=>e.sets.forEach(s=>{
+    if(hasVal(s.cur.w)||hasVal(s.cur.r)) return;
+    if(s.prev&&(hasVal(s.prev.w)||hasVal(s.prev.r))) out.push(s);
+  }));
+  return out;
+}
+let autoT=null;
+function pintaAuto(){
+  const b=$('bAuto'), n=$('autoN'); if(!b||!S) return;
+  clearTimeout(autoT); b.classList.remove('conf');
+  const p=autoPend();
+  if(!p.length){ b.classList.add('hide'); n.classList.add('hide'); return; }
+  const rolls=p.map(s=>s.prev.n).filter((x,i,a)=>a.indexOf(x)===i).sort((a,b)=>a-b);
+  b.classList.remove('hide'); n.classList.remove('hide');
+  b.textContent='Autorrellenar con el ROLL '+rolls.join(' y ');
+  n.textContent='Copia peso, repeticiones y RIR en las '+p.length+' series sin registrar y las marca como «auto» en AJUSTE. No toca las que ya tienes.';
+  b.onclick=()=>{
+    if(!b.classList.contains('conf')){
+      b.classList.add('conf'); b.textContent='Confirmar: copiar '+p.length+' series';
+      autoT=setTimeout(pintaAuto,5000); return;
+    }
+    autoRellena();
+  };
+}
+function autoRellena(){
+  const L=S.L, q=queue(); let k=0;
+  autoPend().forEach(s=>{
+    const p=s.prev, vals=new Array(L.stride).fill(null);
+    if(hasVal(p.w)) vals[L.f.w]=p.w;
+    if(hasVal(p.r)) vals[L.f.r]=p.r;
+    if(L.f.rir!==null&&hasVal(p.rir)) vals[L.f.rir]=p.rir;
+    if(L.f.aj!==null){
+      const a=String(p.aj==null?'':p.aj).replace(/\s*·?\s*auto$/i,'').trim();
+      vals[L.f.aj]=/^(RPP?|drop|minis|parciales)\b/i.test(a)?a+' · auto':'auto';
+    }
+    s.cur={ w:vals[L.f.w]===null?undefined:vals[L.f.w], r:vals[L.f.r]===null?undefined:vals[L.f.r],
+      rir:L.f.rir!==null&&vals[L.f.rir]!==null?vals[L.f.rir]:undefined, aj:L.f.aj!==null?vals[L.f.aj]:undefined };
+    s.hist[S.roll-1]=Object.assign({n:S.roll},s.cur);
+    const it={ pid:P.id, day:S.day, row:s.row, c0:S.cc, c1:S.cc+L.stride-1,
+      values:vals, dateCol:S.cc+1, date:fechaCelda() };
+    guardaLocal(it); q.push(it); k++;
+  });
+  if(!k) return;
+  setQueue(q); marcaUltimo(); flush();
+  renderSess(); pintaAuto();
 }
 let gymAbierto=false;
 function pintaGym(){
@@ -993,6 +1048,7 @@ function pintaGym(){
     $('gOtro').onclick=()=>{ if(otro) return; gymAbierto=!gymAbierto; pintaGym(); };
     [...c.querySelectorAll('[data-g]')].forEach(b=>b.onclick=()=>{ gymAbierto=false; ponGym(L[+b.dataset.g]); });
   }
+  pintaAuto();
   if($('gNom')) $('gNom').onchange=()=>ponGym(String($('gNom').value).replace(/[·|]/g,' ').replace(/\s+/g,' ').trim().slice(0,24)||GYMDEF);
 }
 function ponGym(g){
@@ -1170,7 +1226,9 @@ async function calculaToca(){
     // a medias y de hoy: se retoma; a medias de otro día: se da por hecho
     if(j<x.r.filas){
       const ts=fechaTs(x.r.fecha&&x.r.fecha[n]);
-      if(ts!==null? mismoDia(ts,Date.now()) : (u&&u.day===x.d&&+u.roll===n&&mismoDia(u.ts,Date.now()))) return false;
+      // «hoy» llega hasta las 4 de la madrugada, por si la sesión cruza la medianoche
+      const hoy=t0=>mismoDia(t0,Date.now())||mismoDia(t0,Date.now()-4*3600000);
+      if(ts!==null? hoy(ts) : (u&&u.day===x.d&&+u.roll===n&&hoy(u.ts))) return false;
     }
     return true;
   };
@@ -1307,13 +1365,16 @@ function numDe(v){
 /* Récord frente a todo lo registrado en ROLLs anteriores de este ejercicio.
    'peso': más carga que nunca. 'reps': más reps que nunca con esa carga o
    una mayor. Se calcula al vuelo: no se guarda nada en la hoja. */
+/* ROLLs hechos fuera del gimnasio habitual: no cuentan para récords ni marcas. */
+function fueraDe(gyms){ const o={}; Object.keys(gyms||{}).forEach(n=>{ if(!gymIgual(gyms[n]&&gyms[n].g,'')) o[n]=1; }); return o; }
 function recordDe(e,s){
   const c=s.cur; if(!c) return null;
+  const fu=fueraDe(S.gyms); if(fu[S.roll]) return null;
   const w=numDe(c.w), r=parseInt(c.r);
   if(w===null||w<=0||isNaN(r)||r<1) return null;
   let maxW=null, maxR=null;
   e.sets.forEach(x=>x.hist.forEach(h=>{
-    if(h.n>=S.roll) return;
+    if(h.n>=S.roll||fu[h.n]) return;
     const hw=numDe(h.w), hr=parseInt(h.r);
     if(hw===null||isNaN(hr)||hr<1) return;
     if(maxW===null||hw>maxW) maxW=hw;
@@ -1752,18 +1813,19 @@ function setNum(c){
   return (w===null||w<=0||isNaN(r)||r<1)?null:{w:w,r:r};
 }
 /* Mejor serie del ejercicio en el ROLL n (la de mayor 1RM estimado) */
-function mejorDe(e,n){
-  let m=null;
+function mejorDe(e,n,fu){
+  let m=null; if(fu&&fu[n]) return null;
   e.sets.forEach(s=>{ const v=setNum(s.hist[n-1]); if(!v) return;
     const x=e1rm(v.w,v.r); if(!m||x>m.x) m={x:x,w:v.w,r:v.r,n:n}; });
   return m;
 }
 /* Récord de la serie s en el ROLL n frente a los ROLL anteriores (misma regla que recordDe) */
-function recEn(e,s,n){
+function recEn(e,s,n,fu){
+  fu=fu||{}; if(fu[n]) return null;
   const c=setNum(s.hist[n-1]); if(!c) return null;
   let maxW=null, maxR=null;
   e.sets.forEach(x=>x.hist.forEach(h=>{
-    if(h.n>=n) return;
+    if(h.n>=n||fu[h.n]) return;
     const v=setNum(h); if(!v) return;
     if(maxW===null||v.w>maxW) maxW=v.w;
     if(v.w>=c.w&&(maxR===null||v.r>maxR)) maxR=v.r;
@@ -1791,7 +1853,8 @@ function grafica(pts){
 }
 function renderEvo(e){
   const pts=[]; let best=null;
-  for(let n=1;n<=S.L.n;n++){ const m=mejorDe(e,n); if(m){ pts.push(m); if(!best||m.x>best.x) best=m; } }
+  const fu=fueraDe(S.gyms);
+  for(let n=1;n<=S.L.n;n++){ const m=mejorDe(e,n,fu); if(m){ pts.push(m); if(!best||m.x>best.x) best=m; } }
   if(!pts.length){ $('evoCard').classList.add('hide'); return; }
   $('evoCard').classList.remove('hide');
   const a=pts[0], z=pts[pts.length-1], d=pts.length>1?pct(z.x,a.x):null;
@@ -1817,7 +1880,8 @@ async function goProg(){
     if(!reg||!reg.rows) continue;
     const rows=reg.rows.map(r=>(r||[]).slice()); aplicaCola(rows,p.id,day);
     const L=detect(rows); if(!L) continue;
-    out.push({day:day,L:L,rows:rows,ex:parseSheet(rows,1,L,day).ex});
+    const gy={}; for(let n=1;n<=L.n;n++) gy[n]=gymDe((rows[0]||[])[rollCol(L,n)+1]);
+    out.push({day:day,L:L,rows:rows,ex:parseSheet(rows,1,L,day).ex,fu:fueraDe(gy)});
   }
   if(progDe!==p.id||$('vProg').classList.contains('hide')) return;
   progDat={dias:out,faltan:ds.length-out.length}; renderProg();
@@ -1843,7 +1907,7 @@ function renderProg(){
       h++; a+=tonSet(c);
       const rv=parseFloat(String(hasVal(c.rir)?c.rir:s.rir).replace(',','.'));
       if(isNaN(rv)||rv<=3) ef[e.group||'—']=(ef[e.group||'—']||0)+1;
-      const rc=recEn(e,s,n); if(rc) recs.push({e:e.name,d:d.day,t:rc,w:c.w,r:c.r});
+      const rc=recEn(e,s,n,d.fu); if(rc) recs.push({e:e.name,d:d.day,t:rc,w:c.w,r:c.r});
       if(pv&&tonSet(pv)>0&&tonSet(c)>0){ par=true; a2+=tonSet(c); b2+=tonSet(pv); }   // solo series hechas en los dos ROLL
     }));
     tc+=a; pa+=a2; pb+=b2; hechas+=h; total+=t;
@@ -1852,7 +1916,7 @@ function renderProg(){
     filasDia+='<div class="srow"><div class="nm">'+esc(d.day)+'<small>'+(h?h+'/'+t+' series · '+numfmt(Math.round(a))+' kg'+(fecha?' · '+esc(fecha):''):'sin registrar')+'</small></div>'
       +'<div class="dd '+marca(dd)+'">'+(h?(par?signo(dd):'nuevo'):'—')+'</div></div>';
     const lin=d.ex.map(e=>{
-      let best=null; for(let k=1;k<=d.L.n;k++){ const m=mejorDe(e,k); if(m&&(!best||m.x>best.x)) best=m; }
+      let best=null; for(let k=1;k<=d.L.n;k++){ const m=mejorDe(e,k,d.fu); if(m&&(!best||m.x>best.x)) best=m; }
       if(!best) return '';
       return '<div class="srow"><div class="nm">'+esc(e.name)+(best.n===n&&rolls[0]<n?'<span class="nuevo">ESTE ROLL</span>':'')
         +'<small>'+numfmt(best.w)+' kg × '+best.r+' · ROLL '+best.n+'</small></div><div class="dd flat">≈ '+Math.round(best.x)+' kg</div></div>';
@@ -1996,6 +2060,8 @@ function retomaRest(){
 }
 document.addEventListener('visibilitychange',()=>{
   if(document.hidden) return;
+  // al volver a la app se contrasta con la hoja, por si se ha escrito en ella a mano
+  if(P&&P.id&&!enSesion()&&!$('vPick').classList.contains('hide')) precarga(true);
   if(timer) tick();
   if(enSesion()) pideWL();
 });
