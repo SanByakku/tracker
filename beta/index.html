@@ -546,7 +546,7 @@
 <script>
 /* ============ PERFILES ============ */
 const VERSION='v1.1 beta';
-const BUILD=12;   // sube en cada publicación dentro de la misma versión: es lo que detecta el aviso de actualización
+const BUILD=13;   // sube en cada publicación dentro de la misma versión: es lo que detecta el aviso de actualización
 
 /* Diagnóstico: cualquier fallo silencioso se pinta en pantalla. No depende
    de ningún elemento del maquetado, se crea el suyo. */
@@ -2016,9 +2016,12 @@ function gestCel(d,e,s,n,antes){
 }
 function renderGest(){
   const D=gestDat||[];
-  if(!D.length){ $('gBody').innerHTML='<div class="msg">No he podido leer ningún día de este usuario.</div>'; return; }
-  $('gModo').innerHTML=[['tabla','Tabla'],['graf','Gráficas']].map(m=>'<button class="'+(gestModo===m[0]?'on':'')+'" data-m="'+m[0]+'">'+m[1]+'</button>').join('');
-  [...$('gModo').children].forEach(b=>b.onclick=()=>{ gestModo=b.dataset.m; renderGest(); });
+  if(!D.length){ $('gBody').innerHTML='<div class="msg">No he podido leer ningún día de este usuario.</div>'
+    +'<button class="bigbtn" style="max-width:320px" onclick="goDieta(\'gest\',gestP)">Ver su dieta</button>'; return; }
+  $('gModo').innerHTML=[['tabla','Rutina'],['graf','Gráficas'],['dieta','Dieta']].map(m=>'<button class="'+(gestModo===m[0]?'on':'')+'" data-m="'+m[0]+'">'+m[1]+'</button>').join('');
+  [...$('gModo').children].forEach(b=>b.onclick=()=>{
+    if(b.dataset.m==='dieta'){ goDieta('gest',gestP); return; }
+    gestModo=b.dataset.m; renderGest(); });
   $('gDias').innerHTML=D.map((d,i)=>'<button class="used '+(i===gestDia?'on':'')+'" data-i="'+i+'">'+esc(d.day)+'</button>').join('');
   [...$('gDias').children].forEach(b=>b.onclick=()=>{ gestDia=+b.dataset.i; renderGest(); });
   const d=D[gestDia];
@@ -2451,26 +2454,30 @@ async function pintaCardio(){
 }
 function dietSel(){ try{ return JSON.parse(localStorage.getItem(DIETSEL)||'{}')||{}; }catch(e){ return {}; } }
 function ponDietSel(clave,i){
-  const todo=dietSel(); const mio=todo[P.id]||(todo[P.id]={});
+  const todo=dietSel(); const mio=todo[dp().id]||(todo[dp().id]={});
   mio[clave]=i;
   try{ localStorage.setItem(DIETSEL,JSON.stringify(todo)); }catch(e){}
   renderDieta();
 }
 let dietRows=null, dietDe='', dietVolver='pick', dietErr='';
+let dietP=null;                 // desde el gestor: la dieta de otro usuario
+const dp=()=>dietP||P;
 const hoyClave=()=>{ const d=new Date(); return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); };
 function dietModo(){
   try{ const m=JSON.parse(localStorage.getItem(DIETK)||'null');
-    if(m&&m.d===hoyClave()&&m.p===P.id&&(m.m==='entreno'||m.m==='descanso')) return m.m; }catch(e){}
+    if(m&&m.d===hoyClave()&&m.p===dp().id&&(m.m==='entreno'||m.m==='descanso')) return m.m; }catch(e){}
   return 'entreno';
 }
 function ponDietModo(m){
-  try{ localStorage.setItem(DIETK,JSON.stringify({d:hoyClave(),p:P.id,m:m})); }catch(e){}
+  try{ localStorage.setItem(DIETK,JSON.stringify({d:hoyClave(),p:dp().id,m:m})); }catch(e){}
   renderDieta();
 }
-async function goDieta(desde){
-  const p=P; if(!p.id) return;
+async function goDieta(desde,otro){
+  dietP=otro||null;
+  const p=dp(); if(!p.id) return;
   dietVolver=desde; dietRows=null; dietDe=p.id; dietErr='';
-  ['vPick','vSess','vEx','vSum','vProg'].forEach(v=>$(v).classList.add('hide'));
+  ['vPick','vSess','vEx','vSum','vProg','vGest'].forEach(v=>$(v).classList.add('hide'));
+  document.body.classList.remove('ancho');
   $('vDiet').classList.remove('hide'); $('back').classList.remove('hide');
   $('ttl').textContent='Dieta'; $('sub').textContent=p.name;
   renderDieta(); window.scrollTo(0,0);
@@ -2492,6 +2499,8 @@ async function goDieta(desde){
 }
 function salDieta(){
   $('vDiet').classList.add('hide');
+  if(dietVolver==='gest'){ dietP=null; goGest(); return; }
+  dietP=null;
   if(dietVolver==='sess'&&S) goSess(); else $('bPick').click();
 }
 /* ============ LISTA DE LA COMPRA ============ */
@@ -2502,7 +2511,7 @@ function pedidoDias(){ try{ const n=parseInt(localStorage.getItem(SUPLEK),10); r
 let compraOn=false;
 function compraDias(){ try{ const n=parseInt(localStorage.getItem(COMPRAK),10); return (n>=0&&n<=7)?n:6; }catch(e){ return 6; } }   // por defecto 6 de entreno y 1 de descanso
 function lineasDia(modo){
-  const elegido=(dietSel()[P.id])||{}, out=[];
+  const elegido=(dietSel()[dp().id])||{}, out=[];
   (dietRows||[]).forEach(r=>{
     const n=String(r[0]||'').trim(), t=String(r[2]||'').trim(), d=String(r[3]||'').trim().toLowerCase();
     if(!t||n.charAt(0)==='@'||esCardio(n)||!(d===''||d===modo)) return;
@@ -2606,7 +2615,7 @@ function renderDieta(){
     if(!act||act.n!==n){ act={n:n,c:c,l:[]}; bloques.push(act); }
     if(d===''||d===modo) act.l.push({t:t,d:d});
   });
-  const elegido=(dietSel()[P.id])||{}, claves=[];
+  const elegido=(dietSel()[dp().id])||{}, claves=[];
   // kcal de una línea; va sumando en el bloque
   const kc=(txt,b)=>{
     if(!tabla.length) return '';
