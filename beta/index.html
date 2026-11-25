@@ -258,6 +258,17 @@
   .pendbar .pb2 .dz{background:#3a1a16;color:var(--bad)}
   .syn{cursor:pointer}
   .pick{position:relative}
+  .toca{border-color:var(--acc)}
+  .toca .t1{font-size:22px;font-weight:800;letter-spacing:.3px;margin:2px 0 8px}
+  .toca .t1 small{font-size:14px;font-weight:600;color:var(--mut);margin-left:6px}
+  .toca .av{font-size:13px;line-height:1.35;margin:0 0 8px;padding:8px 10px;border-radius:10px;background:rgba(255,160,60,.12);color:#ffb066}
+  .toca .de{font-size:13px;color:var(--mut);margin:0 0 8px}
+  .toca .cic{display:flex;flex-wrap:wrap;gap:5px;margin:0 0 10px}
+  .toca .cic span{font-size:11px;padding:4px 7px;border-radius:8px;border:1px solid #2a2f3a;color:var(--mut);white-space:nowrap}
+  .toca .cic .ok{color:#8fd694;border-color:#2f5a36}
+  .toca .cic .now{color:#10140a;background:var(--acc);border-color:var(--acc);font-weight:700}
+  .toca .cic .falta{color:#ffb066;border-color:#7a4a1c}
+  .toca .cic .des{border-style:dashed;opacity:.75}
   .pick .hoy{position:absolute;top:-7px;right:-4px;background:var(--acc);color:#10140a;
     font-size:8.5px;font-weight:800;padding:2px 6px;border-radius:999px;letter-spacing:.3px}
   .sug{background:#1a2410;border:1px solid #3c4f1c;border-radius:11px;padding:9px 11px;
@@ -378,6 +389,7 @@
     <div class="prof" id="profPick"></div>
   </div>
 
+  <div class="card toca hide" id="tocaCard"></div>
   <div class="card">
     <div class="lab">Día</div>
     <div class="grid2" id="dayPick"></div>
@@ -468,11 +480,11 @@
   <div class="bar"><i id="rBar"></i></div>
 </div>
 
-<script type="application/json" id="cambiosData">[{"v": "v1.1", "f": "25/11/2026", "c": ["En la lista del día, cada ejercicio muestra sus técnicas (rest pause, drop set, EMOM, mini series, parciales, cadencia) y en qué series.", "Código de colores en peso, repeticiones y RIR según el objetivo y el ROLL anterior.", "Técnicas (rest pause, drop set, mini series, parciales, EMOM, cadencia) con su explicación, su registro y su cuenta atrás.", "La sugerencia indica si toca subir, mantener o bajar, y usa la serie anterior si no hay ROLL previo.", "Pantalla de progreso y récords por ROLL, con evolución y gráfica de cada ejercicio.", "Comparar dos ROLL de un ejercicio, serie a serie.", "La sugerencia de carga propone peso y repeticiones.", "Series de aproximación antes de la primera serie.", "Calculadora de discos (20, 10, 5, 2,5 y 1,25 kg, barra de 20) y saltos de 2,5 kg con mancuernas.", "Aviso de fin de descanso con preaviso a 10 segundos.", "Botones grandes en la serie y «igual que la serie anterior».", "Lista de la compra: compra semanal y pedido de suplementación para 15 días, 1 o 2 meses.", "Total del día de la dieta con los macros en tres casillas.", "Aviso de versión nueva con botón de actualizar y esta lista de novedades.", "Cabecera de la pantalla inicial más limpia."]}, {"v": "v1.0", "f": "24/11/2026", "c": ["App instalable, con copia en el móvil y sincronización con la hoja.", "Entrada con Google.", "Dieta con alternativas por comida y día de entreno o descanso.", "Calorías y macros por línea, por comida y del día, con fruta y verdura.", "Tabla de equivalencias de hidratos y suplementación destacada.", "El cardio aparece al final de cada día de entrenamiento."]}]</script>
+<script type="application/json" id="cambiosData">[{"v": "v1.1", "f": "25/11/2026", "c": ["La pantalla inicial indica qué día y qué ROLL toca según el orden de la hoja; si se salta un día, lo propone el primero para volver al orden.", "En la lista del día, cada ejercicio muestra sus técnicas (rest pause, drop set, EMOM, mini series, parciales, cadencia) y en qué series.", "Código de colores en peso, repeticiones y RIR según el objetivo y el ROLL anterior.", "Técnicas (rest pause, drop set, mini series, parciales, EMOM, cadencia) con su explicación, su registro y su cuenta atrás.", "La sugerencia indica si toca subir, mantener o bajar, y usa la serie anterior si no hay ROLL previo.", "Pantalla de progreso y récords por ROLL, con evolución y gráfica de cada ejercicio.", "Comparar dos ROLL de un ejercicio, serie a serie.", "La sugerencia de carga propone peso y repeticiones.", "Series de aproximación antes de la primera serie.", "Calculadora de discos (20, 10, 5, 2,5 y 1,25 kg, barra de 20) y saltos de 2,5 kg con mancuernas.", "Aviso de fin de descanso con preaviso a 10 segundos.", "Botones grandes en la serie y «igual que la serie anterior».", "Lista de la compra: compra semanal y pedido de suplementación para 15 días, 1 o 2 meses.", "Total del día de la dieta con los macros en tres casillas.", "Aviso de versión nueva con botón de actualizar y esta lista de novedades.", "Cabecera de la pantalla inicial más limpia."]}, {"v": "v1.0", "f": "24/11/2026", "c": ["App instalable, con copia en el móvil y sincronización con la hoja.", "Entrada con Google.", "Dieta con alternativas por comida y día de entreno o descanso.", "Calorías y macros por línea, por comida y del día, con fruta y verdura.", "Tabla de equivalencias de hidratos y suplementación destacada.", "El cardio aparece al final de cada día de entrenamiento."]}]</script>
 <script>
 /* ============ PERFILES ============ */
 const VERSION='v1.1 beta';
-const BUILD=4;   // sube en cada publicación dentro de la misma versión: es lo que detecta el aviso de actualización
+const BUILD=5;   // sube en cada publicación dentro de la misma versión: es lo que detecta el aviso de actualización
 
 /* Diagnóstico: cualquier fallo silencioso se pinta en pantalla. No depende
    de ningún elemento del maquetado, se crea el suyo. */
@@ -637,7 +649,7 @@ async function precarga(){
     }
   }finally{ precargando=false; }
   if(P.id!==p.id){ setTimeout(precarga,300); return; }
-  estadoLocal();
+  estadoLocal(); calculaToca();
 }
 async function estadoLocal(){
   const p=P, ds=(days[p.id]||[]).slice();
@@ -742,7 +754,7 @@ function renderProf(){
   $('profPick').innerHTML=vs.map(p=>
     `<button class="${P.id===p.id?'on':''}" data-p="${p.id}">${esc(p.name)}</button>`).join('');
   [...$('profPick').children].forEach(b=>b.onclick=()=>{
-    P=PROFILES.find(x=>x.id===b.dataset.p); pickDay=0; pickRoll=null;
+    P=PROFILES.find(x=>x.id===b.dataset.p); pickDay=0; pickRoll=null; toca=null; pintaToca();
     renderProf(); $('rollMsg').textContent=''; loadDays();
   });
 }
@@ -777,6 +789,7 @@ async function loadDays(){
     pickDay=sugDia(); setSyn('ok','listo'); renderPick(); scanRolls();
     refrescarDias();                     // al margen, por si cambian
     estadoLocal(); setTimeout(precarga,1200);
+    calculaToca(); setTimeout(cargaCiclo,2500);
     return;
   }
   setSyn('pend','leyendo');
@@ -859,8 +872,10 @@ async function scanRolls(){
 }
 function suggest(){
   const r=rollsUsed[key()]; if(!r) return 1;
+  if(toca&&toca.pid===P.id&&(days[P.id]||[])[pickDay]===toca.day) return toca.roll;
   if(!r.used.length) return 1;
   const max=Math.max.apply(null,r.used);
+  for(let n=1;n<max;n++){ if(!r.lleno[n]) return n; }      // un ROLL saltado se rellena antes
   // Si ese ROLL está completo, el siguiente; si está a medias, se retoma.
   return (r.lleno&&r.filas&&r.lleno[max]>=r.filas) ? Math.min(r.n,max+1) : max;
 }
@@ -961,12 +976,131 @@ function marcaUltimo(){
 function sugDia(){
   try{
     const ds=days[P.id]||[]; if(!ds.length) return 0;
+    if(toca&&toca.pid===P.id&&ds[toca.di]===toca.day) return toca.di;
     let u=null; try{ u=JSON.parse(localStorage.getItem(ULTK)||'null'); }catch(e){}
     if(!u||u.p!==P.id) return 0;
     const i=ds.indexOf(u.day); if(i<0) return 0;
     const hoy=new Date(), d=new Date(u.ts);
     return hoy.toDateString()===d.toDateString() ? i : (i+1)%ds.length;
   }catch(e){ return 0; }
+}
+/* ============ ORDEN DE DÍAS Y ROLLS ============
+   El orden es el de las pestañas de la hoja. Dentro de cada ROLL se recorren
+   todos los días; no se pasa al ROLL siguiente hasta completar el anterior.
+   Si se salta un día, ese hueco es lo primero que toca. */
+let toca=null;
+const CICLOK='trackerb.ciclo.v1';
+const esRest=n=>/^(DESCANSO|REST)\b/i.test(String(n||''));
+const mismoDia=(a,b)=>new Date(a).toDateString()===new Date(b).toDateString();
+/* Lee de la pestaña LEYENDA la línea «Split» (D1 … · D4 descanso · …) para
+   saber dónde caen los descansos cuando no tienen pestaña propia. */
+function splitDe(rows){
+  for(const R of rows||[]){ for(const c of R||[]){
+    const t=String(c||'');
+    if(/\bD\s?1\b/i.test(t)&&t.indexOf('·')>0){
+      const out=t.split('·').map(x=>x.trim().replace(/^D\s?\d+\s*[:.\-]?\s*/i,'')).filter(Boolean);
+      if(out.length>1) return out;
+    } } }
+  return null;
+}
+function cicloDe(pid){
+  const ds=days[pid]||[];
+  let sp=null; try{ sp=(JSON.parse(localStorage.getItem(CICLOK)||'{}')||{})[pid]||null; }catch(e){}
+  if(sp){
+    const tr=sp.filter(x=>!esRest(x)), dt=ds.filter(x=>!esRest(x));
+    if(tr.length===dt.length&&tr.every((x,i)=>x.toUpperCase()===dt[i].toUpperCase()))
+      return sp.map(x=>esRest(x)?{rest:true,n:'Descanso'}:{rest:false,n:dt[tr.indexOf(x)]});
+  }
+  return ds.map(d=>({rest:esRest(d),n:esRest(d)?'Descanso':d}));
+}
+let cicloVisto={};
+async function cargaCiclo(){
+  const p=P; if(!p.id||cicloVisto[p.id]) return;
+  cicloVisto[p.id]=true;
+  try{
+    const sp=splitDe(await readDay('LEYENDA',p));
+    let o={}; try{ o=JSON.parse(localStorage.getItem(CICLOK)||'{}')||{}; }catch(e){}
+    if(sp) o[p.id]=sp; else delete o[p.id];
+    localStorage.setItem(CICLOK,JSON.stringify(o));
+    if(P.id===p.id) calculaToca();
+  }catch(e){ /* sin leyenda: vale el orden de pestañas */ }
+}
+async function calculaToca(){
+  const p=P, ds=(days[p.id]||[]).slice();
+  if(!p.id||!ds.length){ toca=null; pintaToca(); return; }
+  const inf=[]; let faltan=0;
+  for(const d of ds){
+    if(esRest(d)) continue;
+    const k=p.id+'|'+d;
+    const loc=await dbGet(dkey(p.id,d));
+    if(loc){ try{ usaRolls(k,aplicaCola(loc.rows,p.id,d)); }catch(e){} }
+    const r=rollsUsed[k];
+    if(!r||!r.lleno){ faltan++; continue; }
+    if(!r.filas) continue;
+    inf.push({d:d,di:ds.indexOf(d),r:r});
+  }
+  if(P.id!==p.id) return;
+  if(faltan||!inf.length){ toca=null; pintaToca(faltan); return; }
+  let u=null; try{ u=JSON.parse(localStorage.getItem(ULTK)||'null'); }catch(e){}
+  if(u&&u.p!==p.id) u=null;
+  const N=Math.max.apply(null,inf.map(x=>x.r.used.length?Math.max.apply(null,x.r.used):0));
+  const tope=Math.min.apply(null,inf.map(x=>x.r.n));
+  const hecho=(x,n)=>{
+    const j=x.r.lleno[n]||0;
+    if(!j) return false;
+    // a medias y de hoy: se retoma; a medias de otro día: se da por hecho
+    if(j<x.r.filas&&u&&u.day===x.d&&+u.roll===n&&mismoDia(u.ts,Date.now())) return false;
+    return true;
+  };
+  let t=null;
+  for(let n=1;n<=Math.min(N+1,tope)&&!t;n++){
+    for(const x of inf){ if(!hecho(x,n)){ t={pid:p.id,day:x.d,di:x.di,roll:n}; break; } }
+  }
+  if(!t){ toca=null; pintaToca(0,'Has completado todos los ROLL de la hoja.'); return; }
+  const pos=inf.findIndex(x=>x.d===t.day);
+  t.medias=!!(inf[pos].r.lleno[t.roll]);
+  // ¿hay algo registrado más adelante en el orden? entonces es un día saltado
+  t.salto=inf.some((x,i)=>{
+    for(let n=t.roll;n<=x.r.n;n++){
+      if((n>t.roll||i>pos)&&x.r.lleno[n]) return true; }
+    return false; });
+  t.linea=inf.map(x=>({n:x.d,ok:hecho(x,t.roll)}));
+  // descanso previsto justo antes del día que toca
+  t.descanso='';
+  const cic=cicloDe(p.id), ci=cic.findIndex(c=>!c.rest&&c.n===t.day);
+  if(!t.salto&&!t.medias&&u&&ci>=0&&cic.length>1){
+    const ant=cic[(ci-1+cic.length)%cic.length], ant2=cic[(ci-2+cic.length)%cic.length];
+    if(ant.rest&&!ant2.rest&&ant2.n===u.day){
+      const ayer=Date.now()-864e5;
+      if(mismoDia(u.ts,Date.now())) t.descanso='mañana';
+      else if(mismoDia(u.ts,ayer)) t.descanso='hoy';
+    }
+  }
+  t.cic=cic;
+  const cambia=!toca||toca.pid!==t.pid||toca.day!==t.day||toca.roll!==t.roll;
+  toca=t;
+  pintaToca();
+  if(cambia&&!$('vPick').classList.contains('hide')&&!enSesion()){
+    pickDay=t.di; pickRoll=null; renderPick(); scanRolls();
+  }
+}
+function pintaToca(faltan,txt){
+  const c=$('tocaCard'); if(!c) return;
+  if(!toca||toca.pid!==P.id){
+    if(txt){ c.classList.remove('hide'); c.innerHTML='<div class="lab">Orden</div><div class="de">'+esc(txt)+'</div>'; }
+    else c.classList.add('hide');
+    return;
+  }
+  const t=toca;
+  let h='<div class="lab">'+(t.descanso==='hoy'?'Hoy, descanso · después':t.descanso==='mañana'?'Mañana, descanso · después':t.medias?'A medias · toca terminar':'Toca ahora')+'</div>';
+  h+='<div class="t1">'+esc(t.day)+'<small>ROLL '+t.roll+'</small></div>';
+  if(t.salto) h+='<div class="av">Este día quedó sin hacer en el ROLL '+t.roll+' y ya hay sesiones posteriores. Hazlo ahora para volver al orden.</div>';
+  let done={}; t.linea.forEach(x=>{ done[x.n]=x.ok; });
+  h+='<div class="cic">'+t.cic.map(x=>x.rest?'<span class="des">Descanso</span>'
+      :'<span class="'+(x.n===t.day?'now':done[x.n]?'ok':'')+'">'+(done[x.n]&&x.n!==t.day?'✓ ':'')+esc(x.n)+'</span>').join('')+'</div>';
+  h+='<button class="go" id="bToca">Cargar '+esc(t.day)+' · ROLL '+t.roll+'</button>';
+  c.innerHTML=h; c.classList.remove('hide');
+  $('bToca').onclick=()=>{ pickDay=t.di; pickRoll=t.roll; renderPick(); loadSession(false); };
 }
 const doneCount=e=>e.sets.filter(s=>hasVal(s.cur.w)||hasVal(s.cur.r)).length;
 function renderSess(){
@@ -2203,7 +2337,7 @@ $('bPick').onclick=()=>{ $('vSess').classList.add('hide'); $('vEx').classList.ad
   $('ttl').textContent=TITULO;
   $('sub').textContent=VERSION;
   sueltaWL();
-  renderProf(); renderPick(); scanRolls(); estadoLocal(); };
+  renderProf(); renderPick(); scanRolls(); estadoLocal(); calculaToca(); };
 
 /* ============ NOVEDADES Y VERSIÓN NUEVA ============ */
 /* La app pregunta de vez en cuando por su propia página, sin pasar por la
