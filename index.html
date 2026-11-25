@@ -441,7 +441,7 @@
 
 <script>
 /* ============ PERFILES ============ */
-const VERSION='v0.12';
+const VERSION='v0.13';
 
 /* Diagnóstico: cualquier fallo silencioso se pinta en pantalla. No depende
    de ningún elemento del maquetado, se crea el suyo. */
@@ -1725,9 +1725,9 @@ function kcalLinea(texto,tabla){
 /* Suplementos: filas «@sup» con la lista de nombres en TEXTO. Una línea es
    suplemento si empieza por uno de ellos (tras la cantidad) o lleva el
    prefijo «Suplementación:». Se pintan con otro fondo. */
-function listaSup(rows){
-  const out=[];
-  rows.forEach(r=>{ if(String(r[0]||'').trim().toLowerCase()==='@sup')
+function listaSup(rows,marca){
+  const out=[], mk=marca||'@sup';
+  rows.forEach(r=>{ if(String(r[0]||'').trim().toLowerCase()===mk)
     String(r[2]||'').split(';').map(a=>sinTilde(a).trim()).filter(Boolean).forEach(a=>out.push(a)); });
   return out;
 }
@@ -1830,7 +1830,8 @@ function salDieta(){
 /* ============ LISTA DE LA COMPRA ============ */
 /* Suma lo que pide la dieta en una semana, con las alternativas que estén
    elegidas en cada tipo de día. No guarda nada: se calcula al abrirla. */
-const COMPRAK='tracker.compra.v1';
+const COMPRAK='tracker.compra.v1', SUPLEK='tracker.suple.v1', PEDIDOS=[[15,'15 días'],[30,'1 mes'],[60,'2 meses']];
+function pedidoDias(){ try{ const n=parseInt(localStorage.getItem(SUPLEK),10); return PEDIDOS.some(p=>p[0]===n)?n:60; }catch(e){ return 60; } }
 let compraOn=false;
 function compraDias(){ try{ const n=parseInt(localStorage.getItem(COMPRAK),10); return (n>=0&&n<=7)?n:6; }catch(e){ return 6; } }   // por defecto 6 de entreno y 1 de descanso
 function lineasDia(modo){
@@ -1845,7 +1846,8 @@ function lineasDia(modo){
   return out;
 }
 function listaCompra(nE){
-  const tabla=tablaKcal(dietRows||[]), sups=listaSup(dietRows||[]), acc={};
+  // «@mensual»: cosas que son comida pero se compran con el pedido del mes (la proteína, por ejemplo)
+  const tabla=tablaKcal(dietRows||[]), sups=listaSup(dietRows||[]).concat(listaSup(dietRows||[],'@mensual')), acc={};
   const suma=(nom,u,q,sup)=>{ const k=sinTilde(nom)+'|'+u; (acc[k]=acc[k]||{nom:nom,u:u,q:0,sup:sup}).q+=q; };
   [['entreno',nE],['descanso',7-nE]].forEach(par=>{
     if(!par[1]) return;
@@ -1889,7 +1891,7 @@ function renderCompra(){
   if(!dietRows||!dietRows.length){ box.innerHTML=''; return; }
   if(!compraOn){ box.innerHTML='<button class="bigbtn" id="bCompra" style="margin-top:10px">Lista de la compra</button>';
     $('bCompra').onclick=()=>{ compraOn=true; renderCompra(); }; return; }
-  const nE=compraDias(), l=listaCompra(nE), MES=30/7;
+  const nE=compraDias(), l=listaCompra(nE), dP=pedidoDias(), MES=dP/7;
   const com=l.filter(x=>!x.sup).map(x=>({nom:nomCompra(x.nom),cant:cantCompra(x,1)}));
   const sup=l.filter(x=>x.sup).map(x=>({nom:nomCompra(x.nom),cant:cantCompra(x,MES)}));
   const fila=x=>'<div class="ci"><span>'+esc(x.nom)+'</span><b>'+esc(x.cant)+'</b></div>';
@@ -1897,21 +1899,23 @@ function renderCompra(){
   box.innerHTML='<div class="card compra"><div class="lab">Lista de la compra</div>'
     +'<div class="cd" style="margin:0"><span>Días de entreno por semana</span><button id="cMenos">−</button><b>'+nE+'</b><button id="cMas">+</button></div>'
     +'<div class="mini" style="margin:10px 0 0"><button id="cCierra">Cerrar la lista</button></div></div>'
-    +'<div class="card compra" id="cSup"><div class="lab">Suplementación mensual · 30 días</div>'
+    +'<div class="card compra" id="cSup"><div class="lab">Suplementación · pedido para '+dP+' días</div>'
+    +'<div class="mini">'+PEDIDOS.map(p=>'<button data-ped="'+p[0]+'" class="'+(p[0]===dP?'on':'')+'">'+p[1]+'</button>').join('')+'</div>'
     +(sup.length?sup.map(fila).join(''):'<div class="msg" style="margin:0">La dieta no marca suplementos.</div>')
-    +(sup.length?'<div class="note">La semana multiplicada por 30/7, con '+reparto+'.</div><div class="mini" style="margin:10px 0 0"><button id="cCopiaS">Copiar suplementación</button></div>':'')+'</div>'
+    +(sup.length?'<div class="note">La semana multiplicada por '+dP+'/7, con '+reparto+'.</div><div class="mini" style="margin:10px 0 0"><button id="cCopiaS">Copiar suplementación</button></div>':'')+'</div>'
     +'<div class="card compra" id="cSem"><div class="lab">Compra semanal · 7 días</div>'
     +(com.length?com.map(fila).join(''):'<div class="msg" style="margin:0">No encuentro cantidades en la dieta.</div>')
     +(com.length?'<div class="note">Con las alternativas que tienes elegidas en cada tipo de día. Pesos en crudo, sin margen: redondea al alza al comprar.</div><div class="mini" style="margin:10px 0 0"><button id="cCopia">Copiar compra</button></div>':'')+'</div>';
   const pon=n=>{ try{ localStorage.setItem(COMPRAK,String(Math.max(0,Math.min(7,n)))); }catch(e){} renderCompra(); };
   $('cMenos').onclick=()=>pon(nE-1); $('cMas').onclick=()=>pon(nE+1);
   $('cCierra').onclick=()=>{ compraOn=false; renderCompra(); };
+  [...box.querySelectorAll('[data-ped]')].forEach(b=>b.onclick=()=>{ try{ localStorage.setItem(SUPLEK,b.dataset.ped); }catch(e){} renderCompra(); });
   const copia=(id,titulo,lista)=>{ const b=$(id); if(!b) return; b.onclick=()=>{
     const txt=titulo+'\n'+lista.map(x=>'- '+x.nom+': '+x.cant).join('\n');
     const ok=()=>{ b.textContent='Copiada'; }, mal=()=>{ b.textContent='No se pudo copiar'; };
     try{ navigator.clipboard.writeText(txt).then(ok,mal); }catch(e){ mal(); } }; };
   copia('cCopia','Compra semanal ('+reparto+')',com);
-  copia('cCopiaS','Suplementación mensual (30 días, '+reparto+')',sup);
+  copia('cCopiaS','Suplementación, pedido para '+dP+' días ('+reparto+')',sup);
 }
 function renderDieta(){
   renderCompra();
