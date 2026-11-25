@@ -277,14 +277,18 @@
   .kc.nd{color:var(--dim2);font-weight:500}
   .km{font-size:11px;color:var(--dim);margin-top:3px;font-variant-numeric:tabular-nums}
   .km b{color:var(--txt);font-weight:700}
-  .ktot .km b{font-size:11px;letter-spacing:0}
   .dl.sup{background:rgba(96,165,250,.11);margin:0 -14px;padding-left:14px;padding-right:14px}
   .dhead{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
   .dhead .kt{font-size:12px;font-weight:750;color:var(--txt);white-space:nowrap}
-  .ktot{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:10px 0;
-    display:flex;align-items:baseline;justify-content:space-between;gap:10px}
-  .ktot b{font-size:20px;font-weight:800;letter-spacing:-.5px}
-  .ktot span{font-size:11px;color:var(--dim);line-height:1.4;text-align:right}
+  .ktot{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:13px 14px;margin:10px 0}
+  .ktot .k1{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+  .ktot b{font-size:24px;font-weight:800;letter-spacing:-.6px}
+  .ktot .k1 span{font-size:11px;color:var(--dim2);letter-spacing:.6px;text-transform:uppercase;font-weight:650;white-space:nowrap}
+  .ktot .kmac{display:flex;gap:8px;margin-top:11px}
+  .ktot .kmac div{flex:1;background:var(--panel2);border-radius:10px;padding:9px 6px;text-align:center}
+  .ktot .kmac i{display:block;font-style:normal;font-size:16px;font-weight:750;letter-spacing:-.3px;white-space:nowrap;font-variant-numeric:tabular-nums}
+  .ktot .kmac small{display:block;font-size:9.5px;color:var(--dim2);letter-spacing:.6px;text-transform:uppercase;margin-top:3px}
+  .ktot .kn{font-size:11px;color:var(--dim);line-height:1.4;margin-top:9px}
   .alts{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
   .alts button{padding:7px 11px;border-radius:999px;background:var(--panel2);border:1px solid var(--line);
     font-size:11.5px;font-weight:650;color:var(--dim);line-height:1.2}
@@ -437,7 +441,7 @@
 
 <script>
 /* ============ PERFILES ============ */
-const VERSION='v0.11.1';
+const VERSION='v0.11.2';
 
 /* Diagnóstico: cualquier fallo silencioso se pinta en pantalla. No depende
    de ningún elemento del maquetado, se crea el suyo. */
@@ -1976,8 +1980,9 @@ function renderDieta(){
       return `<details class="dcard"><summary><h3>${esc(b.n)}</h3><span>${b.l.length} puntos ▾</span></summary>${cuando}${cuerpo}</details>`;
     return `<div class="dcard${comida?' meal':''}">${cab}${cuando}${cuerpo}</div>`;
   }).join('');
-  const total=(tabla.length&&dia>0)?`<div class="ktot"><div><b>≈ ${kfmt(dia)}</b> kcal${diaSinM?'':`<div class="km">${macTxt(diaM)}</div>`}</div>
-    <span>${modo==='entreno'?'Día de entreno':'Día de descanso'}, con lo que tienes elegido.${sinDato?' '+sinDato+(sinDato===1?' línea sin dato.':' líneas sin dato.'):''}</span></div>`:'';
+  const total=(tabla.length&&dia>0)?`<div class="ktot"><div class="k1"><div><b>≈ ${kfmt(dia)}</b> kcal</div><span>${modo==='entreno'?'Día de entreno':'Día de descanso'}</span></div>
+    ${diaSinM?'':`<div class="kmac"><div><i>${Math.round(diaM[1])} g</i><small>Proteína</small></div><div><i>${Math.round(diaM[0])} g</i><small>Hidratos</small></div><div><i>${Math.round(diaM[2])} g</i><small>Grasa</small></div></div>`}
+    <div class="kn">Con lo que tienes elegido.${sinDato?' '+sinDato+(sinDato===1?' línea sin dato.':' líneas sin dato.'):''}</div></div>`:'';
   $('dietBody').innerHTML=total+tarjetas;
   [...$('dietBody').querySelectorAll('[data-ak]')].forEach(bt=>bt.onclick=()=>ponDietSel(claves[+bt.dataset.ak],+bt.dataset.ai));
   renderCompra();
