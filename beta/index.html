@@ -258,6 +258,8 @@
   .pendbar .pb2 .dz{background:#3a1a16;color:var(--bad)}
   .syn{cursor:pointer}
   .pick{position:relative}
+  .autoN{font-size:12px;color:var(--mut);margin:-4px 4px 12px;line-height:1.35}
+  #bAuto.conf{border-color:#ffb066;color:#ffb066}
   .gym{padding:12px 14px}
   .gym .g2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
   .gym .g2 button{min-height:46px;border-radius:12px;border:1px solid #2a2f3a;background:#1c2029;color:var(--tx,#e8eaf0);font-size:15px;font-weight:600}
@@ -436,6 +438,8 @@
   </div>
   <button class="bigbtn" id="bSum">Resumen de la sesión</button>
   <button class="bigbtn" id="bDieta2">Dieta</button>
+  <button class="bigbtn hide" id="bAuto"></button>
+  <div class="autoN hide" id="autoN"></div>
   <button class="bigbtn" id="bReload">Recargar desde la hoja</button>
   <button class="bigbtn" id="bPick">Cambiar día o ROLL</button>
 </div>
@@ -492,11 +496,11 @@
   <div class="bar"><i id="rBar"></i></div>
 </div>
 
-<script type="application/json" id="cambiosData">[{"v": "v1.1", "f": "25/11/2026", "c": ["Gimnasio de hoy: se elige entre los de tu lista u «otro». Se guarda junto a la fecha del ROLL y las comparaciones usan solo sesiones del mismo gimnasio.", "Los descansos se calculan con la fecha de cada sesión guardada en la hoja.", "La pantalla inicial indica qué día y qué ROLL toca según el orden de la hoja; si se salta un día, lo propone el primero para volver al orden.", "En la lista del día, cada ejercicio muestra sus técnicas (rest pause, drop set, EMOM, mini series, parciales, cadencia) y en qué series.", "Código de colores en peso, repeticiones y RIR según el objetivo y el ROLL anterior.", "Técnicas (rest pause, drop set, mini series, parciales, EMOM, cadencia) con su explicación, su registro y su cuenta atrás.", "La sugerencia indica si toca subir, mantener o bajar, y usa la serie anterior si no hay ROLL previo.", "Pantalla de progreso y récords por ROLL, con evolución y gráfica de cada ejercicio.", "Comparar dos ROLL de un ejercicio, serie a serie.", "La sugerencia de carga propone peso y repeticiones.", "Series de aproximación antes de la primera serie.", "Calculadora de discos (20, 10, 5, 2,5 y 1,25 kg, barra de 20) y saltos de 2,5 kg con mancuernas.", "Aviso de fin de descanso con preaviso a 10 segundos.", "Botones grandes en la serie y «igual que la serie anterior».", "Lista de la compra: compra semanal y pedido de suplementación para 15 días, 1 o 2 meses.", "Total del día de la dieta con los macros en tres casillas.", "Aviso de versión nueva con botón de actualizar y esta lista de novedades.", "Cabecera de la pantalla inicial más limpia."]}, {"v": "v1.0", "f": "24/11/2026", "c": ["App instalable, con copia en el móvil y sincronización con la hoja.", "Entrada con Google.", "Dieta con alternativas por comida y día de entreno o descanso.", "Calorías y macros por línea, por comida y del día, con fruta y verdura.", "Tabla de equivalencias de hidratos y suplementación destacada.", "El cardio aparece al final de cada día de entrenamiento."]}]</script>
+<script type="application/json" id="cambiosData">[{"v": "v1.1", "f": "25/11/2026", "c": ["Autorrellenar: copia en las series sin registrar los valores del ROLL anterior del mismo gimnasio.", "Al volver a la app se vuelve a leer la hoja, por si se ha escrito en ella a mano.", "Gimnasio de hoy: se elige entre los de tu lista u «otro». Se guarda junto a la fecha del ROLL y las comparaciones usan solo sesiones del mismo gimnasio.", "Los descansos se calculan con la fecha de cada sesión guardada en la hoja.", "La pantalla inicial indica qué día y qué ROLL toca según el orden de la hoja; si se salta un día, lo propone el primero para volver al orden.", "En la lista del día, cada ejercicio muestra sus técnicas (rest pause, drop set, EMOM, mini series, parciales, cadencia) y en qué series.", "Código de colores en peso, repeticiones y RIR según el objetivo y el ROLL anterior.", "Técnicas (rest pause, drop set, mini series, parciales, EMOM, cadencia) con su explicación, su registro y su cuenta atrás.", "La sugerencia indica si toca subir, mantener o bajar, y usa la serie anterior si no hay ROLL previo.", "Pantalla de progreso y récords por ROLL, con evolución y gráfica de cada ejercicio.", "Comparar dos ROLL de un ejercicio, serie a serie.", "La sugerencia de carga propone peso y repeticiones.", "Series de aproximación antes de la primera serie.", "Calculadora de discos (20, 10, 5, 2,5 y 1,25 kg, barra de 20) y saltos de 2,5 kg con mancuernas.", "Aviso de fin de descanso con preaviso a 10 segundos.", "Botones grandes en la serie y «igual que la serie anterior».", "Lista de la compra: compra semanal y pedido de suplementación para 15 días, 1 o 2 meses.", "Total del día de la dieta con los macros en tres casillas.", "Aviso de versión nueva con botón de actualizar y esta lista de novedades.", "Cabecera de la pantalla inicial más limpia."]}, {"v": "v1.0", "f": "24/11/2026", "c": ["App instalable, con copia en el móvil y sincronización con la hoja.", "Entrada con Google.", "Dieta con alternativas por comida y día de entreno o descanso.", "Calorías y macros por línea, por comida y del día, con fruta y verdura.", "Tabla de equivalencias de hidratos y suplementación destacada.", "El cardio aparece al final de cada día de entrenamiento."]}]</script>
 <script>
 /* ============ PERFILES ============ */
 const VERSION='v1.1 beta';
-const BUILD=8;   // sube en cada publicación dentro de la misma versión: es lo que detecta el aviso de actualización
+const BUILD=9;   // sube en cada publicación dentro de la misma versión: es lo que detecta el aviso de actualización
 
 /* Diagnóstico: cualquier fallo silencioso se pinta en pantalla. No depende
    de ningún elemento del maquetado, se crea el suyo. */
@@ -681,7 +685,7 @@ async function traeDia(p,day){
 /* Baja en segundo plano los días que falten o lleven más de 10 min sin
    contrastar, para tener la rutina entera disponible sin cobertura. */
 let precargando=false;
-async function precarga(){
+async function precarga(rapido){
   if(precargando) return;
   precargando=true;
   const p=P, ds=(days[p.id]||[]).slice();
@@ -690,7 +694,7 @@ async function precarga(){
       if(P.id!==p.id) break;
       if(S&&S.pid===p.id&&S.day===day&&enSesion()) continue;
       const loc=await dbGet(dkey(p.id,day));
-      if(loc&&Date.now()-loc.ts<PREC) continue;
+      if(loc&&Date.now()-loc.ts<(rapido===true?60000:PREC)) continue;
       try{ await traeDia(p,day); }catch(e){ break; }
     }
   }finally{ precargando=false; }
@@ -967,6 +971,56 @@ function fijaPrev(X){
     }
   }));
 }
+/* Autorrellenar: copia en las series sin registrar los valores del ROLL de
+   referencia (el anterior hecho en el mismo gimnasio). No pisa nada. */
+function autoPend(){
+  const out=[]; if(!S) return out;
+  S.ex.forEach(e=>e.sets.forEach(s=>{
+    if(hasVal(s.cur.w)||hasVal(s.cur.r)) return;
+    if(s.prev&&(hasVal(s.prev.w)||hasVal(s.prev.r))) out.push(s);
+  }));
+  return out;
+}
+let autoT=null;
+function pintaAuto(){
+  const b=$('bAuto'), n=$('autoN'); if(!b||!S) return;
+  clearTimeout(autoT); b.classList.remove('conf');
+  const p=autoPend();
+  if(!p.length){ b.classList.add('hide'); n.classList.add('hide'); return; }
+  const rolls=p.map(s=>s.prev.n).filter((x,i,a)=>a.indexOf(x)===i).sort((a,b)=>a-b);
+  b.classList.remove('hide'); n.classList.remove('hide');
+  b.textContent='Autorrellenar con el ROLL '+rolls.join(' y ');
+  n.textContent='Copia peso, repeticiones y RIR en las '+p.length+' series sin registrar y las marca como «auto» en AJUSTE. No toca las que ya tienes.';
+  b.onclick=()=>{
+    if(!b.classList.contains('conf')){
+      b.classList.add('conf'); b.textContent='Confirmar: copiar '+p.length+' series';
+      autoT=setTimeout(pintaAuto,5000); return;
+    }
+    autoRellena();
+  };
+}
+function autoRellena(){
+  const L=S.L, q=queue(); let k=0;
+  autoPend().forEach(s=>{
+    const p=s.prev, vals=new Array(L.stride).fill(null);
+    if(hasVal(p.w)) vals[L.f.w]=p.w;
+    if(hasVal(p.r)) vals[L.f.r]=p.r;
+    if(L.f.rir!==null&&hasVal(p.rir)) vals[L.f.rir]=p.rir;
+    if(L.f.aj!==null){
+      const a=String(p.aj==null?'':p.aj).replace(/\s*·?\s*auto$/i,'').trim();
+      vals[L.f.aj]=/^(RPP?|drop|minis|parciales)\b/i.test(a)?a+' · auto':'auto';
+    }
+    s.cur={ w:vals[L.f.w]===null?undefined:vals[L.f.w], r:vals[L.f.r]===null?undefined:vals[L.f.r],
+      rir:L.f.rir!==null&&vals[L.f.rir]!==null?vals[L.f.rir]:undefined, aj:L.f.aj!==null?vals[L.f.aj]:undefined };
+    s.hist[S.roll-1]=Object.assign({n:S.roll},s.cur);
+    const it={ pid:P.id, day:S.day, row:s.row, c0:S.cc, c1:S.cc+L.stride-1,
+      values:vals, dateCol:S.cc+1, date:fechaCelda() };
+    guardaLocal(it); q.push(it); k++;
+  });
+  if(!k) return;
+  setQueue(q); marcaUltimo(); flush();
+  renderSess(); pintaAuto();
+}
 let gymAbierto=false;
 function pintaGym(){
   const c=$('gymBox'); if(!c||!S) return;
@@ -993,6 +1047,7 @@ function pintaGym(){
     $('gOtro').onclick=()=>{ if(otro) return; gymAbierto=!gymAbierto; pintaGym(); };
     [...c.querySelectorAll('[data-g]')].forEach(b=>b.onclick=()=>{ gymAbierto=false; ponGym(L[+b.dataset.g]); });
   }
+  pintaAuto();
   if($('gNom')) $('gNom').onchange=()=>ponGym(String($('gNom').value).replace(/[·|]/g,' ').replace(/\s+/g,' ').trim().slice(0,24)||GYMDEF);
 }
 function ponGym(g){
@@ -1996,6 +2051,8 @@ function retomaRest(){
 }
 document.addEventListener('visibilitychange',()=>{
   if(document.hidden) return;
+  // al volver a la app se contrasta con la hoja, por si se ha escrito en ella a mano
+  if(P&&P.id&&!enSesion()&&!$('vPick').classList.contains('hide')) precarga(true);
   if(timer) tick();
   if(enSesion()) pideWL();
 });
