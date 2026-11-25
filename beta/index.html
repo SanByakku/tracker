@@ -180,6 +180,8 @@
   .sug.down{background:#2a1512;border-color:#4a241e} .sug.down b{color:var(--bad)}
   .ley{font-size:10.5px;color:var(--dim2);line-height:1.6;margin:6px 2px 10px}
   .ley i{font-style:normal;font-weight:700}
+  .excard .tcs{margin-top:6px;display:flex;flex-wrap:wrap;gap:4px}
+  .excard .tcs .tchip{margin-left:0}
   .mini{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 9px}
   .mini button{flex:1 1 auto;padding:9px 10px;border-radius:10px;background:var(--panel);border:1px solid var(--line);
     font-size:11.5px;font-weight:650;color:var(--dim)}
@@ -466,11 +468,11 @@
   <div class="bar"><i id="rBar"></i></div>
 </div>
 
-<script type="application/json" id="cambiosData">[{"v": "v1.1", "f": "25/11/2026", "c": ["Código de colores en peso, repeticiones y RIR según el objetivo y el ROLL anterior.", "Técnicas (rest pause, drop set, mini series, parciales, EMOM, cadencia) con su explicación, su registro y su cuenta atrás.", "La sugerencia indica si toca subir, mantener o bajar, y usa la serie anterior si no hay ROLL previo.", "Pantalla de progreso y récords por ROLL, con evolución y gráfica de cada ejercicio.", "Comparar dos ROLL de un ejercicio, serie a serie.", "La sugerencia de carga propone peso y repeticiones.", "Series de aproximación antes de la primera serie.", "Calculadora de discos (20, 10, 5, 2,5 y 1,25 kg, barra de 20) y saltos de 2,5 kg con mancuernas.", "Aviso de fin de descanso con preaviso a 10 segundos.", "Botones grandes en la serie y «igual que la serie anterior».", "Lista de la compra: compra semanal y pedido de suplementación para 15 días, 1 o 2 meses.", "Total del día de la dieta con los macros en tres casillas.", "Aviso de versión nueva con botón de actualizar y esta lista de novedades.", "Cabecera de la pantalla inicial más limpia."]}, {"v": "v1.0", "f": "24/11/2026", "c": ["App instalable, con copia en el móvil y sincronización con la hoja.", "Entrada con Google.", "Dieta con alternativas por comida y día de entreno o descanso.", "Calorías y macros por línea, por comida y del día, con fruta y verdura.", "Tabla de equivalencias de hidratos y suplementación destacada.", "El cardio aparece al final de cada día de entrenamiento."]}]</script>
+<script type="application/json" id="cambiosData">[{"v": "v1.1", "f": "25/11/2026", "c": ["En la lista del día, cada ejercicio muestra sus técnicas (rest pause, drop set, EMOM, mini series, parciales, cadencia) y en qué series.", "Código de colores en peso, repeticiones y RIR según el objetivo y el ROLL anterior.", "Técnicas (rest pause, drop set, mini series, parciales, EMOM, cadencia) con su explicación, su registro y su cuenta atrás.", "La sugerencia indica si toca subir, mantener o bajar, y usa la serie anterior si no hay ROLL previo.", "Pantalla de progreso y récords por ROLL, con evolución y gráfica de cada ejercicio.", "Comparar dos ROLL de un ejercicio, serie a serie.", "La sugerencia de carga propone peso y repeticiones.", "Series de aproximación antes de la primera serie.", "Calculadora de discos (20, 10, 5, 2,5 y 1,25 kg, barra de 20) y saltos de 2,5 kg con mancuernas.", "Aviso de fin de descanso con preaviso a 10 segundos.", "Botones grandes en la serie y «igual que la serie anterior».", "Lista de la compra: compra semanal y pedido de suplementación para 15 días, 1 o 2 meses.", "Total del día de la dieta con los macros en tres casillas.", "Aviso de versión nueva con botón de actualizar y esta lista de novedades.", "Cabecera de la pantalla inicial más limpia."]}, {"v": "v1.0", "f": "24/11/2026", "c": ["App instalable, con copia en el móvil y sincronización con la hoja.", "Entrada con Google.", "Dieta con alternativas por comida y día de entreno o descanso.", "Calorías y macros por línea, por comida y del día, con fruta y verdura.", "Tabla de equivalencias de hidratos y suplementación destacada.", "El cardio aparece al final de cada día de entrenamiento."]}]</script>
 <script>
 /* ============ PERFILES ============ */
 const VERSION='v1.1 beta';
-const BUILD=2;   // sube en cada publicación dentro de la misma versión: es lo que detecta el aviso de actualización
+const BUILD=3;   // sube en cada publicación dentro de la misma versión: es lo que detecta el aviso de actualización
 
 /* Diagnóstico: cualquier fallo silencioso se pinta en pantalla. No depende
    de ningún elemento del maquetado, se crea el suyo. */
@@ -976,7 +978,7 @@ function renderSess(){
     const d=doneCount(e), t=e.sets.length, pct=t?Math.min(1,d/t):0, C=2*Math.PI*14.5;
     html+=`<button class="excard ${d>=t?'done':''}" data-i="${i}">
       <div class="grow"><div class="nm">${esc(e.name)}</div>
-      <div class="rx">${t} series · ${esc(e.sets.map(s=>s.reps).join('/'))} reps · RIR ${esc(e.sets.map(s=>s.rir).join('/'))}</div></div>
+      <div class="rx">${t} series · ${esc(e.sets.map(s=>s.reps).join('/'))} reps · RIR ${esc(e.sets.map(s=>s.rir).join('/'))}</div>${tecsEj(e)}</div>
       <div class="ring ${pct>=1?'full':''}"><svg width="36" height="36">
         <circle cx="18" cy="18" r="14.5" fill="none" stroke="#262a33" stroke-width="3"/>
         <circle cx="18" cy="18" r="14.5" fill="none" stroke="${pct>=1?'#d7ff3e':'#6b7280'}" stroke-width="3"
@@ -1356,6 +1358,16 @@ function pausaCorta(seg){
   tTotal=seg; tEnd=Date.now()+seg*1000; tOver=false; tPre=true;
   try{ localStorage.removeItem(RESTK); }catch(e){}
   pintaRest('Pausa de '+seg+' s','Sigue con el mismo peso');
+}
+
+/* Técnicas de un ejercicio para la lista del día: nombre y en qué series («S3»), salvo que sean todas */
+function tecsEj(e){
+  const m={}, ord=[];
+  e.sets.forEach((s,i)=>{ const k=tecnicaDe(s); if(!k) return;
+    const ns=[]; if(k.t) ns.push(TEC[k.t][0]); if(k.cad) ns.push('Cadencia '+k.cad[0]+'-'+k.cad[1]);
+    ns.forEach(n=>{ if(!m[n]){ m[n]=[]; ord.push(n); } m[n].push(i+1); }); });
+  if(!ord.length) return '';
+  return '<div class="tcs">'+ord.map(n=>'<span class="tchip">'+esc(n)+(m[n].length<e.sets.length?' · S'+m[n].join(','):'')+'</span>').join('')+'</div>';
 }
 
 /* ============ AYUDAS EN LA SERIE ============ */

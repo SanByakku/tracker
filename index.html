@@ -166,6 +166,9 @@
   .aprox .ar:first-of-type{border-top:0}
   .aprox .ar b{color:var(--txt);font-size:13.5px;white-space:nowrap}
   .aprox .ar span{text-align:right}
+  .tchip{display:inline-block;font-size:9.5px;font-weight:750;letter-spacing:.4px;padding:2px 6px;border-radius:5px;background:#2a2140;color:#b48cff;margin-left:6px}
+  .excard .tcs{margin-top:6px;display:flex;flex-wrap:wrap;gap:4px}
+  .excard .tcs .tchip{margin-left:0}
   .mini{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 9px}
   .mini button{flex:1 1 auto;padding:9px 10px;border-radius:10px;background:var(--panel);border:1px solid var(--line);
     font-size:11.5px;font-weight:650;color:var(--dim)}
@@ -451,11 +454,11 @@
   <div class="bar"><i id="rBar"></i></div>
 </div>
 
-<script type="application/json" id="cambiosData">[{"v": "v1.1", "f": "25/11/2026", "c": ["Pantalla de progreso y récords por ROLL, con evolución y gráfica de cada ejercicio.", "Comparar dos ROLL de un ejercicio, serie a serie.", "La sugerencia de carga propone peso y repeticiones.", "Series de aproximación antes de la primera serie.", "Calculadora de discos (20, 10, 5, 2,5 y 1,25 kg, barra de 20) y saltos de 2,5 kg con mancuernas.", "Aviso de fin de descanso con preaviso a 10 segundos.", "Botones grandes en la serie y «igual que la serie anterior».", "Lista de la compra: compra semanal y pedido de suplementación para 15 días, 1 o 2 meses.", "Total del día de la dieta con los macros en tres casillas.", "Aviso de versión nueva con botón de actualizar y esta lista de novedades.", "Cabecera de la pantalla inicial más limpia."]}, {"v": "v1.0", "f": "24/11/2026", "c": ["App instalable, con copia en el móvil y sincronización con la hoja.", "Entrada con Google.", "Dieta con alternativas por comida y día de entreno o descanso.", "Calorías y macros por línea, por comida y del día, con fruta y verdura.", "Tabla de equivalencias de hidratos y suplementación destacada.", "El cardio aparece al final de cada día de entrenamiento."]}]</script>
+<script type="application/json" id="cambiosData">[{"v": "v1.1", "f": "25/11/2026", "c": ["En la lista del día, cada ejercicio muestra sus técnicas (rest pause, drop set, EMOM, mini series, parciales, cadencia) y en qué series.", "Pantalla de progreso y récords por ROLL, con evolución y gráfica de cada ejercicio.", "Comparar dos ROLL de un ejercicio, serie a serie.", "La sugerencia de carga propone peso y repeticiones.", "Series de aproximación antes de la primera serie.", "Calculadora de discos (20, 10, 5, 2,5 y 1,25 kg, barra de 20) y saltos de 2,5 kg con mancuernas.", "Aviso de fin de descanso con preaviso a 10 segundos.", "Botones grandes en la serie y «igual que la serie anterior».", "Lista de la compra: compra semanal y pedido de suplementación para 15 días, 1 o 2 meses.", "Total del día de la dieta con los macros en tres casillas.", "Aviso de versión nueva con botón de actualizar y esta lista de novedades.", "Cabecera de la pantalla inicial más limpia."]}, {"v": "v1.0", "f": "24/11/2026", "c": ["App instalable, con copia en el móvil y sincronización con la hoja.", "Entrada con Google.", "Dieta con alternativas por comida y día de entreno o descanso.", "Calorías y macros por línea, por comida y del día, con fruta y verdura.", "Tabla de equivalencias de hidratos y suplementación destacada.", "El cardio aparece al final de cada día de entrenamiento."]}]</script>
 <script>
 /* ============ PERFILES ============ */
 const VERSION='v1.1';
-const BUILD=1;   // sube en cada publicación dentro de la misma versión: es lo que detecta el aviso de actualización
+const BUILD=2;   // sube en cada publicación dentro de la misma versión: es lo que detecta el aviso de actualización
 
 /* Diagnóstico: cualquier fallo silencioso se pinta en pantalla. No depende
    de ningún elemento del maquetado, se crea el suyo. */
@@ -961,7 +964,7 @@ function renderSess(){
     const d=doneCount(e), t=e.sets.length, pct=t?Math.min(1,d/t):0, C=2*Math.PI*14.5;
     html+=`<button class="excard ${d>=t?'done':''}" data-i="${i}">
       <div class="grow"><div class="nm">${esc(e.name)}</div>
-      <div class="rx">${t} series · ${esc(e.sets.map(s=>s.reps).join('/'))} reps · RIR ${esc(e.sets.map(s=>s.rir).join('/'))}</div></div>
+      <div class="rx">${t} series · ${esc(e.sets.map(s=>s.reps).join('/'))} reps · RIR ${esc(e.sets.map(s=>s.rir).join('/'))}</div>${tecsEj(e)}</div>
       <div class="ring ${pct>=1?'full':''}"><svg width="36" height="36">
         <circle cx="18" cy="18" r="14.5" fill="none" stroke="#262a33" stroke-width="3"/>
         <circle cx="18" cy="18" r="14.5" fill="none" stroke="${pct>=1?'#d7ff3e':'#6b7280'}" stroke-width="3"
@@ -1264,6 +1267,39 @@ function renderHist(e){
   e.sets.forEach((s,i)=>{ h+=`<tr><td class="s">${i+1}</td>`+rolls.map(n=>{
     const c=s.hist[n-1]; return `<td>${hasVal(c.w)?esc(c.w)+'×'+esc(c.r):'—'}</td>`; }).join('')+'</tr>'; });
   $('histBox').innerHTML=h+'</tbody></table>';
+}
+
+/* Técnicas: se leen de la columna Notas de la fila */
+const TEC={
+  RP:['Rest pause','Haz las repeticiones marcadas, descansa 10 s y saca las que puedas con el mismo peso.','Reps extra tras la pausa','4','RP',10],
+  RPP:['Rest pause plus','Como el rest pause, repitiendo pausas de 10 s hasta sacar 1 o 2 repeticiones.','Reps de cada tramo extra','4+2+1','RPP',10],
+  DS:['Drop set','Repeticiones marcadas, baja un 30-40 % sin descanso y repite al fallo, dos veces.','Bajadas: reps y, si quieres, pesos','8/7 · 40/30','DS',0],
+  PAR:['Parciales','Al terminar: final a medio, inicio a medio, 5 s y recorrido completo al fallo.','Parciales hechas','6',null,0],
+  MINI:['Mini series','Tras la serie, la pausa indicada y las repeticiones marcadas a RIR 0.','Reps de cada mini serie','8/7',null,15],
+  EMOM:['EMOM','Una ronda al empezar cada minuto: el descanso es lo que quede del minuto.',null,null,null,0] };
+const PREF={RP:'RP',RPP:'RPP',DS:'drop',PAR:'parciales',MINI:'minis'};
+function tecnicaDe(s){
+  const t=String((s&&s.nota)||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  if(!t) return null;
+  const o={}; let m;
+  if(/rest[- ]?pause[- ]?plus|\brpp\b/.test(t)) o.t='RPP';
+  else if(/rest[- ]?pause|\brp\b/.test(t)) o.t='RP';
+  else if(/drop ?set/.test(t)) o.t='DS';
+  else if(/parciales/.test(t)) o.t='PAR';
+  else if(/\bemom\b/.test(t)) o.t='EMOM';
+  else if((m=t.match(/(\d+)\s*mini ?series? de (\d+)/))){ o.t='MINI'; o.n=+m[1]; o.reps=+m[2]; const p=t.match(/(\d+)\s*s\b[^·]*entre/); o.pausa=p?+p[1]:15; }
+  const c=t.match(/cadencia\s(\d)-(\d)/); if(c) o.cad=[c[1],c[2]];
+  return (o.t||o.cad)?o:null;
+}
+
+/* Técnicas de un ejercicio para la lista del día: nombre y en qué series («S3»), salvo que sean todas */
+function tecsEj(e){
+  const m={}, ord=[];
+  e.sets.forEach((s,i)=>{ const k=tecnicaDe(s); if(!k) return;
+    const ns=[]; if(k.t) ns.push(TEC[k.t][0]); if(k.cad) ns.push('Cadencia '+k.cad[0]+'-'+k.cad[1]);
+    ns.forEach(n=>{ if(!m[n]){ m[n]=[]; ord.push(n); } m[n].push(i+1); }); });
+  if(!ord.length) return '';
+  return '<div class="tcs">'+ord.map(n=>'<span class="tchip">'+esc(n)+(m[n].length<e.sets.length?' · S'+m[n].join(','):'')+'</span>').join('')+'</div>';
 }
 
 /* ============ AYUDAS EN LA SERIE ============ */
