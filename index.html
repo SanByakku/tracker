@@ -166,7 +166,20 @@
   .aprox .ar:first-of-type{border-top:0}
   .aprox .ar b{color:var(--txt);font-size:13.5px;white-space:nowrap}
   .aprox .ar span{text-align:right}
+  .c-ok{color:var(--ok)!important} .c-mal{color:var(--bad)!important} .c-mas{color:var(--blue)!important}
+  .c-menos{color:var(--warn)!important} .c-tec{color:#b48cff!important} .c-igual{color:var(--dim)!important}
+  .rirrow button.on.c-ok{border-color:var(--ok);background:#15321f} .rirrow button.on.c-mas{border-color:var(--blue);background:#152a3a}
+  .rirrow button.on.c-menos{border-color:var(--warn);background:#3a2a12} .rirrow button.on.c-tec{border-color:#b48cff;background:#2a2140}
   .tchip{display:inline-block;font-size:9.5px;font-weight:750;letter-spacing:.4px;padding:2px 6px;border-radius:5px;background:#2a2140;color:#b48cff;margin-left:6px}
+  .tec{background:#1d1830;border:1px solid #453a6b;border-radius:11px;padding:10px 11px;margin-bottom:9px;font-size:12px;color:var(--dim);line-height:1.45}
+  .tec b{color:#b48cff;font-size:13px;display:block;margin-bottom:3px}
+  .tec input{width:100%;margin-top:8px;background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:11px;color:var(--txt);font-size:15px}
+  .tec button{margin-top:8px;width:100%;padding:11px;border-radius:9px;background:#2a2140;border:1px solid #453a6b;color:#b48cff;font-weight:700;font-size:12.5px}
+  .sug .dir{font-style:normal;font-weight:800;font-size:10.5px;letter-spacing:.5px;margin-right:6px}
+  .sug.up .dir{color:var(--ok)} .sug.down .dir{color:var(--bad)} .sug.same .dir{color:var(--dim)}
+  .sug.down{background:#2a1512;border-color:#4a241e} .sug.down b{color:var(--bad)}
+  .ley{font-size:10.5px;color:var(--dim2);line-height:1.6;margin:6px 2px 10px}
+  .ley i{font-style:normal;font-weight:700}
   .excard .tcs{margin-top:6px;display:flex;flex-wrap:wrap;gap:4px}
   .excard .tcs .tchip{margin-left:0}
   .mini{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 9px}
@@ -409,6 +422,7 @@
   <div id="exNota"></div>
   <div class="seclab"><span>Series</span><span id="exProg"></span></div>
   <div id="sets"></div>
+  <div class="ley"><i class="c-ok">Verde</i> cumplido o más carga · <i class="c-mas">Azul</i> te sobraba margen · <i class="c-mal">Rojo</i> por debajo, o te pasaste saltándote el RIR · <i class="c-menos">Naranja</i> más justo de RIR · <i class="c-tec">Morado</i> técnica</div>
   <div id="activeHost"></div>
   <div class="card evo hide" id="evoCard">
     <div class="lab">Evolución · 1RM estimado por ROLL</div>
@@ -454,11 +468,11 @@
   <div class="bar"><i id="rBar"></i></div>
 </div>
 
-<script type="application/json" id="cambiosData">[{"v": "v1.1", "f": "25/11/2026", "c": ["En la lista del día, cada ejercicio muestra sus técnicas (rest pause, drop set, EMOM, mini series, parciales, cadencia) y en qué series.", "Pantalla de progreso y récords por ROLL, con evolución y gráfica de cada ejercicio.", "Comparar dos ROLL de un ejercicio, serie a serie.", "La sugerencia de carga propone peso y repeticiones.", "Series de aproximación antes de la primera serie.", "Calculadora de discos (20, 10, 5, 2,5 y 1,25 kg, barra de 20) y saltos de 2,5 kg con mancuernas.", "Aviso de fin de descanso con preaviso a 10 segundos.", "Botones grandes en la serie y «igual que la serie anterior».", "Lista de la compra: compra semanal y pedido de suplementación para 15 días, 1 o 2 meses.", "Total del día de la dieta con los macros en tres casillas.", "Aviso de versión nueva con botón de actualizar y esta lista de novedades.", "Cabecera de la pantalla inicial más limpia."]}, {"v": "v1.0", "f": "24/11/2026", "c": ["App instalable, con copia en el móvil y sincronización con la hoja.", "Entrada con Google.", "Dieta con alternativas por comida y día de entreno o descanso.", "Calorías y macros por línea, por comida y del día, con fruta y verdura.", "Tabla de equivalencias de hidratos y suplementación destacada.", "El cardio aparece al final de cada día de entrenamiento."]}]</script>
+<script type="application/json" id="cambiosData">[{"v": "v1.1", "f": "25/11/2026", "c": ["En la lista del día, cada ejercicio muestra sus técnicas (rest pause, drop set, EMOM, mini series, parciales, cadencia) y en qué series.", "Código de colores en peso, repeticiones y RIR según el objetivo y el ROLL anterior.", "Técnicas (rest pause, drop set, mini series, parciales, EMOM, cadencia) con su explicación, su registro y su cuenta atrás.", "La sugerencia indica si toca subir, mantener o bajar, y usa la serie anterior si no hay ROLL previo.", "Pantalla de progreso y récords por ROLL, con evolución y gráfica de cada ejercicio.", "Comparar dos ROLL de un ejercicio, serie a serie.", "La sugerencia de carga propone peso y repeticiones.", "Series de aproximación antes de la primera serie.", "Calculadora de discos (20, 10, 5, 2,5 y 1,25 kg, barra de 20) y saltos de 2,5 kg con mancuernas.", "Aviso de fin de descanso con preaviso a 10 segundos.", "Botones grandes en la serie y «igual que la serie anterior».", "Lista de la compra: compra semanal y pedido de suplementación para 15 días, 1 o 2 meses.", "Total del día de la dieta con los macros en tres casillas.", "Aviso de versión nueva con botón de actualizar y esta lista de novedades.", "Cabecera de la pantalla inicial más limpia."]}, {"v": "v1.0", "f": "24/11/2026", "c": ["App instalable, con copia en el móvil y sincronización con la hoja.", "Entrada con Google.", "Dieta con alternativas por comida y día de entreno o descanso.", "Calorías y macros por línea, por comida y del día, con fruta y verdura.", "Tabla de equivalencias de hidratos y suplementación destacada.", "El cardio aparece al final de cada día de entrenamiento."]}]</script>
 <script>
 /* ============ PERFILES ============ */
 const VERSION='v1.1';
-const BUILD=2;   // sube en cada publicación dentro de la misma versión: es lo que detecta el aviso de actualización
+const BUILD=4;   // sube en cada publicación dentro de la misma versión: es lo que detecta el aviso de actualización
 
 /* Diagnóstico: cualquier fallo silencioso se pinta en pantalla. No depende
    de ningún elemento del maquetado, se crea el suyo. */
@@ -1111,7 +1125,12 @@ function mkDraft(e,idx){
   if(!hasVal(w)) w=0;
   const wt0=String(w).trim().replace(/\s/g,'');
   if(esNum(wt0)) w=parseFloat(wt0.replace(',','.'));
-  const sug=sugerencia(s,e);
+  let sug=sugerencia(s,e);
+  if(!sug&&!(s.prev&&hasVal(s.prev.w))){
+    for(let k=idx-1;k>=0;k--){ const c=e.sets[k].cur, wk=numDe(c.w);
+      if(wk!==null&&hasVal(c.r)){ const tr=parseInt(String(s.reps).trim(),10);
+        sug={ w:wk, r:isNaN(tr)?c.r:tr, prev:wk, prevR:c.r, motivo:'como la serie '+(k+1)+' de hoy', dir:'same', hoy:true }; break; } }
+  }
   if(sug) w=sug.w;
   let r=s.prev&&hasVal(s.prev.r)?String(s.prev.r):s.reps;
   if(!hasVal(r)) r='';
@@ -1143,12 +1162,13 @@ function renderEx(){
     const logged=hasVal(s.cur.w)||hasVal(s.cur.r);
     const prev=s.prev&&hasVal(s.prev.w)
       ? `<em>ROLL ${S.roll-1}</em> ${esc(s.prev.w)}×${esc(s.prev.r)}${hasVal(s.prev.rir)?' @'+esc(s.prev.rir):''}` : '';
-    const tgt=`obj. ${esc(s.reps)}${hasVal(s.rir)?' @RIR '+esc(s.rir):''}`;
+    const tk=tecnicaDe(s), cl=colores(s,s.cur);
+    const tgt=`obj. ${esc(s.reps)}${hasVal(s.rir)?' @RIR '+esc(s.rir):''}`+(tk&&tk.t?'<span class="tchip">'+esc(TEC[tk.t][0])+'</span>':'');
     if(logged) return `<div class="set logged tap" data-edit="${i}"><div class="n">${i+1}</div>
       <div class="tgt">${tgt}${prev?'<br>'+prev:''}
       ${hasVal(s.cur.aj)?'<div class="aj">'+esc(s.cur.aj)+'</div>':''}</div>
-      <div class="val">${esc(pesoTxt(s.cur.w))} <small>kg</small> × ${esc(s.cur.r)}
-      ${hasVal(s.cur.rir)?'<small>@'+esc(s.cur.rir)+'</small>':''}${devTags(s,s.cur)}${recordDe(e,s)?'<span class="dev pr">RÉCORD</span>':''}
+      <div class="val"><span class="${cl.w}">${esc(pesoTxt(s.cur.w))}</span> <small>kg</small> × <span class="${cl.r}">${esc(s.cur.r)}</span>
+      ${hasVal(s.cur.rir)?'<small class="'+cl.rir+'">@'+esc(s.cur.rir)+'</small>':''}${recordDe(e,s)?'<span class="dev pr">RÉCORD</span>':''}
       <div class="edit">editar</div></div></div>`;
     return `<div class="set tap" data-edit="${i}"><div class="n">${i+1}</div>
       <div class="tgt">${tgt}${prev?'<br>'+prev:''}</div>
@@ -1190,10 +1210,11 @@ function renderEx(){
     </div>
     <input class="wtxt" id="iWT" type="text" inputmode="text" autocapitalize="none" autocorrect="off"
       spellcheck="false" placeholder="o peso en texto — goma roja, peso corporal…" value="${esc(wTxt)}">
-    ${draft.sug&&!editando ? `<div class="sug">
-       Sugerido <b>${numfmt(draft.sug.w)} kg × ${draft.sug.r}</b> · ${esc(draft.sug.motivo)}
-       <button data-prev="${draft.sug.prev}" data-prevr="${draft.sug.prevR}">repetir ${numfmt(draft.sug.prev)} kg × ${draft.sug.prevR} del ROLL ${S.roll-1}</button>
+    ${draft.sug&&!editando ? `<div class="sug ${draft.sug.dir}">
+       <i class="dir">${draft.sug.dir==='up'?'▲ SUBE':(draft.sug.dir==='down'?'▼ BAJA':'● MANTIENE')}</i>Sugerido <b>${numfmt(draft.sug.w)} kg × ${esc(draft.sug.r)}</b> · ${esc(draft.sug.motivo)}
+       ${draft.sug.hoy?'':`<button data-prev="${draft.sug.prev}" data-prevr="${draft.sug.prevR}">repetir ${numfmt(draft.sug.prev)} kg × ${draft.sug.prevR} del ROLL ${S.roll-1}</button>`}
      </div>` : ''}
+    ${tecHtml(s,editando)}
     ${miniBotones(e,idx,editando)}
     <div id="discosBox">${discosHtml(draft.w)}</div>
     <div class="steps">${[1.25,2.5,5,10].map(v=>`<button data-st="${v}" class="${wStep===v?'on':''}">±${numfmt(v)}</button>`).join('')}</div>
@@ -1206,7 +1227,7 @@ function renderEx(){
       ? `<button class="logbtn" id="bLog">Guardar cambios</button>
          <button class="logbtn sec" id="bCancel">Cancelar</button>
          <button class="logbtn danger" id="bClear">Borrar esta serie</button>`
-      : `<button class="logbtn" id="bLog">Registrar y descansar ${s.rest}s</button>
+      : `<button class="logbtn" id="bLog">${(tecnicaDe(s)||{}).t==='EMOM'?'Registrar · siguiente minuto':'Registrar y descansar '+s.rest+'s'}</button>
          <button class="logbtn sec" id="bLogNo">Registrar sin temporizador</button>`}
   </div>`;
   [...document.querySelectorAll('.ctl button')].forEach(b=>b.onclick=()=>{
@@ -1257,6 +1278,7 @@ function readInputs(){
   }
   if(r) draft.r=r.value.trim();
   if(a) draft.aj=a.value.trim();
+  const tx=$('iTec'); if(tx) draft.tec=tx.value.trim();
 }
 function renderHist(e){
   const L=S.L, rolls=[];
@@ -1269,6 +1291,36 @@ function renderHist(e){
   $('histBox').innerHTML=h+'</tbody></table>';
 }
 
+/* ============ COLORES Y TÉCNICAS ============ */
+const numRir=v=>{ const n=parseFloat(String(v).replace(',','.')); return isNaN(n)?null:n; };
+const esTecRir=v=>/^(fallo|rp|rpp|ds|drop)/i.test(String(v==null?'':v).trim());
+/* Colores de una serie (v) frente a su objetivo (s) y a la misma serie del ROLL anterior.
+   Reps: cumplido verde; por debajo rojo; por encima azul si el RIR se respetó y rojo si no.
+   RIR: igual verde; más margen azul; menos naranja; técnica morado.
+   Peso: más que el ROLL anterior verde; menos rojo; igual gris. */
+function colores(s,v){
+  const o={w:'',r:'',rir:''};
+  const tr=/^\d+$/.test(String(s.reps).trim())?parseInt(s.reps,10):null, rr=/^\d+$/.test(String(v.r).trim())?parseInt(v.r,10):null;
+  const ti=numRir(s.rir), ri=numRir(v.rir), tec=esTecRir(v.rir);
+  if(tr!==null&&rr!==null){
+    if(rr<tr) o.r='c-mal';
+    else if(rr===tr) o.r='c-ok';
+    else o.r=(!tec&&ti!==null&&ri!==null&&ri<ti)?'c-mal':'c-mas';
+  }
+  if(tec) o.rir='c-tec';
+  else if(ti!==null&&ri!==null) o.rir=ri===ti?'c-ok':(ri>ti?'c-mas':'c-menos');
+  const pw=s.prev?numDe(s.prev.w):null, cw=numDe(v.w);
+  if(pw!==null&&cw!==null) o.w=cw>pw?'c-ok':(cw<pw?'c-mal':'c-igual');
+  return o;
+}
+function pintaColores(){
+  if(!S||cur===null||!draft) return;
+  const e=S.ex[cur], idx=(editIdx!==null?editIdx:nextSet(e)); if(idx<0) return;
+  const c=colores(e.sets[idx],draft), w=$('iW'), r=$('iR');
+  if(w) w.className=c.w; if(r) r.className=c.r;
+  const b=document.querySelector('.rirrow button.on');
+  if(b){ b.classList.remove('c-ok','c-mas','c-menos','c-tec'); if(c.rir) b.classList.add(c.rir); }
+}
 /* Técnicas: se leen de la columna Notas de la fila */
 const TEC={
   RP:['Rest pause','Haz las repeticiones marcadas, descansa 10 s y saca las que puedas con el mismo peso.','Reps extra tras la pausa','4','RP',10],
@@ -1290,6 +1342,22 @@ function tecnicaDe(s){
   else if((m=t.match(/(\d+)\s*mini ?series? de (\d+)/))){ o.t='MINI'; o.n=+m[1]; o.reps=+m[2]; const p=t.match(/(\d+)\s*s\b[^·]*entre/); o.pausa=p?+p[1]:15; }
   const c=t.match(/cadencia\s(\d)-(\d)/); if(c) o.cad=[c[1],c[2]];
   return (o.t||o.cad)?o:null;
+}
+function tecHtml(s,editando){
+  const k=tecnicaDe(s); if(!k) return '';
+  let h='';
+  if(k.t){ const d=TEC[k.t], seg=k.t==='MINI'?k.pausa:d[5];
+    h+='<div class="tec"><b>'+esc(d[0])+(k.t==='MINI'?' · '+k.n+' de '+k.reps:'')+'</b>'+esc(d[1])
+      +(d[2]&&!editando?'<input id="iTec" inputmode="text" autocapitalize="none" autocorrect="off" placeholder="'+esc(d[2])+' — p. ej. '+esc(k.t==='MINI'?Array(k.n).fill(k.reps).join('/'):d[3])+'" value="'+esc((draft&&draft.tec)||'')+'">':'')
+      +(seg&&!editando?'<button id="bPausa" data-seg="'+seg+'">Cuenta atrás de '+seg+' s</button>':'')+'</div>'; }
+  if(k.cad) h+='<div class="tec"><b>Cadencia '+k.cad[0]+'-'+k.cad[1]+'</b>'+k.cad[0]+' s bajando y '+k.cad[1]+' s subiendo.</div>';
+  return h;
+}
+function pausaCorta(seg){
+  audioListo();
+  tTotal=seg; tEnd=Date.now()+seg*1000; tOver=false; tPre=true;
+  try{ localStorage.removeItem(RESTK); }catch(e){}
+  pintaRest('Pausa de '+seg+' s','Sigue con el mismo peso');
 }
 
 /* Técnicas de un ejercicio para la lista del día: nombre y en qué series («S3»), salvo que sean todas */
@@ -1328,7 +1396,8 @@ function discosHtml(wv){
   return '<div class="discos">'+txt+'<div class="bs">'+BARRAS.map(b=>'<button data-barra="'+b+'" class="'+(b===c.barra?'on':'')+'">barra '+numfmt(b)+'</button>').join('')+'</div></div>';
 }
 function pintaDiscos(){ const b=$('discosBox'); if(!b||!draft) return; b.innerHTML=discosHtml(draft.w); cableaDiscos();
-  const a=$('aproxBox'); if(a&&$('bAprox')) a.innerHTML=aproxHtml(draft.w); }
+  const a=$('aproxBox'); if(a&&$('bAprox')) a.innerHTML=aproxHtml(draft.w);
+  pintaColores(); }
 function cableaDiscos(){ [...document.querySelectorAll('[data-barra]')].forEach(b=>b.onclick=()=>{
   const c=discCfg(); c.barra=parseFloat(b.dataset.barra); ponDiscCfg(c); readInputs(); pintaDiscos(); }); }
 /* Botones pequeños bajo la sugerencia: repetir la serie anterior de hoy y abrir los discos */
@@ -1342,6 +1411,9 @@ function miniBotones(e,idx,editando){
     +'<div id="aproxBox">'+(idx===0&&!editando?aproxHtml(draft.w):'')+'</div>';
 }
 function cableaMini(e,idx){
+  pintaColores();
+  const bp=$('bPausa'); if(bp) bp.onclick=()=>{ readInputs(); pausaCorta(parseInt(bp.dataset.seg,10)||10); };
+  const it=$('iTec'); if(it) it.oninput=()=>{ draft.tec=it.value.trim(); };
   const bi=$('bIgual');
   if(bi) bi.onclick=()=>{
     for(let k=idx-1;k>=0;k--){ const c=e.sets[k].cur; if(hasVal(c.w)&&hasVal(c.r)){
@@ -1559,6 +1631,13 @@ function doLog(withTimer){
   const s=e.sets[idx];
   const av=avisos(e,idx);
   if(av&&av!==draft.avisoOk){ draft.aviso=av; draft.avisoT=withTimer; renderEx(); return; }
+  // Técnica: el desglose va a AJUSTE y la técnica a RIR; las reps principales se quedan en REPS
+  const tc=tecnicaDe(s);
+  if(tc&&tc.t&&PREF[tc.t]&&draft.tec){
+    const pre=PREF[tc.t]+' '+((tc.t==='RP'||tc.t==='RPP')?String(draft.r)+'+':'')+draft.tec;
+    draft.aj=[pre,draft.aj].filter(Boolean).join(' · ');
+    if(TEC[tc.t][4]&&L.f.rir!==null) draft.rir=TEC[tc.t][4];
+  }
   const vals=new Array(L.stride).fill(null);
   vals[L.f.w]=typeof draft.w==='number'?draft.w:String(draft.w);
   vals[L.f.r]=/^\d+$/.test(String(draft.r).trim())?parseInt(draft.r,10):String(draft.r);
@@ -1617,7 +1696,8 @@ setInterval(()=>{ if(queue().length&&!flushing) flush(); },20000);
 
 /* ============ TEMPORIZADOR ============ */
 function startRest(e,s,idx){
-  tTotal=s.rest||120; tEnd=Date.now()+tTotal*1000; tOver=false; tPre=false;
+  const tcR=tecnicaDe(s);
+  tTotal=(tcR&&tcR.t==='EMOM')?60:(s.rest||120); tEnd=Date.now()+tTotal*1000; tOver=false; tPre=false;
   const n=idx+2, rec=recordDe(e,s);
   const last=`Registrado ${pesoTxt(s.cur.w)} kg × ${s.cur.r}`+(rec?' · récord de '+rec:'');
   const next=n<=e.sets.length
