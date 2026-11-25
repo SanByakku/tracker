@@ -441,7 +441,7 @@
 
 <script>
 /* ============ PERFILES ============ */
-const VERSION='v0.11.2 beta';
+const VERSION='v0.12 beta';
 
 /* Diagnóstico: cualquier fallo silencioso se pinta en pantalla. No depende
    de ningún elemento del maquetado, se crea el suyo. */
@@ -1871,40 +1871,47 @@ function listaCompra(nE){
       });
     });
   });
-  const fmt=x=>{
-    const n=v=>(Math.round(v*10)/10).toLocaleString('es-ES');
-    if(x.u==='g') return x.q>=1000?n(x.q/1000)+' kg':n(x.q)+' g';
-    if(x.u==='ml') return x.q>=1000?n(x.q/1000)+' l':n(x.q)+' ml';
-    if(x.u==='mg') return x.q>=1000?n(x.q/1000)+' g':n(x.q)+' mg';
-    if(x.u==='ud') return n(x.q)+' ud';
-    if(x.u==='rac') return n(x.q)+(x.q===1?' ración':' raciones');
-    return n(x.q)+' '+x.u.toUpperCase();
-  };
-  const may=t=>t.charAt(0).toUpperCase()+t.slice(1);
-  return Object.keys(acc).map(k=>acc[k]).sort((a,b)=>a.nom.localeCompare(b.nom,'es')).map(x=>({nom:may(x.nom),cant:fmt(x),sup:x.sup}));
+  return Object.keys(acc).map(k=>acc[k]).sort((a,b)=>a.nom.localeCompare(b.nom,'es'));
 }
+/* Cantidad legible; `fac` escala la semana (30/7 para el mes) */
+function cantCompra(x,fac){
+  const q=x.q*fac, n=v=>(v>=100?Math.round(v):Math.round(v*10)/10).toLocaleString('es-ES');   // sin decimales a partir de 100
+  if(x.u==='g') return q>=1000?n(q/1000)+' kg':n(q)+' g';
+  if(x.u==='ml') return q>=1000?n(q/1000)+' l':n(q)+' ml';
+  if(x.u==='mg') return q>=1000?n(q/1000)+' g':n(q)+' mg';
+  if(x.u==='ud') return Math.round(q).toLocaleString('es-ES')+' ud';
+  if(x.u==='rac'){ const r=Math.round(q); return r+(r===1?' ración':' raciones'); }
+  return Math.round(q).toLocaleString('es-ES')+' '+x.u.toUpperCase();
+}
+const nomCompra=t=>t.charAt(0).toUpperCase()+t.slice(1);
 function renderCompra(){
   const box=$('compraBox'); if(!box) return;
   if(!dietRows||!dietRows.length){ box.innerHTML=''; return; }
-  if(!compraOn){ box.innerHTML='<button class="bigbtn" id="bCompra" style="margin-top:10px">Lista de la compra de la semana</button>';
+  if(!compraOn){ box.innerHTML='<button class="bigbtn" id="bCompra" style="margin-top:10px">Lista de la compra</button>';
     $('bCompra').onclick=()=>{ compraOn=true; renderCompra(); }; return; }
-  const nE=compraDias(), l=listaCompra(nE), com=l.filter(x=>!x.sup), sup=l.filter(x=>x.sup);
+  const nE=compraDias(), l=listaCompra(nE), MES=30/7;
+  const com=l.filter(x=>!x.sup).map(x=>({nom:nomCompra(x.nom),cant:cantCompra(x,1)}));
+  const sup=l.filter(x=>x.sup).map(x=>({nom:nomCompra(x.nom),cant:cantCompra(x,MES)}));
   const fila=x=>'<div class="ci"><span>'+esc(x.nom)+'</span><b>'+esc(x.cant)+'</b></div>';
-  box.innerHTML='<div class="card compra"><div class="lab">Lista de la compra · 7 días</div>'
-    +'<div class="cd"><span>Días de entreno</span><button id="cMenos">−</button><b>'+nE+'</b><button id="cMas">+</button><span>· descanso '+(7-nE)+'</span></div>'
-    +(com.length?'<div class="ch">Comida</div>'+com.map(fila).join(''):'<div class="msg">No encuentro cantidades en la dieta.</div>')
-    +(sup.length?'<div class="ch">Suplementación</div>'+sup.map(fila).join(''):'')
-    +'<div class="note">Con las alternativas que tienes elegidas en cada tipo de día. Pesos en crudo, sin margen: redondea al alza al comprar.</div>'
-    +'<div class="mini" style="margin:10px 0 0"><button id="cCopia">Copiar lista</button><button id="cCierra">Cerrar</button></div></div>';
+  const reparto=nE+' de entreno y '+(7-nE)+' de descanso por semana';
+  box.innerHTML='<div class="card compra"><div class="lab">Lista de la compra</div>'
+    +'<div class="cd" style="margin:0"><span>Días de entreno por semana</span><button id="cMenos">−</button><b>'+nE+'</b><button id="cMas">+</button></div>'
+    +'<div class="mini" style="margin:10px 0 0"><button id="cCierra">Cerrar la lista</button></div></div>'
+    +'<div class="card compra" id="cSup"><div class="lab">Suplementación mensual · 30 días</div>'
+    +(sup.length?sup.map(fila).join(''):'<div class="msg" style="margin:0">La dieta no marca suplementos.</div>')
+    +(sup.length?'<div class="note">La semana multiplicada por 30/7, con '+reparto+'.</div><div class="mini" style="margin:10px 0 0"><button id="cCopiaS">Copiar suplementación</button></div>':'')+'</div>'
+    +'<div class="card compra" id="cSem"><div class="lab">Compra semanal · 7 días</div>'
+    +(com.length?com.map(fila).join(''):'<div class="msg" style="margin:0">No encuentro cantidades en la dieta.</div>')
+    +(com.length?'<div class="note">Con las alternativas que tienes elegidas en cada tipo de día. Pesos en crudo, sin margen: redondea al alza al comprar.</div><div class="mini" style="margin:10px 0 0"><button id="cCopia">Copiar compra</button></div>':'')+'</div>';
   const pon=n=>{ try{ localStorage.setItem(COMPRAK,String(Math.max(0,Math.min(7,n)))); }catch(e){} renderCompra(); };
   $('cMenos').onclick=()=>pon(nE-1); $('cMas').onclick=()=>pon(nE+1);
   $('cCierra').onclick=()=>{ compraOn=false; renderCompra(); };
-  $('cCopia').onclick=()=>{
-    const txt='Lista de la compra (7 días: '+nE+' de entreno, '+(7-nE)+' de descanso)\n'
-      +com.map(x=>'- '+x.nom+': '+x.cant).join('\n')+(sup.length?'\n\nSuplementación\n'+sup.map(x=>'- '+x.nom+': '+x.cant).join('\n'):'');
-    const ok=()=>{ $('cCopia').textContent='Copiada'; }, mal=()=>{ $('cCopia').textContent='No se pudo copiar'; };
-    try{ navigator.clipboard.writeText(txt).then(ok,mal); }catch(e){ mal(); }
-  };
+  const copia=(id,titulo,lista)=>{ const b=$(id); if(!b) return; b.onclick=()=>{
+    const txt=titulo+'\n'+lista.map(x=>'- '+x.nom+': '+x.cant).join('\n');
+    const ok=()=>{ b.textContent='Copiada'; }, mal=()=>{ b.textContent='No se pudo copiar'; };
+    try{ navigator.clipboard.writeText(txt).then(ok,mal); }catch(e){ mal(); } }; };
+  copia('cCopia','Compra semanal ('+reparto+')',com);
+  copia('cCopiaS','Suplementación mensual (30 días, '+reparto+')',sup);
 }
 function renderDieta(){
   renderCompra();
