@@ -261,6 +261,9 @@
   .gym{padding:12px 14px}
   .gym .g2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
   .gym .g2 button{min-height:46px;border-radius:12px;border:1px solid #2a2f3a;background:#1c2029;color:var(--tx,#e8eaf0);font-size:15px;font-weight:600}
+  .gym .g2.alt{margin-top:8px}
+  .gym .g2.alt button{min-height:42px;font-size:14px}
+  .gym .g2 button.ab{border-color:var(--acc)}
   .gym .g2 button.on{background:#3a4a12;border-color:var(--acc);color:var(--acc)}
   .gym input{width:100%;margin-top:8px;min-height:44px;border-radius:10px;border:1px solid #2a2f3a;background:#12151b;color:inherit;font-size:16px;padding:0 12px;box-sizing:border-box}
   .gym .gn{font-size:12px;color:var(--mut);margin-top:8px;line-height:1.35}
@@ -270,12 +273,13 @@
   .toca .t1 small{font-size:14px;font-weight:600;color:var(--mut);margin-left:6px}
   .toca .av{font-size:13px;line-height:1.35;margin:0 0 8px;padding:8px 10px;border-radius:10px;background:rgba(255,160,60,.12);color:#ffb066}
   .toca .de{font-size:13px;color:var(--mut);margin:0 0 8px}
-  .toca .cic{display:flex;flex-wrap:wrap;gap:5px;margin:0 0 10px}
-  .toca .cic span{font-size:11px;padding:4px 7px;border-radius:8px;border:1px solid #2a2f3a;color:var(--mut);white-space:nowrap}
+  .toca .cic{display:flex;flex-direction:column;gap:6px;margin:0 0 10px}
+  .toca .cic .cf{display:flex;flex-wrap:nowrap;gap:3px;align-items:center}
+  .toca .cic span{font-size:10.5px;padding:4px 5px;border-radius:8px;border:1px solid #2a2f3a;color:var(--mut);white-space:nowrap}
   .toca .cic .ok{color:#8fd694;border-color:#2f5a36}
   .toca .cic .now{color:#10140a;background:var(--acc);border-color:var(--acc);font-weight:700}
   .toca .cic .falta{color:#ffb066;border-color:#7a4a1c}
-  .toca .cic .des{border-style:dashed;opacity:.75}
+  .toca .cic .des{border-style:dashed;opacity:.75;margin-left:auto}
   .pick .hoy{position:absolute;top:-7px;right:-4px;background:var(--acc);color:#10140a;
     font-size:8.5px;font-weight:800;padding:2px 6px;border-radius:999px;letter-spacing:.3px}
   .sug{background:#1a2410;border:1px solid #3c4f1c;border-radius:11px;padding:9px 11px;
@@ -492,7 +496,7 @@
 <script>
 /* ============ PERFILES ============ */
 const VERSION='v1.1 beta';
-const BUILD=7;   // sube en cada publicación dentro de la misma versión: es lo que detecta el aviso de actualización
+const BUILD=8;   // sube en cada publicación dentro de la misma versión: es lo que detecta el aviso de actualización
 
 /* Diagnóstico: cualquier fallo silencioso se pinta en pantalla. No depende
    de ningún elemento del maquetado, se crea el suyo. */
@@ -963,6 +967,7 @@ function fijaPrev(X){
     }
   }));
 }
+let gymAbierto=false;
 function pintaGym(){
   const c=$('gymBox'); if(!c||!S) return;
   const L=gymLista();
@@ -976,14 +981,17 @@ function pintaGym(){
     $('gHab').onclick=()=>ponGym('');
     $('gOtro').onclick=()=>{ if(!S.gym) ponGym(GYMDEF); };
   } else {
-    const en=L.findIndex(x=>gymIgual(x,S.gym)), otro=en<0;
+    const en=L.findIndex(x=>gymIgual(x,S.gym)), otro=en!==0, abre=otro||gymAbierto;
     c.innerHTML='<div class="lab">Gimnasio de hoy</div><div class="g2">'
-      +L.map((x,i)=>'<button data-g="'+i+'" class="'+(i===en?'on':'')+'">'+esc(x)+'</button>').join('')
-      +'<button id="gOtro" class="'+(otro?'on':'')+'">Otro</button></div>'
-      +(otro?'<input id="gNom" maxlength="24" placeholder="Nombre del gimnasio (opcional)" value="'+esc(gymIgual(S.gym,GYMDEF)?'':S.gym)+'">':'')
-      +(en!==0?'<div class="gn">La sugerencia y los colores comparan solo con sesiones hechas en este mismo gimnasio.</div>':'');
-    [...c.querySelectorAll('[data-g]')].forEach(b=>b.onclick=()=>ponGym(L[+b.dataset.g]));
-    $('gOtro').onclick=()=>{ if(!otro) ponGym(GYMDEF); };
+      +'<button id="gHab" class="'+(otro?'':'on')+'">'+esc(L[0])+'</button>'
+      +'<button id="gOtro" class="'+(otro?'on':(abre?'ab':''))+'">Otro</button></div>'
+      +(abre?'<div class="g2 alt">'+L.slice(1).map((x,i)=>'<button data-g="'+(i+1)+'" class="'+(i+1===en?'on':'')+'">'+esc(x)+'</button>').join('')+'</div>'
+            +'<input id="gNom" maxlength="24" placeholder="Otro: escribe el nombre" value="'+esc(en<0&&!gymIgual(S.gym,GYMDEF)?S.gym:'')+'">':'')
+      +(otro?'<div class="gn">La sugerencia y los colores comparan solo con sesiones hechas en este mismo gimnasio.</div>'
+            :(abre?'<div class="gn">Elige en cuál entrenas hoy.</div>':''));
+    $('gHab').onclick=()=>{ gymAbierto=false; ponGym(L[0]); };
+    $('gOtro').onclick=()=>{ if(otro) return; gymAbierto=!gymAbierto; pintaGym(); };
+    [...c.querySelectorAll('[data-g]')].forEach(b=>b.onclick=()=>{ gymAbierto=false; ponGym(L[+b.dataset.g]); });
   }
   if($('gNom')) $('gNom').onchange=()=>ponGym(String($('gNom').value).replace(/[·|]/g,' ').replace(/\s+/g,' ').trim().slice(0,24)||GYMDEF);
 }
@@ -1063,7 +1071,7 @@ function goSess(){
   $('ttl').textContent=S.banner||S.day;
   $('sub').textContent=`${P.name} · ${S.day} · ROLL ${S.roll}`;
   renderSess(); window.scrollTo(0,0);
-  pintaGym();
+  gymAbierto=false; pintaGym();
   pintaCardio();
   pideWL();
 }
@@ -1211,8 +1219,10 @@ function pintaToca(faltan,txt){
   if(t.ult) h+='<div class="ul">'+esc(t.ult)+'</div>';
   if(t.salto) h+='<div class="av">Este día quedó sin hacer en el ROLL '+t.roll+' y ya hay sesiones posteriores. Hazlo ahora para volver al orden.</div>';
   let done={}; t.linea.forEach(x=>{ done[x.n]=x.ok; });
-  h+='<div class="cic">'+t.cic.map(x=>x.rest?'<span class="des">Descanso</span>'
-      :'<span class="'+(x.n===t.day?'now':done[x.n]?'ok':'')+'">'+(done[x.n]&&x.n!==t.day?'✓ ':'')+esc(x.n)+'</span>').join('')+'</div>';
+  const filas=[[]];
+  t.cic.forEach(x=>{ filas[filas.length-1].push(x); if(x.rest) filas.push([]); });
+  h+='<div class="cic">'+filas.filter(f=>f.length).map(f=>'<div class="cf">'+f.map(x=>x.rest?'<span class="des">Descanso</span>'
+      :'<span class="'+(x.n===t.day?'now':done[x.n]?'ok':'')+'">'+(done[x.n]&&x.n!==t.day?'✓ ':'')+esc(x.n)+'</span>').join('')+'</div>').join('')+'</div>';
   h+='<button class="go" id="bToca">Cargar '+esc(t.day)+' · ROLL '+t.roll+'</button>';
   c.innerHTML=h; c.classList.remove('hide');
   $('bToca').onclick=()=>{ pickDay=t.di; pickRoll=t.roll; renderPick(); loadSession(false); };
