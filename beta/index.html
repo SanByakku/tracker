@@ -155,6 +155,34 @@
   .rest.over{animation:finDesc .7s ease-in-out 5;border-top-color:var(--acc)}
   .rest.over .lb b{color:var(--acc)}
   @keyframes finDesc{0%,100%{background:rgba(16,18,22,.97)}50%{background:#3d4a12}}
+  .mini{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 9px}
+  .mini button{flex:1 1 auto;padding:9px 10px;border-radius:10px;background:var(--panel);border:1px solid var(--line);
+    font-size:11.5px;font-weight:650;color:var(--dim)}
+  .mini button.on{background:var(--accd);border-color:#4e6318;color:var(--acc)}
+  .discos{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:9px 11px;margin-bottom:9px;font-size:12px;color:var(--dim);line-height:1.5}
+  .discos b{color:var(--txt);font-size:13.5px}
+  .discos .bs{display:flex;gap:5px;margin-top:7px}
+  .discos .bs button{flex:1;padding:7px 0;border-radius:8px;background:var(--panel2);border:1px solid var(--line);font-size:11px;font-weight:650;color:var(--dim)}
+  .discos .bs button.on{border-color:#4e6318;color:var(--acc);background:var(--accd)}
+  table.cmp{border-collapse:collapse;width:100%;font-size:12.5px;margin-top:8px}
+  table.cmp th,table.cmp td{padding:7px 5px;border-top:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+  table.cmp thead th{border-top:0;font-size:10.5px;color:var(--dim2);font-weight:650;letter-spacing:.5px}
+  table.cmp td:first-child,table.cmp th:first-child{text-align:left;color:var(--dim)}
+  .cmpsel{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--dim)}
+  .cmpsel select{flex:1;background:var(--panel2);color:var(--txt);border:1px solid var(--line);border-radius:9px;padding:8px 6px;font-size:13px}
+  body.grande .field .ctl button{width:46px;height:46px;font-size:24px}
+  body.grande .field .ctl input{font-size:26px}
+  body.grande .steps button{padding:11px 0;font-size:12.5px}
+  body.grande .rirrow button,body.grande .rirrow.wide button{padding:14px 2px;font-size:12.5px}
+  body.grande .logbtn{padding:20px;font-size:16px}
+  body.grande .mini button{padding:13px 10px;font-size:12.5px}
+  .compra .ci{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid var(--line);font-size:13px}
+  .compra .ci:first-of-type{border-top:0}
+  .compra .ci b{font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
+  .compra .ch{font-size:10px;color:var(--dim2);letter-spacing:.8px;text-transform:uppercase;font-weight:650;margin:12px 0 2px}
+  .compra .cd{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--dim);margin-bottom:6px}
+  .compra .cd button{width:36px;height:36px;border-radius:9px;background:var(--panel2);border:1px solid var(--line);font-size:18px}
+  .compra .cd b{color:var(--txt);font-size:15px;min-width:18px;text-align:center}
   .evo svg{display:block;width:100%;height:auto;margin-top:6px}
   .evo .ev1{font-size:12.5px;line-height:1.5;color:var(--dim)}
   .evo .ev1 b{color:var(--txt)}
@@ -366,16 +394,22 @@
     <div class="lab">Evolución · 1RM estimado por ROLL</div>
     <div id="evoBox"></div>
   </div>
+  <div class="card hide" id="cmpCard">
+    <div class="lab">Comparar dos ROLL</div>
+    <div id="cmpBox"></div>
+  </div>
   <div class="card" id="histCard">
     <div class="lab">Progresión por ROLL</div>
     <div class="hist" id="histBox"></div>
   </div>
   <button class="bigbtn" id="bNext">Siguiente ejercicio ›</button>
+  <button class="bigbtn" id="bGrande" style="margin-top:8px"></button>
 </div>
 
 <!-- DIETA -->
 <div id="vDiet" class="wrap hide">
   <div class="prof" id="dietModo" style="margin-top:14px"></div>
+  <div id="compraBox"></div>
   <div id="dietBody"></div>
 </div>
 
@@ -403,7 +437,7 @@
 
 <script>
 /* ============ PERFILES ============ */
-const VERSION='v0.10 beta';
+const VERSION='v0.11 beta';
 
 /* Diagnóstico: cualquier fallo silencioso se pinta en pantalla. No depende
    de ningún elemento del maquetado, se crea el suyo. */
@@ -958,13 +992,13 @@ function sugerencia(s){
     const motivo = dR>0
       ? '+'+dR+' reps sobre objetivo'+(dI>0?' y RIR '+dI+' de margen':'')
       : (dI>0?'objetivo cerrado con RIR '+dI+' de margen':'objetivo cerrado');
-    return { w:red(w+inc*salto), prev:w, motivo:motivo, dir:'up' };
+    return { w:red(w+inc*salto), r:tr, prev:w, prevR:pr, motivo:motivo, dir:'up' };
   }
   if(dR<=-2||dI<=-2){
-    return { w:red(Math.max(0,w-inc)), prev:w,
+    return { w:red(Math.max(0,w-inc)), r:tr, prev:w, prevR:pr,
       motivo:(dR<0?Math.abs(dR)+' reps por debajo del objetivo':'RIR por debajo del objetivo'), dir:'down' };
   }
-  return { w:w, prev:w, motivo:'a falta de cerrar el rango, misma carga', dir:'same' };
+  return { w:w, r:Math.min(tr,pr+1), prev:w, prevR:pr, motivo:'misma carga, a por '+(Math.min(tr,pr+1)>pr?'una repetición más':'cerrar el RIR'), dir:'same' };
 }
 
 /* ============ RÉCORDS Y VALIDACIÓN ============ */
@@ -1057,6 +1091,7 @@ function mkDraft(e,idx){
   if(sug) w=sug.w;
   let r=s.prev&&hasVal(s.prev.r)?String(s.prev.r):s.reps;
   if(!hasVal(r)) r='';
+  if(sug) r=String(sug.r);
   let ri=parseFloat(String(s.rir).replace(',','.'));
   const rirVal=isNaN(ri)?(S.L.f.rir!==null?s.rir:''):ri;
   return { w:w, r:r, rir:rirVal, aj:'', sug:sug };
@@ -1099,7 +1134,7 @@ function renderEx(){
     editIdx=+b.dataset.edit; draft=null; renderEx();
     const a=$('activeHost'); if(a&&a.scrollIntoView) a.scrollIntoView({block:'center',behavior:'smooth'});
   });
-  renderHist(e); renderEvo(e);
+  renderHist(e); renderEvo(e); renderCmp(e);
 
   if(idx<0){ $('activeHost').innerHTML=`<div class="set" style="justify-content:center;color:var(--dim);
     font-size:12.5px;padding:16px">Ejercicio completado en este ROLL</div>`; return; }
@@ -1131,10 +1166,12 @@ function renderEx(){
     </div>
     <input class="wtxt" id="iWT" type="text" inputmode="text" autocapitalize="none" autocorrect="off"
       spellcheck="false" placeholder="o peso en texto — goma roja, peso corporal…" value="${esc(wTxt)}">
-    ${draft.sug&&draft.sug.dir!=='same'&&!editando ? `<div class="sug">
-       Sugerido <b>${numfmt(draft.sug.w)} kg</b> · ${esc(draft.sug.motivo)}
-       <button data-prev="${draft.sug.prev}">usar ${numfmt(draft.sug.prev)} kg del ROLL ${S.roll-1}</button>
+    ${draft.sug&&!editando ? `<div class="sug">
+       Sugerido <b>${numfmt(draft.sug.w)} kg × ${draft.sug.r}</b> · ${esc(draft.sug.motivo)}
+       <button data-prev="${draft.sug.prev}" data-prevr="${draft.sug.prevR}">repetir ${numfmt(draft.sug.prev)} kg × ${draft.sug.prevR} del ROLL ${S.roll-1}</button>
      </div>` : ''}
+    ${miniBotones(e,idx,editando)}
+    <div id="discosBox">${discosHtml(draft.w)}</div>
     <div class="steps">${[1.25,2.5,5,10].map(v=>`<button data-st="${v}" class="${wStep===v?'on':''}">±${numfmt(v)}</button>`).join('')}</div>
     ${rirBlock}${ajBlock}
     ${draft.aviso
@@ -1161,12 +1198,13 @@ function renderEx(){
     if(a==='r-'&&!isNaN(r)) draft.r=String(Math.max(1,r-1));
     const wi=$('iW'), ri=$('iR');
     if(wi) wi.value=typeof draft.w==='number'?numfmt(draft.w):draft.w;
-    if(ri) ri.value=draft.r; });
+    if(ri) ri.value=draft.r; pintaDiscos(); });
   // Al tocar un campo se selecciona todo: escribir reemplaza, no concatena
   ['iW','iR','iWT'].forEach(id=>{ const el=$(id); if(!el) return;
-    el.onfocus=()=>{ try{ el.select(); }catch(e){} }; });
+    el.onfocus=()=>{ try{ el.select(); }catch(e){} }; el.oninput=()=>{ readInputs(); pintaDiscos(); }; });
   [...document.querySelectorAll('[data-prev]')].forEach(b=>b.onclick=()=>{
-    readInputs(); draft.w=parseFloat(b.dataset.prev); draft.sug=null; renderEx(); });
+    readInputs(); draft.w=parseFloat(b.dataset.prev); if(b.dataset.prevr) draft.r=String(b.dataset.prevr); draft.sug=null; renderEx(); });
+  cableaMini(e,idx);
   [...document.querySelectorAll('[data-st]')].forEach(b=>b.onclick=()=>{ readInputs(); wStep=parseFloat(b.dataset.st); renderEx(); });
   [...document.querySelectorAll('[data-rir]')].forEach(b=>b.onclick=()=>{
     readInputs(); const v=b.dataset.rir; draft.rir=/^\d+$/.test(v)?+v:v; renderEx(); });
@@ -1205,6 +1243,91 @@ function renderHist(e){
   e.sets.forEach((s,i)=>{ h+=`<tr><td class="s">${i+1}</td>`+rolls.map(n=>{
     const c=s.hist[n-1]; return `<td>${hasVal(c.w)?esc(c.w)+'×'+esc(c.r):'—'}</td>`; }).join('')+'</tr>'; });
   $('histBox').innerHTML=h+'</tbody></table>';
+}
+
+/* ============ AYUDAS EN LA SERIE ============ */
+/* Calculadora de discos: qué poner en cada lado de la barra */
+const DISCK='trackerb.discos.v1', GRANDEK='trackerb.grande.v1';
+const DISCOS=[25,20,15,10,5,2.5,1.25], BARRAS=[20,15,10,7.5];
+function discCfg(){ try{ const c=JSON.parse(localStorage.getItem(DISCK)||'{}')||{}; return {on:!!c.on,barra:BARRAS.indexOf(c.barra)>=0?c.barra:20}; }catch(e){ return {on:false,barra:20}; } }
+function ponDiscCfg(c){ try{ localStorage.setItem(DISCK,JSON.stringify(c)); }catch(e){} }
+function discosDe(w,barra){
+  let lado=Math.round((w-barra)/2*1000)/1000; if(lado<0) return null;
+  const out=[]; DISCOS.forEach(d=>{ while(lado>=d-1e-9){ out.push(d); lado=Math.round((lado-d)*1000)/1000; } });
+  return {discos:out,resto:lado};
+}
+function discosHtml(wv){
+  const c=discCfg(); if(!c.on) return '';
+  const ws=String(wv).trim().replace(/\s/g,''), w=typeof wv==='number'?wv:(esNum(ws)?parseFloat(ws.replace(',','.')):NaN);
+  let txt;
+  if(isNaN(w)) txt='Pon un peso en kilos para calcular los discos.';
+  else{
+    const r=discosDe(w,c.barra);
+    if(!r) txt='Con '+numfmt(w)+' kg no llega ni a la barra de '+numfmt(c.barra)+' kg.';
+    else txt='Por lado: <b>'+(r.discos.length?r.discos.map(numfmt).join(' + '):'sin discos')+'</b>'
+      +(r.resto>0?'<br>No sale exacto: sobran '+numfmt(r.resto*2)+' kg. Con estos discos quedas en '+numfmt(w-r.resto*2)+' kg.':'');
+  }
+  return '<div class="discos">'+txt+'<div class="bs">'+BARRAS.map(b=>'<button data-barra="'+b+'" class="'+(b===c.barra?'on':'')+'">barra '+numfmt(b)+'</button>').join('')+'</div></div>';
+}
+function pintaDiscos(){ const b=$('discosBox'); if(!b||!draft) return; b.innerHTML=discosHtml(draft.w); cableaDiscos(); }
+function cableaDiscos(){ [...document.querySelectorAll('[data-barra]')].forEach(b=>b.onclick=()=>{
+  const c=discCfg(); c.barra=parseFloat(b.dataset.barra); ponDiscCfg(c); readInputs(); pintaDiscos(); }); }
+/* Botones pequeños bajo la sugerencia: repetir la serie anterior de hoy y abrir los discos */
+function miniBotones(e,idx,editando){
+  let ant=null;
+  if(!editando) for(let k=idx-1;k>=0;k--){ const c=e.sets[k].cur; if(hasVal(c.w)&&hasVal(c.r)){ ant={k:k,c:c}; break; } }
+  return '<div class="mini">'
+    +(ant?'<button id="bIgual">Igual que la serie '+(ant.k+1)+' · '+esc(pesoTxt(ant.c.w))+' × '+esc(ant.c.r)+'</button>':'')
+    +'<button id="bDiscos" class="'+(discCfg().on?'on':'')+'">Discos</button></div>';
+}
+function cableaMini(e,idx){
+  const bi=$('bIgual');
+  if(bi) bi.onclick=()=>{
+    for(let k=idx-1;k>=0;k--){ const c=e.sets[k].cur; if(hasVal(c.w)&&hasVal(c.r)){
+      const wt=String(c.w).trim().replace(/\s/g,'');
+      draft.w=esNum(wt)?parseFloat(wt.replace(',','.')):c.w; draft.r=String(c.r); draft.sug=null; break; } }
+    renderEx(); };
+  const bd=$('bDiscos');
+  if(bd) bd.onclick=()=>{ readInputs(); const c=discCfg(); c.on=!c.on; ponDiscCfg(c); renderEx(); };
+  cableaDiscos();
+}
+/* Botones grandes: para manejar la serie con una mano */
+function grande(){ try{ return localStorage.getItem(GRANDEK)==='1'; }catch(e){ return false; } }
+function pintaGrande(){ const on=grande(); document.body.classList.toggle('grande',on);
+  const b=$('bGrande'); if(b) b.textContent='Botones grandes: '+(on?'sí':'no'); }
+$('bGrande').onclick=()=>{ try{ localStorage.setItem(GRANDEK,grande()?'0':'1'); }catch(e){} pintaGrande(); };
+pintaGrande();
+/* Comparar dos ROLL de un ejercicio, serie a serie */
+let cmpDe='', cmpA=null, cmpB=null;
+function renderCmp(e){
+  const L=S.L, rolls=[];
+  for(let n=1;n<=L.n;n++) if(e.sets.some(s=>hasVal(s.hist[n-1].w)||hasVal(s.hist[n-1].r))) rolls.push(n);
+  if(rolls.length<2){ $('cmpCard').classList.add('hide'); return; }
+  $('cmpCard').classList.remove('hide');
+  const k=S.pid+'|'+S.day+'|'+cur;
+  if(cmpDe!==k||rolls.indexOf(cmpA)<0||rolls.indexOf(cmpB)<0){ cmpDe=k; cmpA=rolls[rolls.length-1]; cmpB=rolls[rolls.length-2]; }
+  const sel=(id,v)=>'<select id="'+id+'">'+rolls.map(n=>'<option value="'+n+'"'+(n===v?' selected':'')+'>ROLL '+n+'</option>').join('')+'</select>';
+  let ta=0, tb=0;
+  const filas=e.sets.map((s,i)=>{
+    const a=s.hist[cmpA-1], b=s.hist[cmpB-1], va=setNum(a), vb=setNum(b);
+    const tx=c=>(hasVal(c.w)||hasVal(c.r))?esc(pesoTxt(c.w))+' × '+esc(c.r):'—';
+    let d='—', cl='flat';
+    if(va&&vb){
+      ta+=va.w*va.r; tb+=vb.w*vb.r;
+      const dw=Math.round((va.w-vb.w)*100)/100, dr=va.r-vb.r, p=[];
+      if(dw) p.push((dw>0?'+':'−')+numfmt(Math.abs(dw))+' kg');
+      if(dr) p.push((dr>0?'+':'−')+Math.abs(dr)+' rep');
+      d=p.length?p.join(' · '):'igual';
+      const x=e1rm(va.w,va.r)-e1rm(vb.w,vb.r); cl=x>0.01?'up':(x<-0.01?'down':'flat');
+    }
+    return '<tr><td>'+(i+1)+'</td><td>'+tx(a)+'</td><td>'+tx(b)+'</td><td class="'+cl+'">'+d+'</td></tr>';
+  }).join('');
+  const dt=tb>0?pct(ta,tb):null;
+  $('cmpBox').innerHTML='<div class="cmpsel">'+sel('cmpSA',cmpA)+'<span>frente a</span>'+sel('cmpSB',cmpB)+'</div>'
+    +'<table class="cmp"><thead><tr><th>Serie</th><th>ROLL '+cmpA+'</th><th>ROLL '+cmpB+'</th><th>Cambio</th></tr></thead><tbody>'+filas+'</tbody></table>'
+    +(dt!==null?'<div class="note">Tonelaje de las series hechas en los dos: <b class="'+marca(dt)+'">'+signo(dt)+'</b>. El color sigue al 1RM estimado de cada serie.</div>':'');
+  $('cmpSA').onchange=ev=>{ cmpA=+ev.target.value; renderCmp(e); };
+  $('cmpSB').onchange=ev=>{ cmpB=+ev.target.value; renderCmp(e); };
 }
 
 /* ============ PROGRESO ============ */
@@ -1568,7 +1691,8 @@ function tablaKcal(rows){
     const mc=(v.length>=4&&!isNaN(v[1])&&!isNaN(v[2])&&!isNaN(v[3]))?[v[1],v[2],v[3]]:null;   // HC, P, G
     const d3=sinTilde(r[3]||'');
     const por=/unidad/.test(d3)?'u':(/racion/.test(d3)?'r':'c');   // 'r': línea sin cantidad (p. ej. «Verdura»), cuenta una ración
-    String(r[1]||'').split(';').map(a=>sinTilde(a).trim()).filter(Boolean).forEach(a=>out.push({a:a,k:k,por:por,m:mc}));
+    const crudos=String(r[1]||'').split(';').map(a=>a.trim()).filter(Boolean);
+    crudos.forEach(a=>out.push({a:sinTilde(a),k:k,por:por,m:mc,nom:(k>0?crudos[0]:a)}));
   });
   return out.sort((x,y)=>y.a.length-x.a.length);       // el alias más largo gana
 }
@@ -1699,7 +1823,87 @@ function salDieta(){
   $('vDiet').classList.add('hide');
   if(dietVolver==='sess'&&S) goSess(); else $('bPick').click();
 }
+/* ============ LISTA DE LA COMPRA ============ */
+/* Suma lo que pide la dieta en una semana, con las alternativas que estén
+   elegidas en cada tipo de día. No guarda nada: se calcula al abrirla. */
+const COMPRAK='trackerb.compra.v1';
+let compraOn=false;
+function compraDias(){ try{ const n=parseInt(localStorage.getItem(COMPRAK),10); return (n>=0&&n<=7)?n:5; }catch(e){ return 5; } }
+function lineasDia(modo){
+  const elegido=(dietSel()[P.id])||{}, out=[];
+  (dietRows||[]).forEach(r=>{
+    const n=String(r[0]||'').trim(), t=String(r[2]||'').trim(), d=String(r[3]||'').trim().toLowerCase();
+    if(!t||n.charAt(0)==='@'||esCardio(n)||!(d===''||d===modo)) return;
+    const alt=alternativas(t);
+    if(alt){ const clave=n+'§'+d+'§'+alt.map(a=>a.e).join('/'); let i=elegido[clave]; if(!(i>=0&&i<alt.length)) i=0; out.push(alt[i].t); }
+    else out.push(t);
+  });
+  return out;
+}
+function listaCompra(nE){
+  const tabla=tablaKcal(dietRows||[]), sups=listaSup(dietRows||[]), acc={};
+  const suma=(nom,u,q,sup)=>{ const k=sinTilde(nom)+'|'+u; (acc[k]=acc[k]||{nom:nom,u:u,q:0,sup:sup}).q+=q; };
+  [['entreno',nE],['descanso',7-nE]].forEach(par=>{
+    if(!par[1]) return;
+    lineasDia(par[0]).forEach(lin=>{
+      const esS=/^Suplementaci[oó]n\s*:/i.test(lin);
+      const t=lin.replace(/^[^:\d]{1,40}:\s*(?=\d)/,'');
+      if(!/^\d/.test(t)){
+        const f0=sinTilde(t).trim(), rc=tabla.find(x=>x.por==='r'&&f0.indexOf(x.a)===0);
+        if(rc) suma(rc.nom,'rac',par[1],false);
+        return;
+      }
+      t.split(/\s+y\s+(?=\d)|,\s*(?=\d)/).forEach(seg=>{
+        const m=seg.match(/^(\d+(?:[.,]\d+)?)\s*(gramos?|g|ml|mg|mcg|iu|ui)?\b\s*(?:de\s+)?(.*)$/i);
+        if(!m) return;
+        const q=parseFloat(m[1].replace(',','.'));
+        let u=(m[2]||'').toLowerCase(); if(/^gramos?$/.test(u)) u='g'; if(u==='ui') u='iu'; if(!u) u='ud';
+        const f=sinTilde(m[3]).trim(); if(!f||/^agua\b/.test(f)) return;
+        const al=tabla.find(x=>x.por!=='r'&&f.indexOf(x.a)===0);
+        if(!al&&u==='ud'&&!/^[a-z]/.test(f)) return;
+        if(!al&&!m[2]&&!/^(huevo|multivit|pieza|capsula|comprimido|pastilla)/.test(f)) return;   // frases, no alimentos
+        let nom=al?al.nom:m[3].replace(/\(.*$/,'').replace(/\s+o\s+.*$/,'').replace(/[.\s]+$/,'').trim();
+        suma(nom,u,q*par[1],esS||esSup(seg,sups));
+      });
+    });
+  });
+  const fmt=x=>{
+    const n=v=>(Math.round(v*10)/10).toLocaleString('es-ES');
+    if(x.u==='g') return x.q>=1000?n(x.q/1000)+' kg':n(x.q)+' g';
+    if(x.u==='ml') return x.q>=1000?n(x.q/1000)+' l':n(x.q)+' ml';
+    if(x.u==='mg') return x.q>=1000?n(x.q/1000)+' g':n(x.q)+' mg';
+    if(x.u==='ud') return n(x.q)+' ud';
+    if(x.u==='rac') return n(x.q)+(x.q===1?' ración':' raciones');
+    return n(x.q)+' '+x.u.toUpperCase();
+  };
+  const may=t=>t.charAt(0).toUpperCase()+t.slice(1);
+  return Object.keys(acc).map(k=>acc[k]).sort((a,b)=>a.nom.localeCompare(b.nom,'es')).map(x=>({nom:may(x.nom),cant:fmt(x),sup:x.sup}));
+}
+function renderCompra(){
+  const box=$('compraBox'); if(!box) return;
+  if(!dietRows||!dietRows.length){ box.innerHTML=''; return; }
+  if(!compraOn){ box.innerHTML='<button class="bigbtn" id="bCompra" style="margin-top:10px">Lista de la compra de la semana</button>';
+    $('bCompra').onclick=()=>{ compraOn=true; renderCompra(); }; return; }
+  const nE=compraDias(), l=listaCompra(nE), com=l.filter(x=>!x.sup), sup=l.filter(x=>x.sup);
+  const fila=x=>'<div class="ci"><span>'+esc(x.nom)+'</span><b>'+esc(x.cant)+'</b></div>';
+  box.innerHTML='<div class="card compra"><div class="lab">Lista de la compra · 7 días</div>'
+    +'<div class="cd"><span>Días de entreno</span><button id="cMenos">−</button><b>'+nE+'</b><button id="cMas">+</button><span>· descanso '+(7-nE)+'</span></div>'
+    +(com.length?'<div class="ch">Comida</div>'+com.map(fila).join(''):'<div class="msg">No encuentro cantidades en la dieta.</div>')
+    +(sup.length?'<div class="ch">Suplementación</div>'+sup.map(fila).join(''):'')
+    +'<div class="note">Con las alternativas que tienes elegidas en cada tipo de día. Pesos en crudo, sin margen: redondea al alza al comprar.</div>'
+    +'<div class="mini" style="margin:10px 0 0"><button id="cCopia">Copiar lista</button><button id="cCierra">Cerrar</button></div></div>';
+  const pon=n=>{ try{ localStorage.setItem(COMPRAK,String(Math.max(0,Math.min(7,n)))); }catch(e){} renderCompra(); };
+  $('cMenos').onclick=()=>pon(nE-1); $('cMas').onclick=()=>pon(nE+1);
+  $('cCierra').onclick=()=>{ compraOn=false; renderCompra(); };
+  $('cCopia').onclick=()=>{
+    const txt='Lista de la compra (7 días: '+nE+' de entreno, '+(7-nE)+' de descanso)\n'
+      +com.map(x=>'- '+x.nom+': '+x.cant).join('\n')+(sup.length?'\n\nSuplementación\n'+sup.map(x=>'- '+x.nom+': '+x.cant).join('\n'):'');
+    const ok=()=>{ $('cCopia').textContent='Copiada'; }, mal=()=>{ $('cCopia').textContent='No se pudo copiar'; };
+    try{ navigator.clipboard.writeText(txt).then(ok,mal); }catch(e){ mal(); }
+  };
+}
 function renderDieta(){
+  renderCompra();
   const modo=dietModo();
   $('dietModo').innerHTML=[['entreno','Hoy entreno'],['descanso','Hoy descanso']].map(x=>
     `<button class="${modo===x[0]?'on':''}" data-m="${x[0]}">${x[1]}</button>`).join('');
@@ -1776,6 +1980,7 @@ function renderDieta(){
     <span>${modo==='entreno'?'Día de entreno':'Día de descanso'}, con lo que tienes elegido.${sinDato?' '+sinDato+(sinDato===1?' línea sin dato.':' líneas sin dato.'):''}</span></div>`:'';
   $('dietBody').innerHTML=total+tarjetas;
   [...$('dietBody').querySelectorAll('[data-ak]')].forEach(bt=>bt.onclick=()=>ponDietSel(claves[+bt.dataset.ak],+bt.dataset.ai));
+  renderCompra();
 }
 
 /* ============ COLA PENDIENTE ============ */
