@@ -260,6 +260,7 @@
   .pick{position:relative}
   .soloAncho{display:none}
   @media (min-width:900px){ .soloAncho{display:block} }
+  .soloAncho.hide{display:none}
   body.ancho{max-width:1500px}
   .gbar{display:flex;flex-wrap:wrap;gap:12px 18px;align-items:center;margin:14px 0 6px}
   .gbar .prof,.gbar .rolls{margin:0}
@@ -454,7 +455,7 @@
   <button class="go" id="bLoad">Cargar sesión</button>
   <button class="bigbtn" id="bDieta" style="margin-top:10px">Dieta</button>
   <button class="bigbtn" id="bProg">Progreso y récords</button>
-  <button class="bigbtn soloAncho" id="bGest">Gestor · vista de escritorio</button>
+  <button class="bigbtn soloAncho hide" id="bGest">Gestor · todos los usuarios</button>
   <button class="bigbtn" id="bNov">Novedades de la app</button>
   <div class="msg" id="pickMsg"></div>
   <div class="msg" id="locMsg"></div>
@@ -541,11 +542,11 @@
   <div class="bar"><i id="rBar"></i></div>
 </div>
 
-<script type="application/json" id="cambiosData">[{"v": "v1.1", "f": "25/11/2026", "c": ["Gestor para pantalla grande (solo en ordenador): la rutina de cada día con todos los ROLL en columnas y las gráficas de cada ejercicio.", "Los récords y las mejores marcas cuentan solo las sesiones del gimnasio habitual.", "Autorrellenar: copia en las series sin registrar los valores del ROLL anterior del mismo gimnasio.", "Al volver a la app se vuelve a leer la hoja, por si se ha escrito en ella a mano.", "Gimnasio de hoy: se elige entre los de tu lista u «otro». Se guarda junto a la fecha del ROLL y las comparaciones usan solo sesiones del mismo gimnasio.", "Los descansos se calculan con la fecha de cada sesión guardada en la hoja.", "La pantalla inicial indica qué día y qué ROLL toca según el orden de la hoja; si se salta un día, lo propone el primero para volver al orden.", "En la lista del día, cada ejercicio muestra sus técnicas (rest pause, drop set, EMOM, mini series, parciales, cadencia) y en qué series.", "Código de colores en peso, repeticiones y RIR según el objetivo y el ROLL anterior.", "Técnicas (rest pause, drop set, mini series, parciales, EMOM, cadencia) con su explicación, su registro y su cuenta atrás.", "La sugerencia indica si toca subir, mantener o bajar, y usa la serie anterior si no hay ROLL previo.", "Pantalla de progreso y récords por ROLL, con evolución y gráfica de cada ejercicio.", "Comparar dos ROLL de un ejercicio, serie a serie.", "La sugerencia de carga propone peso y repeticiones.", "Series de aproximación antes de la primera serie.", "Calculadora de discos (20, 10, 5, 2,5 y 1,25 kg, barra de 20) y saltos de 2,5 kg con mancuernas.", "Aviso de fin de descanso con preaviso a 10 segundos.", "Botones grandes en la serie y «igual que la serie anterior».", "Lista de la compra: compra semanal y pedido de suplementación para 15 días, 1 o 2 meses.", "Total del día de la dieta con los macros en tres casillas.", "Aviso de versión nueva con botón de actualizar y esta lista de novedades.", "Cabecera de la pantalla inicial más limpia."]}, {"v": "v1.0", "f": "24/11/2026", "c": ["App instalable, con copia en el móvil y sincronización con la hoja.", "Entrada con Google.", "Dieta con alternativas por comida y día de entreno o descanso.", "Calorías y macros por línea, por comida y del día, con fruta y verdura.", "Tabla de equivalencias de hidratos y suplementación destacada.", "El cardio aparece al final de cada día de entrenamiento."]}]</script>
+<script type="application/json" id="cambiosData">[{"v": "v1.1", "f": "25/11/2026", "c": ["Gestor (solo para quien administra, en ordenador): acceso a todos los usuarios, con la rutina de cada día en tabla y las gráficas de cada ejercicio.", "Los récords y las mejores marcas cuentan solo las sesiones del gimnasio habitual.", "Autorrellenar: copia en las series sin registrar los valores del ROLL anterior del mismo gimnasio.", "Al volver a la app se vuelve a leer la hoja, por si se ha escrito en ella a mano.", "Gimnasio de hoy: se elige entre los de tu lista u «otro». Se guarda junto a la fecha del ROLL y las comparaciones usan solo sesiones del mismo gimnasio.", "Los descansos se calculan con la fecha de cada sesión guardada en la hoja.", "La pantalla inicial indica qué día y qué ROLL toca según el orden de la hoja; si se salta un día, lo propone el primero para volver al orden.", "En la lista del día, cada ejercicio muestra sus técnicas (rest pause, drop set, EMOM, mini series, parciales, cadencia) y en qué series.", "Código de colores en peso, repeticiones y RIR según el objetivo y el ROLL anterior.", "Técnicas (rest pause, drop set, mini series, parciales, EMOM, cadencia) con su explicación, su registro y su cuenta atrás.", "La sugerencia indica si toca subir, mantener o bajar, y usa la serie anterior si no hay ROLL previo.", "Pantalla de progreso y récords por ROLL, con evolución y gráfica de cada ejercicio.", "Comparar dos ROLL de un ejercicio, serie a serie.", "La sugerencia de carga propone peso y repeticiones.", "Series de aproximación antes de la primera serie.", "Calculadora de discos (20, 10, 5, 2,5 y 1,25 kg, barra de 20) y saltos de 2,5 kg con mancuernas.", "Aviso de fin de descanso con preaviso a 10 segundos.", "Botones grandes en la serie y «igual que la serie anterior».", "Lista de la compra: compra semanal y pedido de suplementación para 15 días, 1 o 2 meses.", "Total del día de la dieta con los macros en tres casillas.", "Aviso de versión nueva con botón de actualizar y esta lista de novedades.", "Cabecera de la pantalla inicial más limpia."]}, {"v": "v1.0", "f": "24/11/2026", "c": ["App instalable, con copia en el móvil y sincronización con la hoja.", "Entrada con Google.", "Dieta con alternativas por comida y día de entreno o descanso.", "Calorías y macros por línea, por comida y del día, con fruta y verdura.", "Tabla de equivalencias de hidratos y suplementación destacada.", "El cardio aparece al final de cada día de entrenamiento."]}]</script>
 <script>
 /* ============ PERFILES ============ */
 const VERSION='v1.1 beta';
-const BUILD=11;   // sube en cada publicación dentro de la misma versión: es lo que detecta el aviso de actualización
+const BUILD=12;   // sube en cada publicación dentro de la misma versión: es lo que detecta el aviso de actualización
 
 /* Diagnóstico: cualquier fallo silencioso se pinta en pantalla. No depende
    de ningún elemento del maquetado, se crea el suyo. */
@@ -584,6 +585,17 @@ function ponPerfiles(lista){
   try{ localStorage.setItem(PERFK,JSON.stringify(PROFILES)); }catch(e){}
   P=PROFILES.find(x=>x.id===P.id)||PROFILES[0]||NADIE;
 }
+/* Gestor: quien lo es entra en la app con su perfil, como cualquiera, y además
+   tiene un botón propio desde el que llega a los perfiles de todos. */
+const GESTK='trackerb.gestor.v1';
+let ESGESTOR=false;
+try{ ESGESTOR=localStorage.getItem(GESTK)==='1'; }catch(e){}
+function ponGestor(v){
+  ESGESTOR=!!v;
+  try{ if(v) localStorage.setItem(GESTK,'1'); else{ localStorage.removeItem(GESTK); localStorage.removeItem(GESTK+'.lista'); } }catch(e){}
+  pintaBGest();
+}
+function pintaBGest(){ const b=document.getElementById('bGest'); if(b) b.classList.toggle('hide',!ESGESTOR); }
 const NODAY=/^(LEYENDA|RESUMEN|GR[ÁA]FICAS?|NOTAS|PLANTILLA)/i;
 const MESES=['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
 
@@ -614,7 +626,8 @@ const GYMK='trackerb.gym.v1', GYMDEF='otro gym';
 /* Lista de gimnasios del perfil: fila «Gimnasios» de la pestaña LEYENDA,
    separados por «·». El primero es el habitual. */
 const GYMSK='trackerb.gyms.v1';
-function gymLista(){ try{ const o=JSON.parse(localStorage.getItem(GYMSK)||'{}')||{}; return Array.isArray(o[P.id])?o[P.id]:[]; }catch(e){ return []; } }
+let gestPid='';     // dentro del gestor, el perfil que se está mirando
+function gymLista(){ try{ const o=JSON.parse(localStorage.getItem(GYMSK)||'{}')||{}, k=gestPid||P.id; return Array.isArray(o[k])?o[k]:[]; }catch(e){ return []; } }
 const gymHab=()=>gymLista()[0]||'';
 const gymNorm=x=>(String(x||'').trim()||gymHab()).toLowerCase();
 const gymIgual=(a,b)=>gymNorm(a)===gymNorm(b);
@@ -1949,34 +1962,47 @@ async function leeDiasDe(p){
   }
   return out;
 }
+let gestLista=[], gestP=null, gestLey={};
 async function goGest(){
-  const p=P; if(!p.id) return;
-  gestDe=p.id; gestDat=null;
+  if(!ESGESTOR||!P.id) return;
   ['vPick','vSess','vEx','vSum','vDiet','vProg'].forEach(v=>$(v).classList.add('hide'));
   $('vGest').classList.remove('hide'); $('back').classList.remove('hide');
   document.body.classList.add('ancho');
-  $('ttl').textContent='Gestor'; $('sub').textContent=p.name;
-  $('gProf').innerHTML=PROFILES.length>1?PROFILES.map(x=>'<button class="'+(x.id===p.id?'on':'')+'" data-p="'+x.id+'">'+esc(x.name)+'</button>').join(''):'';
-  [...$('gProf').children].forEach(b=>b.onclick=()=>gestPerfil(b.dataset.p));
-  $('gModo').innerHTML=''; $('gDias').innerHTML=''; $('gBody').innerHTML='<div class="msg">Leyendo tus días…</div>'; window.scrollTo(0,0);
+  $('ttl').textContent='Gestor'; $('sub').textContent='Todos los usuarios';
+  $('gProf').innerHTML=''; $('gModo').innerHTML=''; $('gDias').innerHTML='';
+  $('gBody').innerHTML='<div class="msg">Leyendo los usuarios…</div>'; window.scrollTo(0,0);
+  // lista completa de perfiles: de la hoja si hay red; si no, la última guardada
+  try{
+    const j=await api({action:'perfiles',todos:true});
+    if(!j.gestor){ ponGestor(false); salGest(); return; }
+    gestLista=(j.todos||[]).filter(x=>x&&x.id).map(x=>({id:String(x.id),name:String(x.name||x.id),dias:(x.dias||[]).map(String)}));
+    try{ localStorage.setItem(GESTK+'.lista',JSON.stringify(gestLista)); }catch(e){}
+  }catch(e){
+    try{ gestLista=JSON.parse(localStorage.getItem(GESTK+'.lista')||'[]')||[]; }catch(e2){ gestLista=[]; }
+  }
+  if($('vGest').classList.contains('hide')) return;
+  if(!gestLista.length){ $('gBody').innerHTML='<div class="msg">No he podido leer la lista de usuarios. Si acabas de cambiar el script, comprueba que has creado una «Nueva versión» de la implementación.</div>'; return; }
+  gestAbre((gestP&&gestLista.find(x=>x.id===gestP.id))||gestLista.find(x=>x.id===P.id)||gestLista[0]);
+}
+async function gestAbre(p){
+  gestP=p; gestPid=p.id; gestDat=null; gestDe=p.id;
+  days[p.id]=(p.dias||[]).filter(t=>t&&!NODAY.test(t));
+  $('sub').textContent=p.name;
+  $('gProf').innerHTML=gestLista.map(x=>'<button class="'+(x.id===p.id?'on':'')+'" data-p="'+esc(x.id)+'">'+esc(x.name)+'</button>').join('');
+  [...$('gProf').children].forEach(b=>b.onclick=()=>{ if(b.dataset.p!==gestPid){ gestDia=0; gestAbre(gestLista.find(x=>x.id===b.dataset.p)); } });
+  $('gModo').innerHTML=''; $('gDias').innerHTML=''; $('gBody').innerHTML='<div class="msg">Leyendo los días de '+esc(p.name)+'…</div>';
+  // su lista de gimnasios, para saber qué ROLL son del habitual
+  if(!gestLey[p.id]){
+    try{ const ley=await readDay('LEYENDA',p), gl=gymsDe(ley);
+      const g=JSON.parse(localStorage.getItem(GYMSK)||'{}')||{}; if(gl.length) g[p.id]=gl; else delete g[p.id];
+      localStorage.setItem(GYMSK,JSON.stringify(g)); gestLey[p.id]=true; }catch(e){}
+  }
   const out=await leeDiasDe(p);
   if(gestDe!==p.id||$('vGest').classList.contains('hide')) return;
   gestDat=out; if(gestDia>=out.length) gestDia=0;
-  if(toca&&toca.pid===p.id){ const i=out.findIndex(d=>d.day===toca.day); if(i>=0) gestDia=i; }
   renderGest();
 }
-function salGest(){ $('vGest').classList.add('hide'); document.body.classList.remove('ancho'); $('bPick').click(); }
-/* Cambiar de perfil dentro del gestor: se hace como en la pantalla inicial y se espera a tener sus días */
-function gestPerfil(id){
-  if(id===P.id) return;
-  const b=[...$('profPick').children].find(x=>x.dataset.p===id); if(!b) return;
-  $('gBody').innerHTML='<div class="msg">Cambiando de perfil…</div>';
-  b.click(); gestDia=0;
-  let n=0; const t=setInterval(()=>{
-    if(P.id===id&&(days[id]||[]).length){ clearInterval(t); goGest(); }
-    else if(++n>40){ clearInterval(t); $('gBody').innerHTML='<div class="msg">No he podido leer ese perfil.</div>'; }
-  },250);
-}
+function salGest(){ gestPid=''; $('vGest').classList.add('hide'); document.body.classList.remove('ancho'); $('bPick').click(); }
 function gestCel(d,e,s,n,antes){
   const c=s.hist[n-1];
   if(!c||!(hasVal(c.w)||hasVal(c.r))) return '<td class="v'+(d.fu[n]?' fu':'')+'">·</td>';
@@ -1990,7 +2016,7 @@ function gestCel(d,e,s,n,antes){
 }
 function renderGest(){
   const D=gestDat||[];
-  if(!D.length){ $('gBody').innerHTML='<div class="msg">No he podido leer ningún día.</div>'; return; }
+  if(!D.length){ $('gBody').innerHTML='<div class="msg">No he podido leer ningún día de este usuario.</div>'; return; }
   $('gModo').innerHTML=[['tabla','Tabla'],['graf','Gráficas']].map(m=>'<button class="'+(gestModo===m[0]?'on':'')+'" data-m="'+m[0]+'">'+m[1]+'</button>').join('');
   [...$('gModo').children].forEach(b=>b.onclick=()=>{ gestModo=b.dataset.m; renderGest(); });
   $('gDias').innerHTML=D.map((d,i)=>'<button class="used '+(i===gestDia?'on':'')+'" data-i="'+i+'">'+esc(d.day)+'</button>').join('');
@@ -2672,7 +2698,7 @@ $('pbDrop').onclick=dropQueue;
 /* ============ NAVEGACIÓN ============ */
 $('back').onclick=()=>{ if(!$('vDiet').classList.contains('hide')) salDieta(); else if(!$('vGest').classList.contains('hide')) salGest(); else if(!$('vProg').classList.contains('hide')) salProg(); else goSess(); };
 $('bProg').onclick=goProg;
-$('bGest').onclick=goGest;
+$('bGest').onclick=goGest; pintaBGest();
 $('bDieta').onclick=()=>goDieta('pick');
 $('bDieta2').onclick=()=>goDieta('sess');
 $('bLoad').onclick=()=>loadSession(false);
@@ -2813,6 +2839,7 @@ async function traePerfiles(){
   if(!j.profiles||!j.profiles.length||typeof j.profiles[0]!=='object')
     throw new Error('el script de la hoja es antiguo: hay que volver a implementarlo');
   ponPerfiles(j.profiles);
+  ponGestor(!!j.gestor);
   return PROFILES;
 }
 async function listSheets(){ await traePerfiles(); renderProf(); return P.dias||[]; }
