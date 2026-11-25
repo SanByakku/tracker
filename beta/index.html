@@ -546,7 +546,7 @@
 <script>
 /* ============ PERFILES ============ */
 const VERSION='v1.1 beta';
-const BUILD=13;   // sube en cada publicación dentro de la misma versión: es lo que detecta el aviso de actualización
+const BUILD=14;   // sube en cada publicación dentro de la misma versión: es lo que detecta el aviso de actualización
 
 /* Diagnóstico: cualquier fallo silencioso se pinta en pantalla. No depende
    de ningún elemento del maquetado, se crea el suyo. */
@@ -2596,7 +2596,7 @@ function renderCompra(){
 function renderDieta(){
   renderCompra();
   const modo=dietModo();
-  $('dietModo').innerHTML=[['entreno','Hoy entreno'],['descanso','Hoy descanso']].map(x=>
+  $('dietModo').innerHTML=[['entreno','Entreno'],['descanso','Rest']].map(x=>
     `<button class="${modo===x[0]?'on':''}" data-m="${x[0]}">${x[1]}</button>`).join('');
   [...$('dietModo').children].forEach(b=>b.onclick=()=>ponDietModo(b.dataset.m));
   if(dietRows===null){ $('dietBody').innerHTML='<div class="msg"><span class="spin"></span> Cargando dieta…</div>'; return; }
