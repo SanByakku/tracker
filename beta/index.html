@@ -152,6 +152,21 @@
   .rest .bar{height:3px;background:var(--line);border-radius:2px;margin-top:9px;overflow:hidden}
   .rest .bar i{display:block;height:100%;background:var(--acc);transition:width .3s linear}
   .rest.over .big{color:var(--acc)}
+  .rest.over{animation:finDesc .7s ease-in-out 5;border-top-color:var(--acc)}
+  .rest.over .lb b{color:var(--acc)}
+  @keyframes finDesc{0%,100%{background:rgba(16,18,22,.97)}50%{background:#3d4a12}}
+  .evo svg{display:block;width:100%;height:auto;margin-top:6px}
+  .evo .ev1{font-size:12.5px;line-height:1.5;color:var(--dim)}
+  .evo .ev1 b{color:var(--txt)}
+  .evo .ev1 b.up{color:var(--ok)} .evo .ev1 b.down{color:var(--bad)}
+  .pday{margin:12px 0 6px;font-size:10px;color:var(--dim2);letter-spacing:.8px;text-transform:uppercase;font-weight:650}
+  details.pdet{margin-bottom:6px}
+  details.pdet summary{cursor:pointer;list-style:none;padding:11px 12px;border-radius:11px;background:var(--panel);
+    border:1px solid var(--line);font-size:12.5px;font-weight:650;display:flex;justify-content:space-between}
+  details.pdet summary::-webkit-details-marker{display:none}
+  details.pdet summary small{color:var(--dim2);font-weight:500}
+  details.pdet[open] summary{margin-bottom:5px}
+  .nuevo{color:var(--acc);font-size:9.5px;font-weight:800;letter-spacing:.6px;margin-left:6px}
 
   .vrow{display:flex;align-items:center;gap:9px;margin-bottom:7px;font-size:12px}
   .vrow .g{width:92px;color:var(--dim);flex:0 0 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -319,6 +334,7 @@
   </div>
   <button class="go" id="bLoad">Cargar sesión</button>
   <button class="bigbtn" id="bDieta" style="margin-top:10px">Dieta</button>
+  <button class="bigbtn" id="bProg">Progreso y récords</button>
   <div class="msg" id="pickMsg"></div>
   <div class="msg" id="locMsg"></div>
 </div>
@@ -346,6 +362,10 @@
   <div class="seclab"><span>Series</span><span id="exProg"></span></div>
   <div id="sets"></div>
   <div id="activeHost"></div>
+  <div class="card evo hide" id="evoCard">
+    <div class="lab">Evolución · 1RM estimado por ROLL</div>
+    <div id="evoBox"></div>
+  </div>
   <div class="card" id="histCard">
     <div class="lab">Progresión por ROLL</div>
     <div class="hist" id="histBox"></div>
@@ -357,6 +377,12 @@
 <div id="vDiet" class="wrap hide">
   <div class="prof" id="dietModo" style="margin-top:14px"></div>
   <div id="dietBody"></div>
+</div>
+
+<!-- PROGRESO -->
+<div id="vProg" class="wrap hide">
+  <div class="card"><div class="lab">ROLL</div><div class="rolls" id="progRolls"></div></div>
+  <div id="progBody"></div>
 </div>
 
 <!-- RESUMEN -->
@@ -377,7 +403,7 @@
 
 <script>
 /* ============ PERFILES ============ */
-const VERSION='v0.9 beta';
+const VERSION='v0.10 beta';
 
 /* Diagnóstico: cualquier fallo silencioso se pinta en pantalla. No depende
    de ningún elemento del maquetado, se crea el suyo. */
@@ -431,7 +457,7 @@ const LSK='trackerb.queue.v2', SESSK='trackerb.sesion.v1', ULTK='trackerb.ultimo
 
 let P=PROFILES[0]||NADIE, S=null, cur=null, draft=null, wStep=2.5, editIdx=null;
 let pickDay=0, pickRoll=null, days={}, rollsUsed={};
-let timer=null,tLeft=0,tTotal=0,tEnd=0,tOver=false,actx=null,wl=null;
+let timer=null,tLeft=0,tTotal=0,tEnd=0,tOver=false,tPre=false,tSig='',actx=null,wl=null;
 
 /* Una promesa que no resuelve deja la app colgada: se le pone límite. */
 function conTiempo(p,ms,etiqueta){
@@ -1073,7 +1099,7 @@ function renderEx(){
     editIdx=+b.dataset.edit; draft=null; renderEx();
     const a=$('activeHost'); if(a&&a.scrollIntoView) a.scrollIntoView({block:'center',behavior:'smooth'});
   });
-  renderHist(e);
+  renderHist(e); renderEvo(e);
 
   if(idx<0){ $('activeHost').innerHTML=`<div class="set" style="justify-content:center;color:var(--dim);
     font-size:12.5px;padding:16px">Ejercicio completado en este ROLL</div>`; return; }
@@ -1181,6 +1207,145 @@ function renderHist(e){
   $('histBox').innerHTML=h+'</tbody></table>';
 }
 
+/* ============ PROGRESO ============ */
+/* Todo sale de lo que ya hay en la hoja (los ROLL de cada día). No se guarda nada nuevo. */
+const e1rm=(w,r)=>w*(1+r/30);                       // Epley
+function setNum(c){
+  if(!c) return null;
+  const w=numDe(c.w), r=parseInt(c.r);
+  return (w===null||w<=0||isNaN(r)||r<1)?null:{w:w,r:r};
+}
+/* Mejor serie del ejercicio en el ROLL n (la de mayor 1RM estimado) */
+function mejorDe(e,n){
+  let m=null;
+  e.sets.forEach(s=>{ const v=setNum(s.hist[n-1]); if(!v) return;
+    const x=e1rm(v.w,v.r); if(!m||x>m.x) m={x:x,w:v.w,r:v.r,n:n}; });
+  return m;
+}
+/* Récord de la serie s en el ROLL n frente a los ROLL anteriores (misma regla que recordDe) */
+function recEn(e,s,n){
+  const c=setNum(s.hist[n-1]); if(!c) return null;
+  let maxW=null, maxR=null;
+  e.sets.forEach(x=>x.hist.forEach(h=>{
+    if(h.n>=n) return;
+    const v=setNum(h); if(!v) return;
+    if(maxW===null||v.w>maxW) maxW=v.w;
+    if(v.w>=c.w&&(maxR===null||v.r>maxR)) maxR=v.r;
+  }));
+  if(maxW===null) return null;
+  if(c.w>maxW) return 'peso';
+  if(maxR!==null&&c.r>maxR) return 'reps';
+  return null;
+}
+function grafica(pts){
+  const W=320,H=96,px=22,py=16;
+  const xs=pts.map(p=>p.n), vs=pts.map(p=>p.x);
+  const x0=Math.min.apply(null,xs), x1=Math.max.apply(null,xs);
+  let v0=Math.min.apply(null,vs), v1=Math.max.apply(null,vs);
+  if(v1-v0<1){ v0-=1; v1+=1; }
+  const X=n=>x1===x0?W/2:px+(n-x0)/(x1-x0)*(W-2*px);
+  const Y=v=>H-py-(v-v0)/(v1-v0)*(H-2*py-8);
+  const linea=pts.map(p=>X(p.n).toFixed(1)+','+Y(p.x).toFixed(1)).join(' ');
+  return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="1RM estimado por ROLL">'
+    +'<polyline fill="none" stroke="var(--acc)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" points="'+linea+'"/>'
+    +pts.map((p,i)=>'<circle cx="'+X(p.n).toFixed(1)+'" cy="'+Y(p.x).toFixed(1)+'" r="3.2" fill="var(--acc)"/>'
+      +((i===0||i===pts.length-1||pts.length<=6)?'<text x="'+X(p.n).toFixed(1)+'" y="'+(Y(p.x)-7).toFixed(1)+'" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--txt)">'+Math.round(p.x)+'</text>':'')
+      +'<text x="'+X(p.n).toFixed(1)+'" y="'+(H-3)+'" text-anchor="middle" font-size="8.5" fill="var(--dim2)">R'+p.n+'</text>').join('')
+    +'</svg>';
+}
+function renderEvo(e){
+  const pts=[]; let best=null;
+  for(let n=1;n<=S.L.n;n++){ const m=mejorDe(e,n); if(m){ pts.push(m); if(!best||m.x>best.x) best=m; } }
+  if(!pts.length){ $('evoCard').classList.add('hide'); return; }
+  $('evoCard').classList.remove('hide');
+  const a=pts[0], z=pts[pts.length-1], d=pts.length>1?pct(z.x,a.x):null;
+  $('evoBox').innerHTML='<div class="ev1">Mejor marca: <b>'+numfmt(best.w)+' kg × '+best.r+'</b> (ROLL '+best.n+') · 1RM est. <b>'+Math.round(best.x)+' kg</b>'
+    +(d!==null?'<br>Del ROLL '+a.n+' al '+z.n+': <b class="'+marca(d)+'">'+signo(d)+'</b>':'')+'</div>'
+    +(pts.length>1?grafica(pts):'');
+}
+/* Pantalla de progreso: resumen del ROLL entero (todos los días), récords
+   conseguidos en él y mejores marcas por ejercicio. */
+let progDat=null, progRoll=null, progDe='';
+async function goProg(){
+  const p=P; if(!p.id) return;
+  progDe=p.id; progDat=null; progRoll=null;
+  ['vPick','vSess','vEx','vSum','vDiet'].forEach(v=>$(v).classList.add('hide'));
+  $('vProg').classList.remove('hide'); $('back').classList.remove('hide');
+  $('ttl').textContent='Progreso'; $('sub').textContent=p.name;
+  $('progRolls').innerHTML=''; $('progBody').innerHTML='<div class="msg">Leyendo tus días…</div>'; window.scrollTo(0,0);
+  const out=[], ds=(days[p.id]||[]).slice();
+  for(const day of ds){
+    let reg=null;
+    try{ reg=await dbGet(dkey(p.id,day)); }catch(e){}
+    if(!reg||!reg.rows){ try{ reg=await traeDia(p,day); }catch(e){ reg=null; } }
+    if(!reg||!reg.rows) continue;
+    const rows=reg.rows.map(r=>(r||[]).slice()); aplicaCola(rows,p.id,day);
+    const L=detect(rows); if(!L) continue;
+    out.push({day:day,L:L,rows:rows,ex:parseSheet(rows,1,L,day).ex});
+  }
+  if(progDe!==p.id||$('vProg').classList.contains('hide')) return;
+  progDat={dias:out,faltan:ds.length-out.length}; renderProg();
+}
+function salProg(){ $('vProg').classList.add('hide'); $('bPick').click(); }
+function renderProg(){
+  const D=(progDat&&progDat.dias)||[], con={};
+  D.forEach(d=>d.ex.forEach(e=>e.sets.forEach(s=>s.hist.forEach(h=>{ if(hasVal(h.w)||hasVal(h.r)) con[h.n]=1; }))));
+  const rolls=Object.keys(con).map(Number).sort((a,b)=>a-b);
+  if(!rolls.length){ $('progRolls').innerHTML=''; $('progBody').innerHTML='<div class="msg">Aún no hay series registradas'+(D.length?'':': no he podido leer ningún día')+'.</div>'; return; }
+  if(progRoll===null||rolls.indexOf(progRoll)<0) progRoll=rolls[rolls.length-1];
+  const n=progRoll;
+  $('progRolls').innerHTML=rolls.map(r=>'<button class="used '+(r===n?'on':'')+'" data-r="'+r+'">'+r+'</button>').join('');
+  [...$('progRolls').children].forEach(b=>b.onclick=()=>{ progRoll=+b.dataset.r; renderProg(); });
+  let tc=0, pa=0, pb=0, hechas=0, total=0, filasDia='', mejores='';
+  const ef={}, recs=[];
+  D.forEach(d=>{
+    let a=0, a2=0, b2=0, h=0, t=0, par=false;
+    d.ex.forEach(e=>e.sets.forEach(s=>{
+      t++;
+      const c=s.hist[n-1], pv=n>1?s.hist[n-2]:null;
+      if(!(hasVal(c.w)||hasVal(c.r))) return;
+      h++; a+=tonSet(c);
+      const rv=parseFloat(String(hasVal(c.rir)?c.rir:s.rir).replace(',','.'));
+      if(isNaN(rv)||rv<=3) ef[e.group||'—']=(ef[e.group||'—']||0)+1;
+      const rc=recEn(e,s,n); if(rc) recs.push({e:e.name,d:d.day,t:rc,w:c.w,r:c.r});
+      if(pv&&tonSet(pv)>0&&tonSet(c)>0){ par=true; a2+=tonSet(c); b2+=tonSet(pv); }   // solo series hechas en los dos ROLL
+    }));
+    tc+=a; pa+=a2; pb+=b2; hechas+=h; total+=t;
+    const fecha=String((d.rows[0]||[])[rollCol(d.L,n)+1]||'').trim();
+    const dd=par?pct(a2,b2):null;
+    filasDia+='<div class="srow"><div class="nm">'+esc(d.day)+'<small>'+(h?h+'/'+t+' series · '+numfmt(Math.round(a))+' kg'+(fecha?' · '+esc(fecha):''):'sin registrar')+'</small></div>'
+      +'<div class="dd '+marca(dd)+'">'+(h?(par?signo(dd):'nuevo'):'—')+'</div></div>';
+    const lin=d.ex.map(e=>{
+      let best=null; for(let k=1;k<=d.L.n;k++){ const m=mejorDe(e,k); if(m&&(!best||m.x>best.x)) best=m; }
+      if(!best) return '';
+      return '<div class="srow"><div class="nm">'+esc(e.name)+(best.n===n&&rolls[0]<n?'<span class="nuevo">ESTE ROLL</span>':'')
+        +'<small>'+numfmt(best.w)+' kg × '+best.r+' · ROLL '+best.n+'</small></div><div class="dd flat">≈ '+Math.round(best.x)+' kg</div></div>';
+    }).filter(Boolean);
+    if(lin.length) mejores+='<details class="pdet"><summary>'+esc(d.day)+'<small>'+lin.length+' ejercicio'+(lin.length===1?'':'s')+'</small></summary>'+lin.join('')+'</details>';
+  });
+  const dT=pb>0?pct(pa,pb):null;
+  const keys=Object.keys(ef), max=Math.max.apply(null,[4].concat(keys.map(k=>ef[k])));
+  $('progBody').innerHTML=
+    '<div class="sumhead">'
+    +'<div><div class="k">Tonelaje</div><div class="v">'+numfmt(Math.round(tc))+'</div><div class="d '+marca(dT)+'">'+(pb>0?signo(dT)+' vs ROLL '+(n-1):'sin ROLL anterior')+'</div></div>'
+    +'<div><div class="k">Series</div><div class="v">'+hechas+'/'+total+'</div><div class="d flat">'+(hechas>=total?'completo':'en curso')+'</div></div>'
+    +'<div><div class="k">Récords</div><div class="v">'+recs.length+'</div><div class="d '+(recs.length?'up':'flat')+'">'+(recs.length?'en este ROLL':'ninguno')+'</div></div>'
+    +'</div>'
+    +(pb>0?'<div class="msg" style="margin:4px 2px 0">La comparación solo cuenta las series hechas en los dos ROLL.</div>':'')
+    +(progDat.faltan?'<div class="msg" style="margin:4px 2px 0">'+progDat.faltan+' día(s) sin copia en el móvil: abre la app con cobertura para completarlos.</div>':'')
+    +'<div class="pday">Por día · ROLL '+n+'</div>'+filasDia
+    +(keys.length?'<div class="card"><div class="lab">Series efectivas por bloque · ROLL '+n+'</div>'
+      +keys.map(k=>'<div class="vrow"><div class="g">'+esc(k)+'</div><div class="t"><i style="width:'+(ef[k]/max*100)+'%"></i></div><div class="s">'+ef[k]+'</div></div>').join('')
+      +'<div class="note">Series con RIR ≤ 3, sumando todos los días del ROLL.</div></div>':'')
+    +'<div class="pday">Récords en el ROLL '+n+'</div>'
+    +(recs.length?D.map(d=>{ const l=recs.filter(r=>r.d===d.day); if(!l.length) return '';
+        return '<details class="pdet"><summary>'+esc(d.day)+'<small>'+l.length+' récord'+(l.length===1?'':'s')+'</small></summary>'
+          +l.map(r=>'<div class="srow"><div class="nm">'+esc(r.e)+'<small>'+esc(r.d)+' · '+esc(pesoTxt(r.w))+' kg × '+esc(r.r)+'</small></div><div class="dd up">'+(r.t==='peso'?'más peso':'más reps')+'</div></div>').join('')+'</details>'; }).join('')
+      :'<div class="msg" style="margin:0 2px 8px">'+(rolls[0]<n?'Ninguno todavía.':'Es el primer ROLL con datos: no hay con qué comparar.')+'</div>')
+    +'<div class="pday">Mejores marcas por ejercicio</div>'+mejores
+    +'<div class="msg" style="margin:6px 2px 0">1RM estimado con la fórmula de Epley. Orientativo, sobre todo por encima de 10 repeticiones.</div>';
+}
+
 /* ============ REGISTRO + COLA ============ */
 function doLog(withTimer){
   readInputs();
@@ -1200,7 +1365,7 @@ function doLog(withTimer){
   draft=null; editIdx=null;
   if(navigator.vibrate) navigator.vibrate(recordDe(e,s)?[30,50,30,50,80]:18);
   renderEx();
-  if(withTimer) startRest(e,s,idx);
+  if(withTimer){ audioListo(); startRest(e,s,idx); }
   marcaUltimo();
   const it={ pid:P.id, day:S.day, row:s.row, c0:S.cc, c1:S.cc+L.stride-1,
     values:vals, dateCol:S.cc+1, date:hoyTxt() };
@@ -1247,7 +1412,7 @@ setInterval(()=>{ if(queue().length&&!flushing) flush(); },20000);
 
 /* ============ TEMPORIZADOR ============ */
 function startRest(e,s,idx){
-  tTotal=s.rest||120; tEnd=Date.now()+tTotal*1000; tOver=false;
+  tTotal=s.rest||120; tEnd=Date.now()+tTotal*1000; tOver=false; tPre=false;
   const n=idx+2, rec=recordDe(e,s);
   const last=`Registrado ${pesoTxt(s.cur.w)} kg × ${s.cur.r}`+(rec?' · récord de '+rec:'');
   const next=n<=e.sets.length
@@ -1257,7 +1422,7 @@ function startRest(e,s,idx){
   pintaRest(last,next);
 }
 function pintaRest(last,next){
-  $('rLast').textContent=last; $('rNext').textContent=next;
+  $('rLast').textContent=last; $('rNext').textContent=next; tSig=next;
   $('rest').classList.add('on'); $('rest').classList.remove('over');
   clearInterval(timer); timer=setInterval(tick,1000); tick();
 }
@@ -1268,8 +1433,9 @@ function tick(){
   const m=Math.floor(Math.abs(tLeft)/60), sc=Math.abs(tLeft)%60;
   $('rTime').textContent=(tLeft<0?'+':'')+m+':'+String(sc).padStart(2,'0');
   $('rBar').style.width=Math.max(0,Math.min(100,tLeft/tTotal*100))+'%';
-  if(tLeft<=0&&!tOver){ tOver=true; $('rest').classList.add('over'); beep();
-    if(navigator.vibrate) navigator.vibrate([90,70,90]); }
+  if(tLeft<=10&&tLeft>0&&!tPre&&tTotal>=30){ tPre=true; beep(1); }        // preaviso: quedan 10 s
+  if(tLeft<=0&&!tOver){ tOver=true; tPre=true; $('rest').classList.add('over'); $('rNext').textContent='Descanso terminado'+(/^Siguiente/.test(tSig)?' · '+tSig.replace(/^Siguiente:\s*/,''):''); beep(3);
+    if(navigator.vibrate) navigator.vibrate([120,80,120,80,220]); }
   if(tLeft<-300) stopRest();
 }
 function stopRest(){
@@ -1281,7 +1447,7 @@ function retomaRest(){
   let c=null; try{ c=JSON.parse(localStorage.getItem(RESTK)||'null'); }catch(err){}
   if(!c||!c.end||!c.total) return;
   if(Date.now()>c.end+300000){ try{ localStorage.removeItem(RESTK); }catch(err){} return; }
-  tEnd=c.end; tTotal=c.total; tOver=false;
+  tEnd=c.end; tTotal=c.total; tOver=false; tPre=Date.now()>c.end-10000;
   pintaRest(c.last||'',c.next||'');
 }
 document.addEventListener('visibilitychange',()=>{
@@ -1289,14 +1455,25 @@ document.addEventListener('visibilitychange',()=>{
   if(timer) tick();
   if(enSesion()) pideWL();
 });
-function beep(){ try{
+/* El móvil solo deja sonar si el audio se ha activado con un toque: se
+   activa al registrar la serie, que es cuando arranca el descanso. */
+function audioListo(){ try{
   actx=actx||new (window.AudioContext||window.webkitAudioContext)();
-  [0,.18].forEach(t=>{ const o=actx.createOscillator(), g=actx.createGain();
-    o.frequency.value=880; o.connect(g); g.connect(actx.destination);
+  if(actx.state==='suspended') actx.resume();
+  const o=actx.createOscillator(), g=actx.createGain(); g.gain.value=.0001;
+  o.connect(g); g.connect(actx.destination); o.start(); o.stop(actx.currentTime+.02);
+}catch(e){} }
+/* n=1: preaviso corto y grave. n=3: fin del descanso, tres tonos que suben. */
+function beep(n){ try{
+  actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+  if(actx.state==='suspended') actx.resume();
+  const tonos=n===1?[[0,660,.10]]:[[0,880,.14],[.20,880,.14],[.40,1175,.30]];
+  tonos.forEach(x=>{ const t=x[0], o=actx.createOscillator(), g=actx.createGain();
+    o.frequency.value=x[1]; o.connect(g); g.connect(actx.destination);
     g.gain.setValueAtTime(.0001,actx.currentTime+t);
-    g.gain.exponentialRampToValueAtTime(.25,actx.currentTime+t+.01);
-    g.gain.exponentialRampToValueAtTime(.0001,actx.currentTime+t+.13);
-    o.start(actx.currentTime+t); o.stop(actx.currentTime+t+.15); });
+    g.gain.exponentialRampToValueAtTime(n===1?.2:.45,actx.currentTime+t+.01);
+    g.gain.exponentialRampToValueAtTime(.0001,actx.currentTime+t+x[2]);
+    o.start(actx.currentTime+t); o.stop(actx.currentTime+t+x[2]+.02); });
 }catch(e){} }
 
 /* ============ RESUMEN DE LA SESIÓN ============ */
@@ -1498,7 +1675,7 @@ function ponDietModo(m){
 async function goDieta(desde){
   const p=P; if(!p.id) return;
   dietVolver=desde; dietRows=null; dietDe=p.id; dietErr='';
-  ['vPick','vSess','vEx','vSum'].forEach(v=>$(v).classList.add('hide'));
+  ['vPick','vSess','vEx','vSum','vProg'].forEach(v=>$(v).classList.add('hide'));
   $('vDiet').classList.remove('hide'); $('back').classList.remove('hide');
   $('ttl').textContent='Dieta'; $('sub').textContent=p.name;
   renderDieta(); window.scrollTo(0,0);
@@ -1631,7 +1808,8 @@ $('pbRetry').onclick=()=>{ flushing=false; flush().then(renderPend).catch(render
 $('pbDrop').onclick=dropQueue;
 
 /* ============ NAVEGACIÓN ============ */
-$('back').onclick=()=>{ if(!$('vDiet').classList.contains('hide')) salDieta(); else goSess(); };
+$('back').onclick=()=>{ if(!$('vDiet').classList.contains('hide')) salDieta(); else if(!$('vProg').classList.contains('hide')) salProg(); else goSess(); };
+$('bProg').onclick=goProg;
 $('bDieta').onclick=()=>goDieta('pick');
 $('bDieta2').onclick=()=>goDieta('sess');
 $('bLoad').onclick=()=>loadSession(false);
