@@ -155,6 +155,17 @@
   .rest.over{animation:finDesc .7s ease-in-out 5;border-top-color:var(--acc)}
   .rest.over .lb b{color:var(--acc)}
   @keyframes finDesc{0%,100%{background:rgba(16,18,22,.97)}50%{background:#3d4a12}}
+  .nov{border-color:#4e6318}
+  .nov h4{margin:0 0 6px;font-size:14px;font-weight:750}
+  .nov .nv{font-size:11px;color:var(--acc);font-weight:750;letter-spacing:.6px;margin:11px 0 3px}
+  .nov .nv small{color:var(--dim2);font-weight:500;letter-spacing:0;margin-left:6px}
+  .nov ul{margin:0;padding-left:17px;font-size:12.5px;line-height:1.5;color:var(--dim)}
+  .nov .go{margin-top:12px}
+  .aprox{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:9px 11px;margin-bottom:9px;font-size:12px;color:var(--dim);line-height:1.5}
+  .aprox .ar{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-top:1px solid var(--line)}
+  .aprox .ar:first-of-type{border-top:0}
+  .aprox .ar b{color:var(--txt);font-size:13.5px;white-space:nowrap}
+  .aprox .ar span{text-align:right}
   .mini{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 9px}
   .mini button{flex:1 1 auto;padding:9px 10px;border-radius:10px;background:var(--panel);border:1px solid var(--line);
     font-size:11.5px;font-weight:650;color:var(--dim)}
@@ -344,6 +355,7 @@
     </details>
   </div>
   <div class="msg" id="cfgLink">Sesión iniciada · cambiar</div>
+  <div id="novBox"></div>
 
   <div class="card">
     <div class="lab">Perfil</div>
@@ -367,6 +379,7 @@
   <button class="go" id="bLoad">Cargar sesión</button>
   <button class="bigbtn" id="bDieta" style="margin-top:10px">Dieta</button>
   <button class="bigbtn" id="bProg">Progreso y récords</button>
+  <button class="bigbtn" id="bNov">Novedades de la app</button>
   <div class="msg" id="pickMsg"></div>
   <div class="msg" id="locMsg"></div>
 </div>
@@ -439,9 +452,10 @@
   <div class="bar"><i id="rBar"></i></div>
 </div>
 
+<script type="application/json" id="cambiosData">[{"v": "v0.14", "f": "25/11/2026", "c": ["Aviso de versión nueva con botón para actualizar, sin tener que cerrar la app.", "Novedades de cada versión, aquí mismo.", "Series de aproximación antes de la primera serie de cada ejercicio."]}, {"v": "v0.13", "f": "25/11/2026", "c": ["Pedido de suplementación para 15 días, 1 mes o 2 meses.", "Los alimentos que se compran con ese pedido van en su lista."]}, {"v": "v0.12", "f": "25/11/2026", "c": ["Lista de la compra en dos: suplementación y compra semanal.", "Total del día de la dieta con los macros en tres casillas."]}, {"v": "v0.11", "f": "25/11/2026", "c": ["La sugerencia de carga propone peso y repeticiones.", "Calculadora de discos por lado.", "Comparar dos ROLL de un ejercicio, serie a serie.", "Lista de la compra desde la dieta.", "Botón «igual que la serie anterior» y botones grandes."]}, {"v": "v0.10", "f": "25/11/2026", "c": ["Pantalla de progreso y récords por ROLL.", "Evolución de cada ejercicio con su gráfica.", "Aviso de fin de descanso con preaviso a 10 segundos."]}, {"v": "v0.9", "f": "24/11/2026", "c": ["Macros por comida y del día.", "La fruta y la verdura entran en el cálculo.", "La suplementación se distingue con otro fondo."]}, {"v": "v0.8", "f": "24/11/2026", "c": ["Tabla de equivalencias de hidratos.", "El cardio aparece al final de cada día de entrenamiento."]}, {"v": "v0.7", "f": "24/11/2026", "c": ["Calorías por línea, por comida y del día."]}, {"v": "v0.6", "f": "24/11/2026", "c": ["Dieta en la app, con alternativas por comida y día de entreno o descanso."]}, {"v": "v0.5", "f": "24/11/2026", "c": ["Entrada con Google."]}]</script>
 <script>
 /* ============ PERFILES ============ */
-const VERSION='v0.13 beta';
+const VERSION='v0.14 beta';
 
 /* Diagnóstico: cualquier fallo silencioso se pinta en pantalla. No depende
    de ningún elemento del maquetado, se crea el suyo. */
@@ -1273,7 +1287,8 @@ function discosHtml(wv){
   }
   return '<div class="discos">'+txt+'<div class="bs">'+BARRAS.map(b=>'<button data-barra="'+b+'" class="'+(b===c.barra?'on':'')+'">barra '+numfmt(b)+'</button>').join('')+'</div></div>';
 }
-function pintaDiscos(){ const b=$('discosBox'); if(!b||!draft) return; b.innerHTML=discosHtml(draft.w); cableaDiscos(); }
+function pintaDiscos(){ const b=$('discosBox'); if(!b||!draft) return; b.innerHTML=discosHtml(draft.w); cableaDiscos();
+  const a=$('aproxBox'); if(a&&$('bAprox')) a.innerHTML=aproxHtml(draft.w); }
 function cableaDiscos(){ [...document.querySelectorAll('[data-barra]')].forEach(b=>b.onclick=()=>{
   const c=discCfg(); c.barra=parseFloat(b.dataset.barra); ponDiscCfg(c); readInputs(); pintaDiscos(); }); }
 /* Botones pequeños bajo la sugerencia: repetir la serie anterior de hoy y abrir los discos */
@@ -1282,7 +1297,9 @@ function miniBotones(e,idx,editando){
   if(!editando) for(let k=idx-1;k>=0;k--){ const c=e.sets[k].cur; if(hasVal(c.w)&&hasVal(c.r)){ ant={k:k,c:c}; break; } }
   return '<div class="mini">'
     +(ant?'<button id="bIgual">Igual que la serie '+(ant.k+1)+' · '+esc(pesoTxt(ant.c.w))+' × '+esc(ant.c.r)+'</button>':'')
-    +'<button id="bDiscos" class="'+(discCfg().on?'on':'')+'">Discos</button></div>';
+    +(idx===0&&!editando?'<button id="bAprox" class="'+(aproxOn()?'on':'')+'">Aproximación</button>':'')
+    +'<button id="bDiscos" class="'+(discCfg().on?'on':'')+'">Discos</button></div>'
+    +'<div id="aproxBox">'+(idx===0&&!editando?aproxHtml(draft.w):'')+'</div>';
 }
 function cableaMini(e,idx){
   const bi=$('bIgual');
@@ -1291,9 +1308,34 @@ function cableaMini(e,idx){
       const wt=String(c.w).trim().replace(/\s/g,'');
       draft.w=esNum(wt)?parseFloat(wt.replace(',','.')):c.w; draft.r=String(c.r); draft.sug=null; break; } }
     renderEx(); };
+  const ba=$('bAprox');
+  if(ba) ba.onclick=()=>{ readInputs(); try{ localStorage.setItem(APROXK,aproxOn()?'0':'1'); }catch(e){} renderEx(); };
   const bd=$('bDiscos');
   if(bd) bd.onclick=()=>{ readInputs(); const c=discCfg(); c.on=!c.on; ponDiscCfg(c); renderEx(); };
   cableaDiscos();
+}
+/* Series de aproximación antes de la primera serie: 40 %, 60 % y 80 % del
+   peso de trabajo, redondeado a lo que se puede cargar. */
+const APROXK='trackerb.aprox.v1';
+function aproxOn(){ try{ return localStorage.getItem(APROXK)==='1'; }catch(e){ return false; } }
+function aproxDe(w){
+  if(!(w>0)) return [];
+  const paso=w<20?1:2.5, red=x=>Math.round(x/paso)*paso;
+  const plan=w<20?[[.5,10]]:[[.4,8],[.6,5],[.8,3]], out=[];
+  plan.forEach(p=>{ const x=red(w*p[0]); if(x>0&&x<w&&(!out.length||x>out[out.length-1].w)) out.push({w:x,r:p[1],p:Math.round(p[0]*100)}); });
+  return out;
+}
+function aproxHtml(wv){
+  if(!aproxOn()) return '';
+  const ws=String(wv).trim().replace(/\s/g,''), w=typeof wv==='number'?wv:(esNum(ws)?parseFloat(ws.replace(',','.')):NaN);
+  if(isNaN(w)) return '<div class="aprox">Pon un peso en kilos para calcular la aproximación.</div>';
+  const l=aproxDe(w), c=discCfg();
+  if(!l.length) return '<div class="aprox">Con '+numfmt(w)+' kg no hace falta aproximación.</div>';
+  return '<div class="aprox">'+l.map(x=>{
+    let lado='';
+    if(c.on){ const d=discosDe(x.w,c.barra); lado=!d?'menos que la barra':(d.discos.length?'por lado '+d.discos.map(numfmt).join(' + '):'solo la barra'); }
+    return '<div class="ar"><b>'+numfmt(x.w)+' kg × '+x.r+'</b><span>'+x.p+' %'+(lado?' · '+lado:'')+'</span></div>';
+  }).join('')+'<div style="margin-top:6px">Lejos del fallo y con descansos cortos. No se registran.</div></div>';
 }
 /* Botones grandes: para manejar la serie con una mano */
 function grande(){ try{ return localStorage.getItem(GRANDEK)==='1'; }catch(e){ return false; } }
@@ -2046,6 +2088,73 @@ $('bPick').onclick=()=>{ $('vSess').classList.add('hide'); $('vEx').classList.ad
   $('sub').textContent='Elige perfil, día y ROLL · '+VERSION;
   sueltaWL();
   renderProf(); renderPick(); scanRolls(); estadoLocal(); };
+
+/* ============ NOVEDADES Y VERSIÓN NUEVA ============ */
+/* La app pregunta de vez en cuando por su propia página, sin pasar por la
+   caché, y compara la versión. Si hay otra, lo dice en la pantalla inicial
+   con lo que trae y un botón para actualizar. */
+const VISTOK='trackerb.visto.v1', VBASE=VERSION.replace(/ beta$/,'');
+let nuevaV=null, novAbierta=false, ultMira=0;
+function cambiosDe(txt){ try{ const m=String(txt).match(/<script type="application\/json" id="cambiosData">([\s\S]*?)<\/script>/); return m?JSON.parse(m[1]):[]; }catch(e){ return []; } }
+function misCambios(){ try{ return JSON.parse($('cambiosData').textContent)||[]; }catch(e){ return []; } }
+const novLista=l=>l.map(x=>'<div class="nv">'+esc(x.v)+'<small>'+esc(x.f||'')+'</small></div><ul>'+(x.c||[]).map(t=>'<li>'+esc(t)+'</li>').join('')+'</ul>').join('');
+function renderNov(){
+  const box=$('novBox'); if(!box) return;
+  let visto=''; try{ visto=localStorage.getItem(VISTOK)||''; }catch(e){}
+  const mios=misCambios();
+  if(nuevaV){
+    const k=nuevaV.cambios.findIndex(x=>x.v===VBASE), trae=k>=0?nuevaV.cambios.slice(0,k):nuevaV.cambios.slice(0,1);
+    box.innerHTML='<div class="card nov"><h4>Hay una versión nueva: '+esc(nuevaV.v)+'</h4><div class="msg" style="margin:0">Tienes la '+esc(VERSION)+'.</div>'
+      +novLista(trae)+'<button class="go" id="bActualiza">Actualizar ahora</button></div>';
+    $('bActualiza').onclick=actualiza; return;
+  }
+  if(novAbierta){
+    box.innerHTML='<div class="card nov"><h4>Novedades de la app</h4><div class="msg" style="margin:0">Estás en la '+esc(VERSION)+'.</div>'+novLista(mios)
+      +'<div class="mini" style="margin:12px 0 0"><button id="bNovMira">Buscar versión nueva</button><button id="bNovCierra">Cerrar</button></div><div class="msg" id="novMsg"></div></div>';
+    $('bNovCierra').onclick=()=>{ novAbierta=false; renderNov(); };
+    $('bNovMira').onclick=async()=>{ $('novMsg').textContent='Buscando…'; const r=await miraVersion(true);
+      if(!nuevaV&&$('novMsg')) $('novMsg').textContent=r===null?'No he podido comprobarlo: sin conexión.':'Tienes la última versión.'; };
+    return;
+  }
+  if(visto&&visto!==VBASE&&mios.length&&mios[0].v===VBASE){
+    box.innerHTML='<div class="card nov"><h4>Actualizada a la '+esc(VERSION)+'</h4>'+novLista(mios.slice(0,1))
+      +'<div class="mini" style="margin:12px 0 0"><button id="bNovOk">Entendido</button><button id="bNovTodo">Ver todas</button></div></div>';
+    $('bNovOk').onclick=()=>{ try{ localStorage.setItem(VISTOK,VBASE); }catch(e){} renderNov(); };
+    $('bNovTodo').onclick=()=>{ try{ localStorage.setItem(VISTOK,VBASE); }catch(e){} novAbierta=true; renderNov(); };
+    return;
+  }
+  if(!visto){ try{ localStorage.setItem(VISTOK,VBASE); }catch(e){} }
+  box.innerHTML='';
+}
+/* Devuelve true si hay versión nueva, false si no, null si no se pudo mirar */
+async function miraVersion(forzar){
+  if(!forzar&&Date.now()-ultMira<10*60000) return false;
+  ultMira=Date.now();
+  try{
+    const r=await fetch('./index.html?v='+Date.now(),{cache:'no-store'});
+    if(!r.ok) return null;
+    const txt=await r.text(), m=txt.match(/const VERSION='([^']+)'/);
+    if(!m) return null;
+    if(m[1]===VERSION){ return false; }
+    nuevaV={v:m[1],cambios:cambiosDe(txt)}; renderNov(); return true;
+  }catch(e){ return null; }
+}
+async function actualiza(){
+  const b=$('bActualiza'); if(b){ b.disabled=true; b.textContent='Actualizando…'; }
+  try{ const r=await navigator.serviceWorker.getRegistration(); if(r) await r.update(); }catch(e){}
+  try{ const ks=await caches.keys(); await Promise.all(ks.map(k=>caches.delete(k))); }catch(e){}
+  location.replace(location.pathname+'?v='+Date.now());
+}
+$('bNov').onclick=()=>{ novAbierta=!novAbierta; renderNov(); if(novAbierta){ const b=$('novBox'); if(b&&b.scrollIntoView) b.scrollIntoView({block:'start',behavior:'smooth'}); } };
+// Tras actualizar se llega con «?v=…»: se limpia la dirección
+try{ if(/[?&]v=\d+/.test(location.search)){
+  history.replaceState(null,'',location.pathname+location.hash);
+  // Se vuelve a guardar la copia para arrancar sin conexión, ya con la versión nueva
+  ['./','./index.html'].forEach(u=>{ try{ fetch(u,{cache:'reload'}).catch(()=>{}); }catch(e){} });
+} }catch(e){}
+renderNov();
+setTimeout(()=>miraVersion(false),4000);
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden) miraVersion(false); });
 
 /* ============ TRANSPORTE: Apps Script (sin Claude) ============ */
 const CFGK='trackerb.cfg.v2', NONK='trackerb.nonce.v1';

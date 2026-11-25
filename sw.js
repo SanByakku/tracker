@@ -19,6 +19,8 @@ self.addEventListener('fetch', e => {
   // Nunca interceptar Apps Script ni Google: los datos siempre en vivo
   if (e.request.method !== 'GET' || /google|googleusercontent/i.test(url.hostname)) return;
   if (url.origin !== location.origin) return;
+  // Comprobación de versión y recarga tras actualizar («?v=…»): directo a la red, sin guardar copia
+  if (url.searchParams.has('v')) return;
   // La app: red primero, caché si no hay cobertura
   e.respondWith(
     fetch(e.request)
