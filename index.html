@@ -451,10 +451,10 @@
   <div class="bar"><i id="rBar"></i></div>
 </div>
 
-<script type="application/json" id="cambiosData">[{"v": "v0.15", "f": "25/11/2026", "c": ["Los botones grandes de la serie quedan fijos para todos."]}, {"v": "v0.14.1", "f": "25/11/2026", "c": ["Cabecera de la pantalla inicial más limpia: nombre, versión y estado de la conexión."]}, {"v": "v0.14", "f": "25/11/2026", "c": ["Aviso de versión nueva con botón para actualizar, sin tener que cerrar la app.", "Novedades de cada versión, aquí mismo.", "Series de aproximación antes de la primera serie de cada ejercicio."]}, {"v": "v0.13", "f": "25/11/2026", "c": ["Pedido de suplementación para 15 días, 1 mes o 2 meses.", "Los alimentos que se compran con ese pedido van en su lista."]}, {"v": "v0.12", "f": "25/11/2026", "c": ["Lista de la compra en dos: suplementación y compra semanal.", "Total del día de la dieta con los macros en tres casillas."]}, {"v": "v0.11", "f": "25/11/2026", "c": ["La sugerencia de carga propone peso y repeticiones.", "Calculadora de discos por lado.", "Comparar dos ROLL de un ejercicio, serie a serie.", "Lista de la compra desde la dieta.", "Botón «igual que la serie anterior» y botones grandes."]}, {"v": "v0.10", "f": "25/11/2026", "c": ["Pantalla de progreso y récords por ROLL.", "Evolución de cada ejercicio con su gráfica.", "Aviso de fin de descanso con preaviso a 10 segundos."]}, {"v": "v0.9", "f": "24/11/2026", "c": ["Macros por comida y del día.", "La fruta y la verdura entran en el cálculo.", "La suplementación se distingue con otro fondo."]}, {"v": "v0.8", "f": "24/11/2026", "c": ["Tabla de equivalencias de hidratos.", "El cardio aparece al final de cada día de entrenamiento."]}, {"v": "v0.7", "f": "24/11/2026", "c": ["Calorías por línea, por comida y del día."]}, {"v": "v0.6", "f": "24/11/2026", "c": ["Dieta en la app, con alternativas por comida y día de entreno o descanso."]}, {"v": "v0.5", "f": "24/11/2026", "c": ["Entrada con Google."]}]</script>
+<script type="application/json" id="cambiosData">[{"v": "v0.16", "f": "25/11/2026", "c": ["Discos de 20, 10, 5, 2,5 y 1,25 kg con barra de 20.", "En ejercicios con mancuernas, la sugerencia y la aproximación van de 2,5 en 2,5 kg."]}, {"v": "v0.15", "f": "25/11/2026", "c": ["Los botones grandes de la serie quedan fijos para todos."]}, {"v": "v0.14.1", "f": "25/11/2026", "c": ["Cabecera de la pantalla inicial más limpia: nombre, versión y estado de la conexión."]}, {"v": "v0.14", "f": "25/11/2026", "c": ["Aviso de versión nueva con botón para actualizar, sin tener que cerrar la app.", "Novedades de cada versión, aquí mismo.", "Series de aproximación antes de la primera serie de cada ejercicio."]}, {"v": "v0.13", "f": "25/11/2026", "c": ["Pedido de suplementación para 15 días, 1 mes o 2 meses.", "Los alimentos que se compran con ese pedido van en su lista."]}, {"v": "v0.12", "f": "25/11/2026", "c": ["Lista de la compra en dos: suplementación y compra semanal.", "Total del día de la dieta con los macros en tres casillas."]}, {"v": "v0.11", "f": "25/11/2026", "c": ["La sugerencia de carga propone peso y repeticiones.", "Calculadora de discos por lado.", "Comparar dos ROLL de un ejercicio, serie a serie.", "Lista de la compra desde la dieta.", "Botón «igual que la serie anterior» y botones grandes."]}, {"v": "v0.10", "f": "25/11/2026", "c": ["Pantalla de progreso y récords por ROLL.", "Evolución de cada ejercicio con su gráfica.", "Aviso de fin de descanso con preaviso a 10 segundos."]}, {"v": "v0.9", "f": "24/11/2026", "c": ["Macros por comida y del día.", "La fruta y la verdura entran en el cálculo.", "La suplementación se distingue con otro fondo."]}, {"v": "v0.8", "f": "24/11/2026", "c": ["Tabla de equivalencias de hidratos.", "El cardio aparece al final de cada día de entrenamiento."]}, {"v": "v0.7", "f": "24/11/2026", "c": ["Calorías por línea, por comida y del día."]}, {"v": "v0.6", "f": "24/11/2026", "c": ["Dieta en la app, con alternativas por comida y día de entreno o descanso."]}, {"v": "v0.5", "f": "24/11/2026", "c": ["Entrada con Google."]}]</script>
 <script>
 /* ============ PERFILES ============ */
-const VERSION='v0.15';
+const VERSION='v0.16';
 
 /* Diagnóstico: cualquier fallo silencioso se pinta en pantalla. No depende
    de ningún elemento del maquetado, se crea el suyo. */
@@ -993,7 +993,10 @@ function renderSess(){
 /* Doble progresión mecánica: solo mira reps y RIR del ROLL anterior de la
    misma fila contra lo prescrito. No sustituye al criterio del entrenador. */
 function incremento(w){ return w<12 ? 1 : (w<80 ? 2.5 : 5); }
-function sugerencia(s){
+/* Mancuernas: se reconocen por el nombre del ejercicio. Suben de 2,5 en 2,5 kg y no llevan discos. */
+const esDB=e=>!!e&&/mancuerna|dumbbell|\bdb\b/i.test(String(e.name||''));
+const exDB=()=>!!(S&&cur!==null&&S.ex&&esDB(S.ex[cur]));
+function sugerencia(s,e){
   if(!s.prev||!hasVal(s.prev.w)) return null;
   const wt=String(s.prev.w).trim().replace(/\s/g,'');
   if(!esNum(wt)) return null;                       // gomas, peso corporal
@@ -1003,7 +1006,7 @@ function sugerencia(s){
   const pri=parseFloat(String(s.prev.rir).replace(',','.'));
   const tri=parseFloat(String(s.rir).replace(',','.'));
   const dR=pr-tr, dI=(!isNaN(pri)&&!isNaN(tri))?pri-tri:0;
-  const inc=incremento(w), red=n=>Math.round(n*100)/100;
+  const inc=esDB(e)?2.5:incremento(w), red=n=>Math.round(n*100)/100;
   if(dR>=0&&dI>=0){
     const salto=(dR>=2||dI>=2)?2:1;
     const motivo = dR>0
@@ -1104,7 +1107,7 @@ function mkDraft(e,idx){
   if(!hasVal(w)) w=0;
   const wt0=String(w).trim().replace(/\s/g,'');
   if(esNum(wt0)) w=parseFloat(wt0.replace(',','.'));
-  const sug=sugerencia(s);
+  const sug=sugerencia(s,e);
   if(sug) w=sug.w;
   let r=s.prev&&hasVal(s.prev.r)?String(s.prev.r):s.reps;
   if(!hasVal(r)) r='';
@@ -1265,7 +1268,7 @@ function renderHist(e){
 /* ============ AYUDAS EN LA SERIE ============ */
 /* Calculadora de discos: qué poner en cada lado de la barra */
 const DISCK='tracker.discos.v1';
-const DISCOS=[25,20,15,10,5,2.5,1.25], BARRAS=[20,15,10,7.5];
+const DISCOS=[20,10,5,2.5,1.25], BARRAS=[20,15,10,7.5];   // discos disponibles; barra de 20 por defecto
 function discCfg(){ try{ const c=JSON.parse(localStorage.getItem(DISCK)||'{}')||{}; return {on:!!c.on,barra:BARRAS.indexOf(c.barra)>=0?c.barra:20}; }catch(e){ return {on:false,barra:20}; } }
 function ponDiscCfg(c){ try{ localStorage.setItem(DISCK,JSON.stringify(c)); }catch(e){} }
 function discosDe(w,barra){
@@ -1275,6 +1278,7 @@ function discosDe(w,barra){
 }
 function discosHtml(wv){
   const c=discCfg(); if(!c.on) return '';
+  if(exDB()) return '<div class="discos">Ejercicio con mancuernas: no lleva discos. Los saltos son de 2,5 kg.</div>';
   const ws=String(wv).trim().replace(/\s/g,''), w=typeof wv==='number'?wv:(esNum(ws)?parseFloat(ws.replace(',','.')):NaN);
   let txt;
   if(isNaN(w)) txt='Pon un peso en kilos para calcular los discos.';
@@ -1317,9 +1321,9 @@ function cableaMini(e,idx){
    peso de trabajo, redondeado a lo que se puede cargar. */
 const APROXK='tracker.aprox.v1';
 function aproxOn(){ try{ return localStorage.getItem(APROXK)==='1'; }catch(e){ return false; } }
-function aproxDe(w){
+function aproxDe(w,db){
   if(!(w>0)) return [];
-  const paso=w<20?1:2.5, red=x=>Math.round(x/paso)*paso;
+  const paso=db?2.5:(w<20?1:2.5), red=x=>Math.round(x/paso)*paso;
   const plan=w<20?[[.5,10]]:[[.4,8],[.6,5],[.8,3]], out=[];
   plan.forEach(p=>{ const x=red(w*p[0]); if(x>0&&x<w&&(!out.length||x>out[out.length-1].w)) out.push({w:x,r:p[1],p:Math.round(p[0]*100)}); });
   return out;
@@ -1328,11 +1332,11 @@ function aproxHtml(wv){
   if(!aproxOn()) return '';
   const ws=String(wv).trim().replace(/\s/g,''), w=typeof wv==='number'?wv:(esNum(ws)?parseFloat(ws.replace(',','.')):NaN);
   if(isNaN(w)) return '<div class="aprox">Pon un peso en kilos para calcular la aproximación.</div>';
-  const l=aproxDe(w), c=discCfg();
+  const db=exDB(), l=aproxDe(w,db), c=discCfg();
   if(!l.length) return '<div class="aprox">Con '+numfmt(w)+' kg no hace falta aproximación.</div>';
   return '<div class="aprox">'+l.map(x=>{
     let lado='';
-    if(c.on){ const d=discosDe(x.w,c.barra); lado=!d?'menos que la barra':(d.discos.length?'por lado '+d.discos.map(numfmt).join(' + '):'solo la barra'); }
+    if(c.on&&!db){ const d=discosDe(x.w,c.barra); lado=!d?'menos que la barra':(d.discos.length?'por lado '+d.discos.map(numfmt).join(' + '):'solo la barra'); }
     return '<div class="ar"><b>'+numfmt(x.w)+' kg × '+x.r+'</b><span>'+x.p+' %'+(lado?' · '+lado:'')+'</span></div>';
   }).join('')+'<div style="margin-top:6px">Lejos del fallo y con descansos cortos. No se registran.</div></div>';
 }
