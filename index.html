@@ -437,7 +437,7 @@
 
 <script>
 /* ============ PERFILES ============ */
-const VERSION='v0.11';
+const VERSION='v0.11.1';
 
 /* Diagnóstico: cualquier fallo silencioso se pinta en pantalla. No depende
    de ningún elemento del maquetado, se crea el suyo. */
@@ -1828,7 +1828,7 @@ function salDieta(){
    elegidas en cada tipo de día. No guarda nada: se calcula al abrirla. */
 const COMPRAK='tracker.compra.v1';
 let compraOn=false;
-function compraDias(){ try{ const n=parseInt(localStorage.getItem(COMPRAK),10); return (n>=0&&n<=7)?n:5; }catch(e){ return 5; } }
+function compraDias(){ try{ const n=parseInt(localStorage.getItem(COMPRAK),10); return (n>=0&&n<=7)?n:6; }catch(e){ return 6; } }   // por defecto 6 de entreno y 1 de descanso
 function lineasDia(modo){
   const elegido=(dietSel()[P.id])||{}, out=[];
   (dietRows||[]).forEach(r=>{
