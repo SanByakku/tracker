@@ -86,8 +86,11 @@
   }
 
   async function entraGoogle(idt){
-    var cuerpo = { provider: 'google', id_token: idt };
     var n = nonceDe(idt);
+    var cuerpo = { provider: 'google', id_token: idt };
+    /* Si el id_token trae nonce hay que reenviarlo: Supabase exige que o
+       estén los dos o ninguno. */
+    if (n) cuerpo.nonce = n;
     var r = await fetch(URL_SB + '/auth/v1/token?grant_type=id_token', {
       method: 'POST',
       headers: { 'apikey': KEY_SB, 'Content-Type': 'application/json' },

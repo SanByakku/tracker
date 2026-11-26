@@ -1,6 +1,6 @@
 /* Service worker: la app arranca sin conexión; las llamadas a la hoja nunca se cachean. */
-const CACHE = 'tracker-beta-v3';
-const ASSETS = ['./', './index.html', './datos-supabase.js', './manifest.webmanifest',
+const CACHE = 'tracker-beta-v4';
+const ASSETS = ['./', './index.html', './datos-supabase.js?r=2', './manifest.webmanifest',
                 './icon-192.png', './icon-512.png', './icon-maskable-512.png',
                 './apple-touch-icon.png'];
 
