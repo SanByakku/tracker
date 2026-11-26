@@ -338,7 +338,7 @@
   .gym input{width:100%;margin-top:8px;min-height:44px;border-radius:10px;border:1px solid #2a2f3a;background:#12151b;color:inherit;font-size:16px;padding:0 12px;box-sizing:border-box}
   .gym .gn{font-size:12px;color:var(--dim);margin-top:8px;line-height:1.35}
   .toca .ul{font-size:12px;color:var(--dim);margin:-4px 0 8px}
-  .hola{margin:16px 4px 14px}
+  .hola{margin:16px 4px 14px;text-align:center}
   .hola .h1{font-size:23px;font-weight:800;line-height:1.2}
   .hola .h2{font-size:14px;color:var(--dim);margin-top:3px}
   .pie2{display:flex;gap:9px;margin:4px 0 10px}
@@ -347,9 +347,11 @@
   .minibtn{display:block;width:100%;background:none;border:0;color:var(--dim);font-size:13px;padding:10px 4px;text-align:left;cursor:pointer}
   #tocaCard{display:none!important}     /* la pantalla inicial es solo la elección de día */
   .grid2.dias{grid-template-columns:1fr;gap:9px}
-  .dias .pick{min-height:72px;padding:12px 16px;font-size:20px;font-weight:800;letter-spacing:.3px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;text-align:left;border-radius:14px}
-  .dias .pick small{font-size:13px;font-weight:600;color:var(--dim);letter-spacing:.3px}
-  .dias .pick small b{color:var(--acc);font-weight:700}
+  .dias .pick{min-height:72px;padding:12px 16px;font-size:20px;font-weight:800;letter-spacing:.3px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center;border-radius:14px;background:var(--acc);border-color:var(--acc);color:#10140a}
+  .dias .pick small{font-size:13px;font-weight:600;color:#3d4a12;letter-spacing:.3px}
+  .dias .pick small b{color:#10140a;font-weight:800}
+  .dias .pick.on{background:#10140a;color:var(--acc)}
+  .dias .pick.on small,.dias .pick.on small b{color:var(--acc)}
   .dias .pick.cargando{opacity:.6}
   details.mas{margin:4px 0 10px}
   details.mas summary{font-size:13px;color:var(--dim);padding:10px 4px;cursor:pointer}
@@ -603,7 +605,7 @@
 <script>
 /* ============ PERFILES ============ */
 const VERSION='v1.2 beta';
-const BUILD=3;   // sube en cada publicación dentro de la misma versión: es lo que detecta el aviso de actualización
+const BUILD=4;   // sube en cada publicación dentro de la misma versión: es lo que detecta el aviso de actualización
 
 /* Diagnóstico: cualquier fallo silencioso se pinta en pantalla. No depende
    de ningún elemento del maquetado, se crea el suyo. */
@@ -639,7 +641,8 @@ try{
 function ponPerfiles(lista){
   PROFILES=(lista||[]).filter(x=>x&&x.id).map(x=>(
     {id:String(x.id), name:String(x.name||x.id), dias:(x.dias||[]).map(String),
-     servicio:(['entreno','dieta'].indexOf(x.servicio)>=0?x.servicio:'completo')}));
+     servicio:(['entreno','dieta'].indexOf(x.servicio)>=0?x.servicio:'completo'),
+     sexo:(x.sexo==='h'||x.sexo==='m')?x.sexo:''}));
   try{ localStorage.setItem(PERFK,JSON.stringify(PROFILES)); }catch(e){}
   P=PROFILES.find(x=>x.id===P.id)||PROFILES[0]||NADIE;
 }
@@ -938,7 +941,7 @@ function pintaHola(){
   const h=$('hola'); if(!h) return;
   if(!P.id||!CFG.token){ h.classList.add('hide'); return; }
   let f=''; try{ f=new Date(Date.now()).toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'}); }catch(e){}
-  h.innerHTML='<div class="h1">Bienvenido/a, '+esc(P.name)+'</div><div class="h2">'+esc(f.charAt(0).toUpperCase()+f.slice(1))+'</div>';
+  h.innerHTML='<div class="h1">'+(P.sexo==='m'?'Bienvenida':P.sexo==='h'?'Bienvenido':'Bienvenido/a')+', '+esc(P.name)+'</div><div class="h2">'+esc(f.charAt(0).toUpperCase()+f.slice(1))+'</div>';
   h.classList.remove('hide');
   const c=$('cPerfil'); if(c) c.classList.toggle('hide',visibles().length<2);
 }
@@ -2166,6 +2169,7 @@ async function gestUsuarios(recarga){
 }
 const SRV=[['entreno','Entreno'],['dieta','Dieta'],['completo','Completo']];
 const EST=[['activo','Activo'],['pausa','En pausa'],['baja','Baja']];
+const SEXO=[['','Bienvenido/a'],['h','Bienvenido'],['m','Bienvenida']];
 const opts=(L,v)=>L.map(x=>'<option value="'+x[0]+'"'+(x[0]===v?' selected':'')+'>'+x[1]+'</option>').join('');
 let gestFicha='';
 function pintaUsuarios(){
@@ -2187,6 +2191,7 @@ function pintaUsuarios(){
       +(F.fijo?'':'<div><label>Nombre</label><input type="text" id="gfNom" maxlength="40" value="'+esc(F.nombre)+'"></div>'
         +'<div><label>Correo de Google</label><input type="email" id="gfCor" maxlength="120" value="'+esc(F.correos.join(', '))+'" placeholder="nombre@correo.com"></div>')
       +'<div><label>Servicio</label><select id="gfSrv">'+opts(SRV,F.servicio)+'</select></div>'
+      +'<div><label>Saludo</label><select id="gfSex">'+opts(SEXO,F.sexo||'')+'</select></div>'
       +(F.fijo?'':'<div><label>Estado</label><select id="gfEst">'+opts(EST,F.estado)+'</select></div>')
       +'<div><label>Inicio</label><input type="text" id="gfIni" maxlength="20" value="'+esc(F.inicio)+'" placeholder="dd/mm/aaaa"></div>'
       +'<div style="grid-column:1/-1"><label>Objetivo</label><input type="text" id="gfObj" maxlength="160" value="'+esc(F.objetivo)+'"></div>'
@@ -2200,6 +2205,7 @@ function pintaUsuarios(){
     +'<div><label>Nombre</label><input type="text" id="gaNom" maxlength="40" autocomplete="off"></div>'
     +'<div><label>Su correo de Google</label><input type="email" id="gaCor" maxlength="80" autocomplete="off" placeholder="nombre@correo.com"></div>'
     +'<div><label>Servicio</label><select id="gaSrv">'+opts(SRV,'completo')+'</select></div>'
+    +'<div><label>Saludo</label><select id="gaSex">'+opts(SEXO,'')+'</select></div>'
     +'<div><label>Plantilla: copiar de</label><select id="gaPl">'+act.map(p=>'<option value="'+esc(p.id)+'">'+esc(p.nombre)+'</option>').join('')+'</select></div>'
     +'<div class="chk"><input type="checkbox" id="gaDie"><span>Copiar también su dieta</span></div>'
     +'<div class="chk"><input type="checkbox" id="gaCom"><span>Compartirle la hoja</span></div>'
@@ -2216,7 +2222,7 @@ function pintaUsuarios(){
     api({action:'g_planes',id:F.id}).then(r=>{ const c=$('gfPlanes'); if(!c||gestFicha!==F.id) return;
       c.innerHTML=(r.planes||[]).length?'<b>Historial de planes</b><br>'+r.planes.slice().reverse().map(x=>esc(x.fecha)+' · '+esc(x.tipo)+' · '+esc(x.plan)+(x.comentario?' — '+esc(x.comentario):'')).join('<br>'):'Sin planes anotados todavía.'; }).catch(()=>{});
     $('gfOk').onclick=async()=>{
-      const campos={ servicio:$('gfSrv').value, inicio:$('gfIni').value.trim(), objetivo:$('gfObj').value.trim(), notas:$('gfNot').value };
+      const campos={ servicio:$('gfSrv').value, sexo:$('gfSex').value, inicio:$('gfIni').value.trim(), objetivo:$('gfObj').value.trim(), notas:$('gfNot').value };
       if(!F.fijo){
         campos.nombre=$('gfNom').value.trim(); campos.estado=$('gfEst').value;
         if($('gfCor').value.trim().toLowerCase()!==F.correos.join(', ')) campos.correo=$('gfCor').value.trim();
@@ -2234,7 +2240,7 @@ function pintaUsuarios(){
     const nom=String($('gaNom').value).trim(), cor=String($('gaCor').value).trim().toLowerCase();
     if(!nom){ gestUmsg=['bad','Falta el nombre.']; pintaUsuarios(); return; }
     if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(cor)){ gestUmsg=['bad','Escribe su correo de Google: sin él no puede entrar.']; pintaUsuarios(); $('gaNom').value=nom; return; }
-    const cuerpo={action:'g_alta',nombre:nom,correo:cor,plantilla:$('gaPl').value,servicio:$('gaSrv').value,conDieta:$('gaDie').checked,compartir:$('gaCom').checked};
+    const cuerpo={action:'g_alta',nombre:nom,correo:cor,plantilla:$('gaPl').value,servicio:$('gaSrv').value,sexo:$('gaSex').value,conDieta:$('gaDie').checked,compartir:$('gaCom').checked};
     $('gaOk').disabled=true; $('gaOk').textContent='Creando su hoja…';
     try{
       const r=await api(cuerpo,180000);
