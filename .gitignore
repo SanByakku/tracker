@@ -1,0 +1,16 @@
+# Secretos — este repositorio es PÚBLICO
+.env
+.env.*
+*.key
+*.pem
+secrets.json
+
+# Restos de clonado
+*.bak
+.git-fallido-*
+
+# Sistema
+.DS_Store
+Thumbs.db
+__pycache__/
+*.pyc
