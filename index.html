@@ -361,6 +361,10 @@
   .dias .pick .tick{position:absolute;right:16px;top:50%;transform:translateY(-50%);width:30px;height:30px;border-radius:50%;background:var(--acc);color:#10140a;font-size:18px;font-weight:900;display:flex;align-items:center;justify-content:center}
   .dias .pick.on small,.dias .pick.on small b{color:var(--acc)}
   .dias .pick.cargando{opacity:.75}
+  .rolls button:disabled{opacity:.3;cursor:not-allowed}
+  .autoN .autoF{display:flex;align-items:center;gap:8px;margin:2px 0 6px;color:var(--txt);font-weight:600}
+  .autoN .autoF input{background:var(--panel2);color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font:inherit}
+  .go2.go3{background:var(--acc);color:#10140a;border-color:var(--acc)}
   .dias .pick .spin{position:absolute;left:16px;top:50%;margin-top:-8px;width:16px;height:16px;border-color:rgba(16,20,10,.25);border-top-color:#10140a}
   .dias .pick.hecho .spin{border-color:var(--line);border-top-color:var(--acc)}
   details.mas{margin:4px 0 10px}
@@ -611,11 +615,11 @@
   <div class="bar"><i id="rBar"></i></div>
 </div>
 
-<script type="application/json" id="cambiosData">[{"v": "v1.2", "f": "26/11/2026", "c": ["Pantalla inicial nueva: un botón por día de entrenamiento; al tocarlo se abre la sesión en el ROLL que corresponde.", "Los días se agrupan en bloques separados por el descanso, y el día ya completado en el ROLL en curso lleva un tick.", "Tipo de servicio por persona (Entreno, Dieta o Completo): la app enseña solo lo contratado.", "Gestor: ficha de cada asesorado con servicio, estado, objetivo y notas privadas, guardada en un libro central.", "Salto de carga propio de cada ejercicio: se recuerda y lo usa la sugerencia.", "EJ Alternativo: cambiar un ejercicio solo para la sesión de hoy, sin tocar la rutina.", "Gestor: pantalla de usuarios, con alta, baja y cambio de correo.", "Dieta: los botones del día pasan a llamarse Entreno y Rest."]}, {"v": "v1.1", "f": "25/11/2026", "c": ["Gestor (solo para quien administra, en ordenador): acceso a todos los usuarios, con la rutina de cada día en tabla y las gráficas de cada ejercicio.", "Los récords y las mejores marcas cuentan solo las sesiones del gimnasio habitual.", "Autorrellenar: copia en las series sin registrar los valores del ROLL anterior del mismo gimnasio.", "Al volver a la app se vuelve a leer la hoja, por si se ha escrito en ella a mano.", "Gimnasio de hoy: se elige entre los de tu lista u «otro». Se guarda junto a la fecha del ROLL y las comparaciones usan solo sesiones del mismo gimnasio.", "Los descansos se calculan con la fecha de cada sesión guardada en la hoja.", "La pantalla inicial indica qué día y qué ROLL toca según el orden de la hoja; si se salta un día, lo propone el primero para volver al orden.", "En la lista del día, cada ejercicio muestra sus técnicas (rest pause, drop set, EMOM, mini series, parciales, cadencia) y en qué series.", "Código de colores en peso, repeticiones y RIR según el objetivo y el ROLL anterior.", "Técnicas (rest pause, drop set, mini series, parciales, EMOM, cadencia) con su explicación, su registro y su cuenta atrás.", "La sugerencia indica si toca subir, mantener o bajar, y usa la serie anterior si no hay ROLL previo.", "Pantalla de progreso y récords por ROLL, con evolución y gráfica de cada ejercicio.", "Comparar dos ROLL de un ejercicio, serie a serie.", "La sugerencia de carga propone peso y repeticiones.", "Series de aproximación antes de la primera serie.", "Calculadora de discos (20, 10, 5, 2,5 y 1,25 kg, barra de 20) y saltos de 2,5 kg con mancuernas.", "Aviso de fin de descanso con preaviso a 10 segundos.", "Botones grandes en la serie y «igual que la serie anterior».", "Lista de la compra: compra semanal y pedido de suplementación para 15 días, 1 o 2 meses.", "Total del día de la dieta con los macros en tres casillas.", "Aviso de versión nueva con botón de actualizar y esta lista de novedades.", "Cabecera de la pantalla inicial más limpia."]}, {"v": "v1.0", "f": "24/11/2026", "c": ["App instalable, con copia en el móvil y sincronización con la hoja.", "Entrada con Google.", "Dieta con alternativas por comida y día de entreno o descanso.", "Calorías y macros por línea, por comida y del día, con fruta y verdura.", "Tabla de equivalencias de hidratos y suplementación destacada.", "El cardio aparece al final de cada día de entrenamiento."]}]</script>
+<script type="application/json" id="cambiosData">[{"v": "v1.2", "f": "26/11/2026", "c": ["Autorrellenar pregunta qué día fue el entreno (hoy por defecto).", "Elegir el ROLL a mano: no deja saltarse ROLL vacíos y pide un segundo toque para abrir uno ya hecho.", "Gestor: las altas quedan en pausa hasta pulsar «Activar», que antes comprueba su hoja; botón «Comprobar su hoja» en la ficha.", "Pantalla inicial nueva: un botón por día de entrenamiento; al tocarlo se abre la sesión en el ROLL que corresponde.", "Los días se agrupan en bloques separados por el descanso, y el día ya completado en el ROLL en curso lleva un tick.", "Tipo de servicio por persona (Entreno, Dieta o Completo): la app enseña solo lo contratado.", "Gestor: ficha de cada asesorado con servicio, estado, objetivo y notas privadas, guardada en un libro central.", "Salto de carga propio de cada ejercicio: se recuerda y lo usa la sugerencia.", "EJ Alternativo: cambiar un ejercicio solo para la sesión de hoy, sin tocar la rutina.", "Gestor: pantalla de usuarios, con alta, baja y cambio de correo.", "Dieta: los botones del día pasan a llamarse Entreno y Rest."]}, {"v": "v1.1", "f": "25/11/2026", "c": ["Gestor (solo para quien administra, en ordenador): acceso a todos los usuarios, con la rutina de cada día en tabla y las gráficas de cada ejercicio.", "Los récords y las mejores marcas cuentan solo las sesiones del gimnasio habitual.", "Autorrellenar: copia en las series sin registrar los valores del ROLL anterior del mismo gimnasio.", "Al volver a la app se vuelve a leer la hoja, por si se ha escrito en ella a mano.", "Gimnasio de hoy: se elige entre los de tu lista u «otro». Se guarda junto a la fecha del ROLL y las comparaciones usan solo sesiones del mismo gimnasio.", "Los descansos se calculan con la fecha de cada sesión guardada en la hoja.", "La pantalla inicial indica qué día y qué ROLL toca según el orden de la hoja; si se salta un día, lo propone el primero para volver al orden.", "En la lista del día, cada ejercicio muestra sus técnicas (rest pause, drop set, EMOM, mini series, parciales, cadencia) y en qué series.", "Código de colores en peso, repeticiones y RIR según el objetivo y el ROLL anterior.", "Técnicas (rest pause, drop set, mini series, parciales, EMOM, cadencia) con su explicación, su registro y su cuenta atrás.", "La sugerencia indica si toca subir, mantener o bajar, y usa la serie anterior si no hay ROLL previo.", "Pantalla de progreso y récords por ROLL, con evolución y gráfica de cada ejercicio.", "Comparar dos ROLL de un ejercicio, serie a serie.", "La sugerencia de carga propone peso y repeticiones.", "Series de aproximación antes de la primera serie.", "Calculadora de discos (20, 10, 5, 2,5 y 1,25 kg, barra de 20) y saltos de 2,5 kg con mancuernas.", "Aviso de fin de descanso con preaviso a 10 segundos.", "Botones grandes en la serie y «igual que la serie anterior».", "Lista de la compra: compra semanal y pedido de suplementación para 15 días, 1 o 2 meses.", "Total del día de la dieta con los macros en tres casillas.", "Aviso de versión nueva con botón de actualizar y esta lista de novedades.", "Cabecera de la pantalla inicial más limpia."]}, {"v": "v1.0", "f": "24/11/2026", "c": ["App instalable, con copia en el móvil y sincronización con la hoja.", "Entrada con Google.", "Dieta con alternativas por comida y día de entreno o descanso.", "Calorías y macros por línea, por comida y del día, con fruta y verdura.", "Tabla de equivalencias de hidratos y suplementación destacada.", "El cardio aparece al final de cada día de entrenamiento."]}]</script>
 <script>
 /* ============ PERFILES ============ */
 const VERSION='v1.2';
-const BUILD=6;   // sube en cada publicación dentro de la misma versión: es lo que detecta el aviso de actualización
+const BUILD=7;   // sube en cada publicación dentro de la misma versión: es lo que detecta el aviso de actualización
 
 /* Diagnóstico: cualquier fallo silencioso se pinta en pantalla. No depende
    de ningún elemento del maquetado, se crea el suyo. */
@@ -1013,14 +1017,26 @@ function renderPick(){
   });
   const nR=(rollsUsed[key()]&&rollsUsed[key()].n)||12;
   const used=(rollsUsed[key()]&&rollsUsed[key()].used)||[];
+  // sin huecos: solo se puede abrir un ROLL hecho o el siguiente a uno hecho
+  const libre=n=>n===1||used.includes(n)||used.includes(n-1);
   $('rollPick').innerHTML=Array.from({length:nR},(_,k)=>{
-    const n=k+1;
-    return `<button class="${pickRoll===n?'on':''} ${used.includes(n)?'used':''}" data-r="${n}">${n}</button>`;
+    const n=k+1, ok=libre(n);
+    return `<button class="${pickRoll===n?'on':''} ${used.includes(n)?'used':''}" data-r="${n}"${ok?'':' disabled title="Antes hay que hacer el ROLL '+(n-1)+'"'}>${n}</button>`;
   }).join('');
-  [...$('rollPick').children].forEach(b=>b.onclick=()=>{ pickRoll=+b.dataset.r; renderPick(); });
+  [...$('rollPick').children].forEach(b=>b.onclick=()=>{ if(b.disabled) return; pickRoll=+b.dataset.r; cargaConf=0; renderPick(); });
   $('bLoad').disabled=!pickRoll||!ds.length;
+  $('bLoad').textContent=cargaConf&&cargaConf===pickRoll?'El ROLL '+pickRoll+' ya está hecho · toca otra vez para abrirlo':'Cargar sesión';
 }
-let abriendoDia=false;
+let abriendoDia=false, cargaConf=0, cargaT=null;
+/* Abrir a mano un ROLL ya completo pide un segundo toque: lo que se registre
+   escribirá encima. */
+function cargaMano(){
+  const r=rollsUsed[key()];
+  const hecho=!!(r&&r.lleno&&r.filas&&pickRoll&&r.lleno[pickRoll]>=r.filas);
+  clearTimeout(cargaT);
+  if(hecho&&cargaConf!==pickRoll){ cargaConf=pickRoll; renderPick(); cargaT=setTimeout(()=>{ cargaConf=0; renderPick(); },6000); return; }
+  cargaConf=0; loadSession(false);
+}
 const key=()=>P.id+'|'+((days[P.id]||[])[pickDay]||'');
 
 async function loadDays(){
@@ -1229,12 +1245,22 @@ function pintaAuto(){
   b.onclick=()=>{
     if(!b.classList.contains('conf')){
       b.classList.add('conf'); b.textContent='Confirmar: copiar '+p.length+' series';
-      autoT=setTimeout(pintaAuto,5000); return;
+      const hoy=isoDia(new Date());
+      n.innerHTML='<label class="autoF">¿Qué día fue? <input type="date" id="autoF" value="'+hoy+'" max="'+hoy+'"></label>'
+        +'Se apunta esa fecha en el ROLL. Vuelve a tocar el botón para copiar.';
+      autoT=setTimeout(pintaAuto,30000); return;
     }
-    autoRellena();
+    const f=$('autoF'); autoRellena(f&&f.value?f.value:'');
   };
 }
-function autoRellena(){
+const isoDia=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+/* «2026-11-24» → «24NOV», con el gimnasio de la sesión detrás si no es el habitual */
+function fechaDe(iso){
+  const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso||''));
+  if(!m) return fechaCelda();
+  return String(+m[3])+MESES[+m[2]-1]+(S&&S.gym?' · '+S.gym:'');
+}
+function autoRellena(dia){
   const L=S.L, q=queue(); let k=0;
   autoPend().forEach(s=>{
     const p=s.prev, vals=new Array(L.stride).fill(null);
@@ -1250,7 +1276,7 @@ function autoRellena(){
       rir:L.f.rir!==null&&vals[L.f.rir]!==null?vals[L.f.rir]:undefined, aj:L.f.aj!==null?vals[L.f.aj]:undefined };
     s.hist[S.roll-1]=Object.assign({n:S.roll},s.cur);
     const it={ pid:P.id, day:S.day, row:s.row, c0:S.cc, c1:S.cc+L.stride-1,
-      values:vals, dateCol:S.cc+1, date:fechaCelda() };
+      values:vals, dateCol:S.cc+1, date:fechaDe(dia) };
     guardaLocal(it); q.push(it); k++;
   });
   if(!k) return;
@@ -2241,7 +2267,11 @@ function pintaUsuarios(){
       +'<div style="grid-column:1/-1"><label>Objetivo</label><input type="text" id="gfObj" maxlength="160" value="'+esc(F.objetivo)+'"></div>'
       +'<div style="grid-column:1/-1"><label>Notas privadas · el cliente no las ve nunca</label><textarea id="gfNot" rows="5">'+esc(F.notas)+'</textarea></div>'
       +(F.fijo?'':'<div class="chk" style="grid-column:1/-1"><input type="checkbox" id="gfCom"'+(/^s/i.test(F.compartida)?' checked':'')+'><span>Compartir su hoja de cálculo con su correo (no hace falta para usar la app)</span></div>')
-      +'<div><button class="go2" id="gfOk">Guardar ficha</button></div></div>'
+      +'<div><button class="go2" id="gfOk">Guardar ficha</button></div>'
+      +(F.fijo?'':'<div><button class="go2" id="gfChk">Comprobar su hoja</button></div>'
+        +(F.estado==='pausa'?'<div><button class="go2 go3" id="gfAct">Activar</button></div>':''))
+      +'</div>'
+      +(F.fijo?'':'<div class="gmsg" id="gfChkR">'+(F.estado==='pausa'?'En pausa: todavía no puede entrar. «Activar» comprueba antes su hoja.':'')+'</div>')
       +(F.fijo?'<div class="gmsg">Usuario fijo: su correo y su acceso se cambian en el script. Aquí se guardan su servicio y tus notas.</div>':'')
       +'<div class="gmsg" id="gfPlanes"></div></div>';
   }
@@ -2277,6 +2307,24 @@ function pintaUsuarios(){
       catch(e){ gestUmsg=['bad','No se ha podido guardar: '+esc((e&&e.message)||e)+'.']; }
       await gestRefresca(); gestUsuarios();
     };
+    const pinta=(r,cab)=>{ const c=$('gfChkR'); if(c) c.innerHTML=cab+(r.lineas.length?'<br>'+r.lineas.map(esc).join('<br>'):''); };
+    if($('gfChk')) $('gfChk').onclick=async()=>{
+      const b=$('gfChk'); b.disabled=true; b.textContent='Comprobando…';
+      try{ const r=await compruebaHoja(F); pinta(r,r.ok?'<b>La hoja está bien</b>: la app la sabe leer.':'<b>La hoja tiene problemas</b>:'); }
+      catch(e){ pinta({lineas:[]},'No se ha podido comprobar: '+esc((e&&e.message)||e)+'.'); }
+      b.disabled=false; b.textContent='Comprobar su hoja';
+    };
+    if($('gfAct')) $('gfAct').onclick=async()=>{
+      const b=$('gfAct'); b.disabled=true; b.textContent='Comprobando su hoja…';
+      try{
+        const r=await compruebaHoja(F);
+        if(!r.ok){ pinta(r,'<b>No se activa</b>: antes hay que arreglar su hoja.'); b.disabled=false; b.textContent='Activar'; return; }
+        b.textContent='Activando…';
+        await api({action:'g_ficha',id:F.id,campos:{estado:'activo'}},60000);
+        gestUmsg=['ok','<b>'+esc(F.nombre)+'</b> activado: ya puede entrar con «Continuar con Google»'+(F.correos.length?' usando '+esc(F.correos.join(', ')):'')+'.'];
+      }catch(e){ gestUmsg=['bad','No se ha podido activar: '+esc((e&&e.message)||e)+'.']; }
+      await gestRefresca(); gestUsuarios();
+    };
   }
   const sv=()=>{ const d=$('gaSrv').value==='entreno'; $('gaDie').disabled=d; if(d) $('gaDie').checked=false; };
   $('gaSrv').onchange=sv; sv();
@@ -2287,16 +2335,36 @@ function pintaUsuarios(){
     const cuerpo={action:'g_alta',nombre:nom,correo:cor,plantilla:$('gaPl').value,servicio:$('gaSrv').value,sexo:$('gaSex').value,conDieta:$('gaDie').checked,compartir:$('gaCom').checked};
     $('gaOk').disabled=true; $('gaOk').textContent='Creando su hoja…';
     try{
-      const r=await api(cuerpo,180000);
+      const r=await api(Object.assign({clave:nom.toLowerCase()+'|'+cor+'|'+Date.now()},cuerpo),180000);
       gestFicha=r.id;
-      gestUmsg=['ok','<b>'+esc(nom)+'</b> ya tiene acceso. Pásale la dirección de la app y que entre con «Continuar con Google» usando '+esc(cor)+'. '
-        +'<a href="https://docs.google.com/spreadsheets/d/'+encodeURIComponent(r.hoja)+'/edit" target="_blank" rel="noopener" style="color:var(--acc)">Abrir su hoja</a>'];
+      const enl=' <a href="https://docs.google.com/spreadsheets/d/'+encodeURIComponent(r.hoja)+'/edit" target="_blank" rel="noopener" style="color:var(--acc)">Abrir su hoja</a>';
+      const av=(r.avisos||[]).length?'<br>Avisos: '+r.avisos.map(x=>esc(x.mensaje)).join(' · '):'';
+      gestUmsg=['ok',r.estado==='pausa'
+        ?'<b>'+esc(nom)+'</b> dado de alta <b>en pausa</b>: todavía no puede entrar. Prepara su rutina y su dieta en su hoja y, cuando esté lista, pulsa «Activar» en su ficha.'+av+enl
+        :'<b>'+esc(nom)+'</b> ya tiene acceso. Pásale la dirección de la app y que entre con «Continuar con Google» usando '+esc(cor)+'.'+enl];
     }catch(e){
-      const m=(e&&e.message)||String(e);
+      const m=(e&&e.message)||String(e), val=e&&e.datos&&e.datos.validacion;
+      if(val){ gestUmsg=['bad','No se ha dado de alta: la hoja copiada no es válida y se ha mandado a la papelera.<br>'
+        +(val.errores||[]).slice(0,8).map(x=>esc((x.pestana?x.pestana+' ':'')+(x.celda?x.celda+': ':'')+x.mensaje)).join('<br>')]; await gestRefresca(); gestUsuarios(); return; }
       gestUmsg=['bad',/abort|tiempo|timeout/i.test(m)?'La respuesta ha tardado demasiado. Puede que el alta se haya completado igualmente: mira la lista antes de repetirla.':'No se ha podido dar de alta: '+esc(m)+'.'];
     }
     await gestRefresca(); gestUsuarios();
   };
+}
+/* Comprueba la hoja de una persona: el validador del script y, además, que la
+   app sepa leer cada día con su propio intérprete. */
+async function compruebaHoja(F){
+  const lineas=[]; let ok=true;
+  const v=await api({action:'g_valida',perfil:F.id},90000);
+  (v.errores||[]).forEach(x=>{ ok=false; lineas.push('✗ '+(x.pestana?x.pestana+' ':'')+(x.celda?x.celda+': ':'')+x.mensaje); });
+  (v.avisos||[]).forEach(x=>lineas.push('· '+(x.pestana?x.pestana+': ':'')+x.mensaje));
+  if(ok&&F.servicio!=='dieta'){
+    const t=await api({action:'todo',perfil:F.id},90000), ps=t.pestanas||[];
+    if(!ps.length){ ok=false; lineas.push('✗ No tiene ningún día de entrenamiento'); }
+    ps.forEach(x=>{ const k='\u0000chk|'+x.nombre, bien=usaRolls(k,x.filas||[]); delete rollsUsed[k];
+      if(!bien){ ok=false; lineas.push('✗ '+x.nombre+': la app no sabe leer esta pestaña'); } });
+  }
+  return {ok:ok,lineas:lineas};
 }
 /* Vuelve a pedir la lista de perfiles del gestor (tras un alta o una baja) */
 async function gestRefresca(){
@@ -3018,7 +3086,7 @@ $('bGest').onclick=goGest; pintaBGest();
 $('gUsr').onclick=()=>{ gestDe='~usuarios'; gestUsuarios(); };
 $('bDieta').onclick=()=>goDieta('pick');
 $('bDieta2').onclick=()=>goDieta('sess');
-$('bLoad').onclick=()=>loadSession(false);
+$('bLoad').onclick=cargaMano;
 $('bReload').onclick=()=>loadSession(true);
 $('rSkip').onclick=stopRest;
 $('bNext').onclick=()=>{ if(cur<S.ex.length-1) openEx(cur+1); else goSess(); };
@@ -3147,7 +3215,8 @@ async function llama(body,ms){
   const j=await r.json();
   if(j.error){
     if(/falta ssid/.test(j.error)) throw new Error('el script de la hoja sigue en la versión antigua: falta implementar la nueva');
-    throw new Error(j.error==='token'?(String(body.token||'').indexOf('s-')===0?'la sesión ya no es válida: vuelve a entrar':'código incorrecto'):j.error);
+    const er=new Error(j.error==='token'?(String(body.token||'').indexOf('s-')===0?'la sesión ya no es válida: vuelve a entrar':'código incorrecto'):j.error);
+    er.datos=j; throw er;
   }
   return j;
 }
