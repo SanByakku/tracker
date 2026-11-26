@@ -307,6 +307,14 @@
   .gform input[type=text],.gform input[type=email],.gform select,.gu td input{width:100%;min-height:42px;border-radius:10px;border:1px solid var(--line);background:#12151b;color:var(--txt);font-size:15px;padding:0 12px;box-sizing:border-box}
   .gform .chk{display:flex;align-items:center;gap:8px;font-size:14px;min-height:42px}
   .gform button.go2{background:var(--acc);border-color:var(--acc);color:#10140a;min-height:42px;justify-content:center}
+  .gu tr.off td{opacity:.55}
+  .gu tr.sep td{font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:var(--dim);background:#12151b}
+  .gu .sv{font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;border:1px solid var(--line)}
+  .gu .sv-completo{color:var(--acc);border-color:#4e6318}
+  .gu .sv-entreno{color:#7fb6ff;border-color:#2c4a73}
+  .gu .sv-dieta{color:#ffb066;border-color:#7a4a1c}
+  .gu .ac button.on{border-color:var(--acc);color:var(--acc)}
+  .gform textarea{width:100%;border-radius:10px;border:1px solid var(--line);background:#12151b;color:var(--txt);font:inherit;font-size:14px;padding:10px 12px;box-sizing:border-box;resize:vertical}
   .gmsg{font-size:13px;margin:10px 2px 0;line-height:1.45;color:var(--dim)}
   .gmsg.bad{color:var(--bad)} .gmsg.ok{color:#8fd694}
   .gley{font-size:12px;color:var(--dim2);margin:0 2px 20px;line-height:1.5}
@@ -463,7 +471,7 @@
   </div>
 
   <div class="card toca hide" id="tocaCard"></div>
-  <div class="card">
+  <div class="card" id="cDia">
     <div class="lab">Día</div>
     <div class="grid2" id="dayPick"></div>
     <div class="errbox hide" id="dayErr">
@@ -472,7 +480,7 @@
       <button id="bDayRetry">Reintentar</button>
     </div>
   </div>
-  <div class="card">
+  <div class="card" id="cRoll">
     <div class="lab">ROLL (pasada del mesociclo)</div>
     <div class="rolls" id="rollPick"></div>
     <div class="msg" id="rollMsg">Los ROLL con datos aparecen en blanco.</div>
@@ -569,11 +577,11 @@
   <div class="bar"><i id="rBar"></i></div>
 </div>
 
-<script type="application/json" id="cambiosData">[{"v": "v1.2", "f": "26/11/2026", "c": ["Salto de carga propio de cada ejercicio: se recuerda y lo usa la sugerencia.", "EJ Alternativo: cambiar un ejercicio solo para la sesión de hoy, sin tocar la rutina.", "Gestor: pantalla de usuarios, con alta, baja y cambio de correo.", "Dieta: los botones del día pasan a llamarse Entreno y Rest."]}, {"v": "v1.1", "f": "25/11/2026", "c": ["Gestor (solo para quien administra, en ordenador): acceso a todos los usuarios, con la rutina de cada día en tabla y las gráficas de cada ejercicio.", "Los récords y las mejores marcas cuentan solo las sesiones del gimnasio habitual.", "Autorrellenar: copia en las series sin registrar los valores del ROLL anterior del mismo gimnasio.", "Al volver a la app se vuelve a leer la hoja, por si se ha escrito en ella a mano.", "Gimnasio de hoy: se elige entre los de tu lista u «otro». Se guarda junto a la fecha del ROLL y las comparaciones usan solo sesiones del mismo gimnasio.", "Los descansos se calculan con la fecha de cada sesión guardada en la hoja.", "La pantalla inicial indica qué día y qué ROLL toca según el orden de la hoja; si se salta un día, lo propone el primero para volver al orden.", "En la lista del día, cada ejercicio muestra sus técnicas (rest pause, drop set, EMOM, mini series, parciales, cadencia) y en qué series.", "Código de colores en peso, repeticiones y RIR según el objetivo y el ROLL anterior.", "Técnicas (rest pause, drop set, mini series, parciales, EMOM, cadencia) con su explicación, su registro y su cuenta atrás.", "La sugerencia indica si toca subir, mantener o bajar, y usa la serie anterior si no hay ROLL previo.", "Pantalla de progreso y récords por ROLL, con evolución y gráfica de cada ejercicio.", "Comparar dos ROLL de un ejercicio, serie a serie.", "La sugerencia de carga propone peso y repeticiones.", "Series de aproximación antes de la primera serie.", "Calculadora de discos (20, 10, 5, 2,5 y 1,25 kg, barra de 20) y saltos de 2,5 kg con mancuernas.", "Aviso de fin de descanso con preaviso a 10 segundos.", "Botones grandes en la serie y «igual que la serie anterior».", "Lista de la compra: compra semanal y pedido de suplementación para 15 días, 1 o 2 meses.", "Total del día de la dieta con los macros en tres casillas.", "Aviso de versión nueva con botón de actualizar y esta lista de novedades.", "Cabecera de la pantalla inicial más limpia."]}, {"v": "v1.0", "f": "24/11/2026", "c": ["App instalable, con copia en el móvil y sincronización con la hoja.", "Entrada con Google.", "Dieta con alternativas por comida y día de entreno o descanso.", "Calorías y macros por línea, por comida y del día, con fruta y verdura.", "Tabla de equivalencias de hidratos y suplementación destacada.", "El cardio aparece al final de cada día de entrenamiento."]}]</script>
+<script type="application/json" id="cambiosData">[{"v": "v1.2", "f": "26/11/2026", "c": ["Tipo de servicio por persona (Entreno, Dieta o Completo): la app enseña solo lo contratado.", "Gestor: ficha de cada asesorado con servicio, estado, objetivo y notas privadas, guardada en un libro central.", "Salto de carga propio de cada ejercicio: se recuerda y lo usa la sugerencia.", "EJ Alternativo: cambiar un ejercicio solo para la sesión de hoy, sin tocar la rutina.", "Gestor: pantalla de usuarios, con alta, baja y cambio de correo.", "Dieta: los botones del día pasan a llamarse Entreno y Rest."]}, {"v": "v1.1", "f": "25/11/2026", "c": ["Gestor (solo para quien administra, en ordenador): acceso a todos los usuarios, con la rutina de cada día en tabla y las gráficas de cada ejercicio.", "Los récords y las mejores marcas cuentan solo las sesiones del gimnasio habitual.", "Autorrellenar: copia en las series sin registrar los valores del ROLL anterior del mismo gimnasio.", "Al volver a la app se vuelve a leer la hoja, por si se ha escrito en ella a mano.", "Gimnasio de hoy: se elige entre los de tu lista u «otro». Se guarda junto a la fecha del ROLL y las comparaciones usan solo sesiones del mismo gimnasio.", "Los descansos se calculan con la fecha de cada sesión guardada en la hoja.", "La pantalla inicial indica qué día y qué ROLL toca según el orden de la hoja; si se salta un día, lo propone el primero para volver al orden.", "En la lista del día, cada ejercicio muestra sus técnicas (rest pause, drop set, EMOM, mini series, parciales, cadencia) y en qué series.", "Código de colores en peso, repeticiones y RIR según el objetivo y el ROLL anterior.", "Técnicas (rest pause, drop set, mini series, parciales, EMOM, cadencia) con su explicación, su registro y su cuenta atrás.", "La sugerencia indica si toca subir, mantener o bajar, y usa la serie anterior si no hay ROLL previo.", "Pantalla de progreso y récords por ROLL, con evolución y gráfica de cada ejercicio.", "Comparar dos ROLL de un ejercicio, serie a serie.", "La sugerencia de carga propone peso y repeticiones.", "Series de aproximación antes de la primera serie.", "Calculadora de discos (20, 10, 5, 2,5 y 1,25 kg, barra de 20) y saltos de 2,5 kg con mancuernas.", "Aviso de fin de descanso con preaviso a 10 segundos.", "Botones grandes en la serie y «igual que la serie anterior».", "Lista de la compra: compra semanal y pedido de suplementación para 15 días, 1 o 2 meses.", "Total del día de la dieta con los macros en tres casillas.", "Aviso de versión nueva con botón de actualizar y esta lista de novedades.", "Cabecera de la pantalla inicial más limpia."]}, {"v": "v1.0", "f": "24/11/2026", "c": ["App instalable, con copia en el móvil y sincronización con la hoja.", "Entrada con Google.", "Dieta con alternativas por comida y día de entreno o descanso.", "Calorías y macros por línea, por comida y del día, con fruta y verdura.", "Tabla de equivalencias de hidratos y suplementación destacada.", "El cardio aparece al final de cada día de entrenamiento."]}]</script>
 <script>
 /* ============ PERFILES ============ */
 const VERSION='v1.2 beta';
-const BUILD=1;   // sube en cada publicación dentro de la misma versión: es lo que detecta el aviso de actualización
+const BUILD=2;   // sube en cada publicación dentro de la misma versión: es lo que detecta el aviso de actualización
 
 /* Diagnóstico: cualquier fallo silencioso se pinta en pantalla. No depende
    de ningún elemento del maquetado, se crea el suyo. */
@@ -608,7 +616,8 @@ try{
 }catch(e){}
 function ponPerfiles(lista){
   PROFILES=(lista||[]).filter(x=>x&&x.id).map(x=>(
-    {id:String(x.id), name:String(x.name||x.id), dias:(x.dias||[]).map(String)}));
+    {id:String(x.id), name:String(x.name||x.id), dias:(x.dias||[]).map(String),
+     servicio:(['entreno','dieta'].indexOf(x.servicio)>=0?x.servicio:'completo')}));
   try{ localStorage.setItem(PERFK,JSON.stringify(PROFILES)); }catch(e){}
   P=PROFILES.find(x=>x.id===P.id)||PROFILES[0]||NADIE;
 }
@@ -893,7 +902,17 @@ function renderProf(){
     renderProf(); $('rollMsg').textContent=''; loadDays();
   });
 }
+/* Servicio contratado: «entreno», «dieta» o «completo». La app enseña solo lo suyo. */
+const servicioDe=p=>(p&&(p.servicio==='entreno'||p.servicio==='dieta'))?p.servicio:'completo';
+function aplicaServicio(){
+  const sv=servicioDe(P), sinEntreno=sv==='dieta', sinDieta=sv==='entreno';
+  ['cDia','cRoll','bLoad','bProg'].forEach(i=>{ const e=$(i); if(e) e.classList.toggle('hide',sinEntreno); });
+  if(sinEntreno) $('tocaCard').classList.add('hide');
+  ['bDieta','bDieta2'].forEach(i=>{ const e=$(i); if(e) e.classList.toggle('hide',sinDieta); });
+  const b=$('bDieta'); if(b){ b.classList.toggle('go',sinEntreno); b.classList.toggle('bigbtn',!sinEntreno); b.textContent=sinEntreno?'Ver mi dieta':'Dieta'; }
+}
 function renderPick(){
+  aplicaServicio();
   const ds=days[P.id]||[];
   const sd=ds.length?sugDia():-1;
   $('dayPick').innerHTML = ds.length
@@ -920,6 +939,7 @@ async function loadDays(){
     if(!days[P.id]||!days[P.id].length) days[P.id]=(P.dias||[]).slice();
     const caja=$('dayErr'); if(caja) caja.classList.add('hide');
   }catch(err){ diag('loadDays (inicio): '+(err&&err.message||err)); }
+  if(servicioDe(P)==='dieta'){ days[P.id]=[]; setSyn('ok','listo'); toca=null; renderPick(); return; }   // solo dieta: no hay días
   if(days[P.id].length){
     pickDay=sugDia(); setSyn('ok','listo'); renderPick(); scanRolls();
     refrescarDias();                     // al margen, por si cambian
@@ -1389,6 +1409,7 @@ async function calculaToca(){
 }
 function pintaToca(faltan,txt){
   const c=$('tocaCard'); if(!c) return;
+  if(servicioDe(P)==='dieta'){ c.classList.add('hide'); return; }
   if(!toca||toca.pid!==P.id){
     if(txt){ c.classList.remove('hide'); c.innerHTML='<div class="lab">Orden</div><div class="de">'+esc(txt)+'</div>'; }
     else c.classList.add('hide');
@@ -2052,7 +2073,7 @@ async function goGest(){
   try{
     const j=await api({action:'perfiles',todos:true});
     if(!j.gestor){ ponGestor(false); salGest(); return; }
-    gestLista=(j.todos||[]).filter(x=>x&&x.id).map(x=>({id:String(x.id),name:String(x.name||x.id),dias:(x.dias||[]).map(String)}));
+    gestLista=(j.todos||[]).filter(x=>x&&x.id).map(x=>({id:String(x.id),name:String(x.name||x.id),dias:(x.dias||[]).map(String),servicio:servicioDe(x)}));
     try{ localStorage.setItem(GESTK+'.lista',JSON.stringify(gestLista)); }catch(e){}
   }catch(e){
     try{ gestLista=JSON.parse(localStorage.getItem(GESTK+'.lista')||'[]')||[]; }catch(e2){ gestLista=[]; }
@@ -2084,7 +2105,7 @@ async function gestAbre(p){
 function salGest(){ gestPid=''; $('vGest').classList.add('hide'); document.body.classList.remove('ancho'); $('bPick').click(); }
 /* ---- Usuarios: quién tiene acceso, alta y baja. Todo lo decide el script;
         aquí solo se pide y se pinta. ---- */
-let gestU=null, gestUmsg=null, gestBaja='', gestEdita='';
+let gestU=null, gestUmsg=null, gestBaja='', gestEdita='';   // (los dos últimos ya no se usan)
 async function gestUsuarios(recarga){
   $('gModo').innerHTML=''; $('gDias').innerHTML=''; $('sub').textContent='Usuarios';
   [...$('gProf').children].forEach(b=>b.classList.remove('on'));
@@ -2097,59 +2118,81 @@ async function gestUsuarios(recarga){
   if($('vGest').classList.contains('hide')||!$('gUsr').classList.contains('on')) return;
   pintaUsuarios();
 }
+const SRV=[['entreno','Entreno'],['dieta','Dieta'],['completo','Completo']];
+const EST=[['activo','Activo'],['pausa','En pausa'],['baja','Baja']];
+const opts=(L,v)=>L.map(x=>'<option value="'+x[0]+'"'+(x[0]===v?' selected':'')+'>'+x[1]+'</option>').join('');
+let gestFicha='';
 function pintaUsuarios(){
-  const U=gestU||{perfiles:[],personas:[]};
-  const de=id=>U.personas.find(p=>(p.perfiles||[]).indexOf(id)>=0)||null;
-  let h='<div class="gu"><div class="gscroll"><table><thead><tr><th>Usuario</th><th>Entra con</th><th>Tipo</th><th></th></tr></thead><tbody>';
-  U.perfiles.forEach(p=>{
-    const per=de(p.id), cs=(per&&per.correos)||[];
-    h+='<tr data-id="'+esc(p.id)+'"><td><b>'+esc(p.nombre)+'</b><small>'+esc(p.id)+'</small></td><td>'
-      +(gestEdita===p.id?'<input id="gCor" type="email" value="'+esc(cs.join(', '))+'" placeholder="nombre@correo.com">'
-        :(cs.length?esc(cs.join(', ')):'<small>sin correo: no puede entrar con Google</small>'))+'</td>'
-      +'<td>'+(per&&per.gestor?'Gestor':(p.fijo?'Fijo (en el script)':'Alta desde la app'))+'</td><td><div class="ac">'
-      +'<a href="https://docs.google.com/spreadsheets/d/'+encodeURIComponent(p.hoja)+'/edit" target="_blank" rel="noopener">Abrir hoja</a>'
-      +'<button data-ver="'+esc(p.id)+'">Ver</button>'
-      +(p.fijo?'':(gestEdita===p.id?'<button data-gc="'+esc(p.id)+'">Guardar correo</button>':'<button data-ec="'+esc(p.id)+'">Cambiar correo</button>')
-        +'<button class="pel" data-baja="'+esc(p.id)+'">'+(gestBaja===p.id?'Confirmar baja':'Dar de baja')+'</button>')
-      +'</div></td></tr>';
-  });
-  h+='</tbody></table></div>'
-    +(gestUmsg?'<div class="gmsg '+gestUmsg[0]+'" id="gUmsg">'+gestUmsg[1]+'</div>':'')
-    +'<div class="card"><div class="lab">Dar de alta a alguien</div><div class="gform">'
+  const U=gestU||{perfiles:[]}, L=U.perfiles||[];
+  const act=L.filter(p=>p.estado!=='baja'), baj=L.filter(p=>p.estado==='baja');
+  const fila=p=>'<tr data-id="'+esc(p.id)+'" class="'+(p.estado!=='activo'?'off':'')+'"><td><b>'+esc(p.nombre)+'</b><small>'+esc(p.objetivo||p.id)+'</small></td>'
+    +'<td>'+(p.correos.length?esc(p.correos.join(', ')):'<small>sin correo: no puede entrar</small>')+'</td>'
+    +'<td><span class="sv sv-'+esc(p.servicio)+'">'+esc((SRV.find(x=>x[0]===p.servicio)||['',''])[1])+'</span></td>'
+    +'<td>'+(p.gestor?'Gestor':esc((EST.find(x=>x[0]===p.estado)||['',''])[1]))+(p.fijo&&!p.gestor?'<small>fijo en el script</small>':'')+'</td>'
+    +'<td><div class="ac"><button data-fi="'+esc(p.id)+'" class="'+(gestFicha===p.id?'on':'')+'">Ficha</button>'
+    +(p.estado==='baja'?'':'<button data-ver="'+esc(p.id)+'">Ver</button>')
+    +'<a href="https://docs.google.com/spreadsheets/d/'+encodeURIComponent(p.hoja)+'/edit" target="_blank" rel="noopener">Abrir hoja</a></div></td></tr>';
+  let h='<div class="gu"><div class="gscroll"><table><thead><tr><th>Usuario</th><th>Entra con</th><th>Servicio</th><th>Estado</th><th></th></tr></thead><tbody>'
+    +act.map(fila).join('')+(baj.length?'<tr class="sep"><td colspan="5">De baja</td></tr>'+baj.map(fila).join(''):'')+'</tbody></table></div>'
+    +(gestUmsg?'<div class="gmsg '+gestUmsg[0]+'" id="gUmsg">'+gestUmsg[1]+'</div>':'');
+  const F=L.find(p=>p.id===gestFicha);
+  if(F){
+    h+='<div class="card" id="gFicha"><div class="lab">Ficha de '+esc(F.nombre)+'</div><div class="gform">'
+      +(F.fijo?'':'<div><label>Nombre</label><input type="text" id="gfNom" maxlength="40" value="'+esc(F.nombre)+'"></div>'
+        +'<div><label>Correo de Google</label><input type="email" id="gfCor" maxlength="120" value="'+esc(F.correos.join(', '))+'" placeholder="nombre@correo.com"></div>')
+      +'<div><label>Servicio</label><select id="gfSrv">'+opts(SRV,F.servicio)+'</select></div>'
+      +(F.fijo?'':'<div><label>Estado</label><select id="gfEst">'+opts(EST,F.estado)+'</select></div>')
+      +'<div><label>Inicio</label><input type="text" id="gfIni" maxlength="20" value="'+esc(F.inicio)+'" placeholder="dd/mm/aaaa"></div>'
+      +'<div style="grid-column:1/-1"><label>Objetivo</label><input type="text" id="gfObj" maxlength="160" value="'+esc(F.objetivo)+'"></div>'
+      +'<div style="grid-column:1/-1"><label>Notas privadas · el cliente no las ve nunca</label><textarea id="gfNot" rows="5">'+esc(F.notas)+'</textarea></div>'
+      +(F.fijo?'':'<div class="chk" style="grid-column:1/-1"><input type="checkbox" id="gfCom"'+(/^s/i.test(F.compartida)?' checked':'')+'><span>Compartir su hoja de cálculo con su correo (no hace falta para usar la app)</span></div>')
+      +'<div><button class="go2" id="gfOk">Guardar ficha</button></div></div>'
+      +(F.fijo?'<div class="gmsg">Usuario fijo: su correo y su acceso se cambian en el script. Aquí se guardan su servicio y tus notas.</div>':'')
+      +'<div class="gmsg" id="gfPlanes"></div></div>';
+  }
+  h+='<div class="card"><div class="lab">Dar de alta a alguien</div><div class="gform">'
     +'<div><label>Nombre</label><input type="text" id="gaNom" maxlength="40" autocomplete="off"></div>'
     +'<div><label>Su correo de Google</label><input type="email" id="gaCor" maxlength="80" autocomplete="off" placeholder="nombre@correo.com"></div>'
-    +'<div><label>Copiar la rutina de</label><select id="gaPl">'+U.perfiles.map(p=>'<option value="'+esc(p.id)+'">'+esc(p.nombre)+'</option>').join('')+'</select></div>'
+    +'<div><label>Servicio</label><select id="gaSrv">'+opts(SRV,'completo')+'</select></div>'
+    +'<div><label>Plantilla: copiar de</label><select id="gaPl">'+act.map(p=>'<option value="'+esc(p.id)+'">'+esc(p.nombre)+'</option>').join('')+'</select></div>'
     +'<div class="chk"><input type="checkbox" id="gaDie"><span>Copiar también su dieta</span></div>'
+    +'<div class="chk"><input type="checkbox" id="gaCom"><span>Compartirle la hoja</span></div>'
     +'<div><button class="go2" id="gaOk">Dar de alta</button></div></div>'
-    +'<div class="gmsg">Se crea una hoja de cálculo nueva en tu Drive, copia de la elegida pero sin series ni fechas, y se comparte con ese correo. La persona entra en la app con «Continuar con Google» y solo ve lo suyo. Tarda alrededor de medio minuto.</div></div>'
-    +'<div class="gley">Dar de baja quita el acceso y saca a la persona de la lista; su hoja de cálculo no se borra. Los usuarios fijos se cambian en el script.</div></div>';
+    +'<div class="gmsg">Se crea una hoja de cálculo nueva en tu Drive, copia de la plantilla pero sin series ni fechas. Con «Entreno» llega sin dieta; con «Dieta», sin días de entrenamiento. La persona entra en la app con «Continuar con Google» y solo ve lo suyo. Tarda alrededor de medio minuto.</div></div>'
+    +'<div class="gley">Las fichas y las notas privadas se guardan en tu libro central'
+    +(U.central?' · <a href="https://docs.google.com/spreadsheets/d/'+encodeURIComponent(U.central)+'/edit" target="_blank" rel="noopener" style="color:var(--acc)">abrir libro central</a>':'')
+    +'. Dar de baja quita el acceso; la hoja de la persona no se borra.</div></div>';
   $('gBody').innerHTML=h;
   const B=$('gBody');
   [...B.querySelectorAll('[data-ver]')].forEach(b=>b.onclick=()=>{ const p=gestLista.find(x=>x.id===b.dataset.ver); if(p){ $('gUsr').classList.remove('on'); gestDia=0; gestAbre(p); } });
-  [...B.querySelectorAll('[data-ec]')].forEach(b=>b.onclick=()=>{ gestEdita=b.dataset.ec; gestBaja=''; pintaUsuarios(); const i=$('gCor'); if(i) i.focus(); });
-  [...B.querySelectorAll('[data-gc]')].forEach(b=>b.onclick=async()=>{
-    const id=b.dataset.gc, cs=String($('gCor').value).split(/[,;\s]+/).map(x=>x.trim()).filter(Boolean);
-    b.disabled=true; b.textContent='Guardando…';
-    try{ await api({action:'g_correos',id:id,correos:cs,compartir:true},60000); gestEdita=''; gestUmsg=['ok','Correo actualizado. La sesión del correo anterior deja de valer.']; }
-    catch(e){ gestUmsg=['bad','No se ha podido cambiar: '+esc((e&&e.message)||e)+'.']; }
-    gestUsuarios();
-  });
-  [...B.querySelectorAll('[data-baja]')].forEach(b=>b.onclick=async()=>{
-    const id=b.dataset.baja;
-    if(gestBaja!==id){ gestBaja=id; gestEdita=''; pintaUsuarios(); return; }
-    b.disabled=true; b.textContent='Dando de baja…';
-    try{ await api({action:'g_baja',id:id},60000); gestUmsg=['ok','Usuario dado de baja. Su hoja de cálculo sigue en tu Drive.']; }
-    catch(e){ gestUmsg=['bad','No se ha podido dar de baja: '+esc((e&&e.message)||e)+'.']; }
-    gestBaja=''; await gestRefresca(); gestUsuarios();
-  });
+  [...B.querySelectorAll('[data-fi]')].forEach(b=>b.onclick=()=>{ gestFicha=(gestFicha===b.dataset.fi?'':b.dataset.fi); gestUmsg=null; pintaUsuarios(); const f=$('gFicha'); if(f&&f.scrollIntoView) f.scrollIntoView({block:'nearest'}); });
+  if(F){
+    api({action:'g_planes',id:F.id}).then(r=>{ const c=$('gfPlanes'); if(!c||gestFicha!==F.id) return;
+      c.innerHTML=(r.planes||[]).length?'<b>Historial de planes</b><br>'+r.planes.slice().reverse().map(x=>esc(x.fecha)+' · '+esc(x.tipo)+' · '+esc(x.plan)+(x.comentario?' — '+esc(x.comentario):'')).join('<br>'):'Sin planes anotados todavía.'; }).catch(()=>{});
+    $('gfOk').onclick=async()=>{
+      const campos={ servicio:$('gfSrv').value, inicio:$('gfIni').value.trim(), objetivo:$('gfObj').value.trim(), notas:$('gfNot').value };
+      if(!F.fijo){
+        campos.nombre=$('gfNom').value.trim(); campos.estado=$('gfEst').value;
+        if($('gfCor').value.trim().toLowerCase()!==F.correos.join(', ')) campos.correo=$('gfCor').value.trim();
+        if($('gfCom').checked!==/^s/i.test(F.compartida)) campos.compartir=$('gfCom').checked;
+      }
+      $('gfOk').disabled=true; $('gfOk').textContent='Guardando…';
+      try{ await api({action:'g_ficha',id:F.id,campos:campos},60000); gestUmsg=['ok','Ficha de '+esc(campos.nombre||F.nombre)+' guardada.']; }
+      catch(e){ gestUmsg=['bad','No se ha podido guardar: '+esc((e&&e.message)||e)+'.']; }
+      await gestRefresca(); gestUsuarios();
+    };
+  }
+  const sv=()=>{ const d=$('gaSrv').value==='entreno'; $('gaDie').disabled=d; if(d) $('gaDie').checked=false; };
+  $('gaSrv').onchange=sv; sv();
   $('gaOk').onclick=async()=>{
     const nom=String($('gaNom').value).trim(), cor=String($('gaCor').value).trim().toLowerCase();
     if(!nom){ gestUmsg=['bad','Falta el nombre.']; pintaUsuarios(); return; }
     if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(cor)){ gestUmsg=['bad','Escribe su correo de Google: sin él no puede entrar.']; pintaUsuarios(); $('gaNom').value=nom; return; }
-    const pl=$('gaPl').value, die=$('gaDie').checked;
+    const cuerpo={action:'g_alta',nombre:nom,correo:cor,plantilla:$('gaPl').value,servicio:$('gaSrv').value,conDieta:$('gaDie').checked,compartir:$('gaCom').checked};
     $('gaOk').disabled=true; $('gaOk').textContent='Creando su hoja…';
     try{
-      const r=await api({action:'g_alta',nombre:nom,correo:cor,plantilla:pl,conDieta:die},180000);
+      const r=await api(cuerpo,180000);
+      gestFicha=r.id;
       gestUmsg=['ok','<b>'+esc(nom)+'</b> ya tiene acceso. Pásale la dirección de la app y que entre con «Continuar con Google» usando '+esc(cor)+'. '
         +'<a href="https://docs.google.com/spreadsheets/d/'+encodeURIComponent(r.hoja)+'/edit" target="_blank" rel="noopener" style="color:var(--acc)">Abrir su hoja</a>'];
     }catch(e){
@@ -2163,7 +2206,7 @@ function pintaUsuarios(){
 async function gestRefresca(){
   try{
     const j=await api({action:'perfiles',todos:true});
-    gestLista=(j.todos||[]).filter(x=>x&&x.id).map(x=>({id:String(x.id),name:String(x.name||x.id),dias:(x.dias||[]).map(String)}));
+    gestLista=(j.todos||[]).filter(x=>x&&x.id).map(x=>({id:String(x.id),name:String(x.name||x.id),dias:(x.dias||[]).map(String),servicio:servicioDe(x)}));
     try{ localStorage.setItem(GESTK+'.lista',JSON.stringify(gestLista)); }catch(e){}
     $('gProf').innerHTML=gestLista.map(x=>'<button data-p="'+esc(x.id)+'">'+esc(x.name)+'</button>').join('');
     [...$('gProf').children].forEach(b=>b.onclick=()=>{ $('gUsr').classList.remove('on'); gestDia=0; gestAbre(gestLista.find(x=>x.id===b.dataset.p)); });
@@ -2182,9 +2225,9 @@ function gestCel(d,e,s,n,antes){
 }
 function renderGest(){
   const D=gestDat||[];
-  if(!D.length){ $('gBody').innerHTML='<div class="msg">No he podido leer ningún día de este usuario.</div>'
+  if(!D.length){ $('gBody').innerHTML='<div class="msg">'+(servicioDe(gestP)==='dieta'?'Este usuario solo tiene dieta.':'No he podido leer ningún día de este usuario.')+'</div>'
     +'<button class="bigbtn" style="max-width:320px" onclick="goDieta(\'gest\',gestP)">Ver su dieta</button>'; return; }
-  $('gModo').innerHTML=[['tabla','Rutina'],['graf','Gráficas'],['dieta','Dieta']].map(m=>'<button class="'+(gestModo===m[0]?'on':'')+'" data-m="'+m[0]+'">'+m[1]+'</button>').join('');
+  $('gModo').innerHTML=[['tabla','Rutina'],['graf','Gráficas'],['dieta','Dieta']].filter(m=>m[0]!=='dieta'||servicioDe(gestP)!=='entreno').map(m=>'<button class="'+(gestModo===m[0]?'on':'')+'" data-m="'+m[0]+'">'+m[1]+'</button>').join('');
   [...$('gModo').children].forEach(b=>b.onclick=()=>{
     if(b.dataset.m==='dieta'){ goDieta('gest',gestP); return; }
     gestModo=b.dataset.m; renderGest(); });
