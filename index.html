@@ -620,7 +620,7 @@
 <script>
 /* ============ PERFILES ============ */
 const VERSION='v1.2';
-const BUILD=10;   // sube en cada publicación dentro de la misma versión: es lo que detecta el aviso de actualización
+const BUILD=11;   // sube en cada publicación dentro de la misma versión: es lo que detecta el aviso de actualización
 
 /* Diagnóstico: cualquier fallo silencioso se pinta en pantalla. No depende
    de ningún elemento del maquetado, se crea el suyo. */
@@ -2112,6 +2112,8 @@ function renderCmp(e){
 const e1rm=(w,r)=>w*(1+r/30);                       // Epley
 function setNum(c){
   if(!c) return null;
+  // series por tiempo (90s, 2 min): no son repeticiones, no entran en el 1RM
+  if(/\d\s*(s|seg|min|'|")/i.test(String(c.r||''))) return null;
   const w=numDe(c.w), r=parseInt(c.r);
   return (w===null||w<=0||isNaN(r)||r<1)?null:{w:w,r:r};
 }
@@ -2193,7 +2195,26 @@ async function goProg(){
    Solo lectura: la rutina de un día con todos sus ROLL en columnas y las
    gráficas de cada ejercicio. Usa los mismos datos que el resto de la app. */
 let gestDat=null, gestDia=0, gestModo='tabla', gestDe='';
+/* El gestor mira la hoja de otra persona: antes de leer la copia local se
+   contrasta con el script (una llamada con huellas), para no enseñar datos
+   viejos si la persona ha entrenado o si su hoja ha cambiado. Sin conexión
+   se queda con lo que haya guardado. */
+async function refrescaDe(p){
+  const ds=(days[p.id]||[]).slice(), hs={}, locs={};
+  for(const day of ds){ let l=null; try{ l=await dbGet(dkey(p.id,day)); }catch(e){} if(l){ locs[day]=l; if(l.h) hs[day]=l.h; } }
+  let j; try{ j=await api({action:'todo',perfil:p.id,huellas:hs},60000); }catch(e){ return; }
+  if(!j||!Array.isArray(j.pestanas)) return;
+  const ahora=Date.now();
+  for(const x of j.pestanas){
+    if(x.filas){ if(!detect(x.filas)) continue; aplicaCola(x.filas,p.id,x.nombre);
+      await dbSet(dkey(p.id,x.nombre),{rows:x.filas,ts:ahora,h:x.huella}); delete rollsUsed[p.id+'|'+x.nombre]; }
+    else if(locs[x.nombre]){ locs[x.nombre].ts=ahora; await dbSet(dkey(p.id,x.nombre),locs[x.nombre]); }
+  }
+  const nombres=j.pestanas.map(x=>x.nombre).filter(t=>!NODAY.test(t));
+  if(nombres.length) days[p.id]=nombres;
+}
 async function leeDiasDe(p){
+  await refrescaDe(p);
   const out=[], ds=(days[p.id]||[]).slice();
   for(const day of ds){
     let reg=null;
