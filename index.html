@@ -92,6 +92,10 @@
   .set .val small{color:var(--dim);font-weight:500;font-size:11px}
   .set.logged{background:var(--panel2);border-color:#2d323c}
   .set.logged .n{color:var(--acc)}
+  .set.actual{background:var(--accd);border-color:var(--acc)}
+  .set.actual .n{color:var(--acc)}
+  .set.actual .tgt{color:var(--txt)}
+  .set .now{font-size:11px;color:var(--acc);font-weight:800;letter-spacing:.8px;text-transform:uppercase}
   .set .dev{font-size:9.5px;padding:2px 5px;border-radius:5px;margin-left:5px;font-weight:700}
   .dev.up{background:#15321f;color:var(--ok)} .dev.down{background:#3a2016;color:var(--bad)}
   .dev.rb{background:#152a3a;color:var(--blue)} .dev.ro{background:#3a2a12;color:var(--warn)}
@@ -612,11 +616,11 @@
   <div class="bar"><i id="rBar"></i></div>
 </div>
 
-<script type="application/json" id="cambiosData">[{"v": "v1.2", "f": "26/11/2026", "c": ["Serie: peso, reps y RIR en la misma fila, con + encima y − debajo de cada uno. El RIR también se puede escribir (número, «RP» o «Fallo»).", "Fuera la tarjeta «Toca ahora» y su cálculo: la pantalla inicial es solo la elección de día.", "La rutina entera se pone al día con una sola llamada y solo baja los días que han cambiado.", "Si alguien cambió la hoja mientras registrabas, la serie no se pierde ni se escribe en otro sitio: aparece un aviso para ver, sobrescribir o descartar.", "El salto de carga de cada ejercicio y el gimnasio se guardan en el servidor: sirven en cualquier móvil.", "Autorrellenar pregunta qué día fue el entreno (hoy por defecto).", "Elegir el ROLL a mano: no deja saltarse ROLL vacíos y pide un segundo toque para abrir uno ya hecho.", "Gestor: las altas quedan en pausa hasta pulsar «Activar», que antes comprueba su hoja; botón «Comprobar su hoja» en la ficha.", "Pantalla inicial nueva: un botón por día de entrenamiento; al tocarlo se abre la sesión en el ROLL que corresponde.", "Los días se agrupan en bloques separados por el descanso, y el día ya completado en el ROLL en curso lleva un tick.", "Tipo de servicio por persona (Entreno, Dieta o Completo): la app enseña solo lo contratado.", "Gestor: ficha de cada asesorado con servicio, estado, objetivo y notas privadas, guardada en un libro central.", "Salto de carga propio de cada ejercicio: se recuerda y lo usa la sugerencia.", "EJ Alternativo: cambiar un ejercicio solo para la sesión de hoy, sin tocar la rutina.", "Gestor: pantalla de usuarios, con alta, baja y cambio de correo.", "Dieta: los botones del día pasan a llamarse Entreno y Rest."]}, {"v": "v1.1", "f": "25/11/2026", "c": ["Gestor (solo para quien administra, en ordenador): acceso a todos los usuarios, con la rutina de cada día en tabla y las gráficas de cada ejercicio.", "Los récords y las mejores marcas cuentan solo las sesiones del gimnasio habitual.", "Autorrellenar: copia en las series sin registrar los valores del ROLL anterior del mismo gimnasio.", "Al volver a la app se vuelve a leer la hoja, por si se ha escrito en ella a mano.", "Gimnasio de hoy: se elige entre los de tu lista u «otro». Se guarda junto a la fecha del ROLL y las comparaciones usan solo sesiones del mismo gimnasio.", "Los descansos se calculan con la fecha de cada sesión guardada en la hoja.", "La pantalla inicial indica qué día y qué ROLL toca según el orden de la hoja; si se salta un día, lo propone el primero para volver al orden.", "En la lista del día, cada ejercicio muestra sus técnicas (rest pause, drop set, EMOM, mini series, parciales, cadencia) y en qué series.", "Código de colores en peso, repeticiones y RIR según el objetivo y el ROLL anterior.", "Técnicas (rest pause, drop set, mini series, parciales, EMOM, cadencia) con su explicación, su registro y su cuenta atrás.", "La sugerencia indica si toca subir, mantener o bajar, y usa la serie anterior si no hay ROLL previo.", "Pantalla de progreso y récords por ROLL, con evolución y gráfica de cada ejercicio.", "Comparar dos ROLL de un ejercicio, serie a serie.", "La sugerencia de carga propone peso y repeticiones.", "Series de aproximación antes de la primera serie.", "Calculadora de discos (20, 10, 5, 2,5 y 1,25 kg, barra de 20) y saltos de 2,5 kg con mancuernas.", "Aviso de fin de descanso con preaviso a 10 segundos.", "Botones grandes en la serie y «igual que la serie anterior».", "Lista de la compra: compra semanal y pedido de suplementación para 15 días, 1 o 2 meses.", "Total del día de la dieta con los macros en tres casillas.", "Aviso de versión nueva con botón de actualizar y esta lista de novedades.", "Cabecera de la pantalla inicial más limpia."]}, {"v": "v1.0", "f": "24/11/2026", "c": ["App instalable, con copia en el móvil y sincronización con la hoja.", "Entrada con Google.", "Dieta con alternativas por comida y día de entreno o descanso.", "Calorías y macros por línea, por comida y del día, con fruta y verdura.", "Tabla de equivalencias de hidratos y suplementación destacada.", "El cardio aparece al final de cada día de entrenamiento."]}]</script>
+<script type="application/json" id="cambiosData">[{"v": "v1.2", "f": "26/11/2026", "c": ["La sesión se titula con el día que has tocado (por ejemplo «TORSO 1»); el rótulo de la hoja con el número de día ya no sale como título.", "La lista de series del ejercicio enseña todas: las hechas, la actual resaltada y las que faltan.", "Serie: peso, reps y RIR en la misma fila, con + encima y − debajo de cada uno. El RIR también se puede escribir (número, «RP» o «Fallo»).", "Fuera la tarjeta «Toca ahora» y su cálculo: la pantalla inicial es solo la elección de día.", "La rutina entera se pone al día con una sola llamada y solo baja los días que han cambiado.", "Si alguien cambió la hoja mientras registrabas, la serie no se pierde ni se escribe en otro sitio: aparece un aviso para ver, sobrescribir o descartar.", "El salto de carga de cada ejercicio y el gimnasio se guardan en el servidor: sirven en cualquier móvil.", "Autorrellenar pregunta qué día fue el entreno (hoy por defecto).", "Elegir el ROLL a mano: no deja saltarse ROLL vacíos y pide un segundo toque para abrir uno ya hecho.", "Gestor: las altas quedan en pausa hasta pulsar «Activar», que antes comprueba su hoja; botón «Comprobar su hoja» en la ficha.", "Pantalla inicial nueva: un botón por día de entrenamiento; al tocarlo se abre la sesión en el ROLL que corresponde.", "Los días se agrupan en bloques separados por el descanso, y el día ya completado en el ROLL en curso lleva un tick.", "Tipo de servicio por persona (Entreno, Dieta o Completo): la app enseña solo lo contratado.", "Gestor: ficha de cada asesorado con servicio, estado, objetivo y notas privadas, guardada en un libro central.", "Salto de carga propio de cada ejercicio: se recuerda y lo usa la sugerencia.", "EJ Alternativo: cambiar un ejercicio solo para la sesión de hoy, sin tocar la rutina.", "Gestor: pantalla de usuarios, con alta, baja y cambio de correo.", "Dieta: los botones del día pasan a llamarse Entreno y Rest."]}, {"v": "v1.1", "f": "25/11/2026", "c": ["Gestor (solo para quien administra, en ordenador): acceso a todos los usuarios, con la rutina de cada día en tabla y las gráficas de cada ejercicio.", "Los récords y las mejores marcas cuentan solo las sesiones del gimnasio habitual.", "Autorrellenar: copia en las series sin registrar los valores del ROLL anterior del mismo gimnasio.", "Al volver a la app se vuelve a leer la hoja, por si se ha escrito en ella a mano.", "Gimnasio de hoy: se elige entre los de tu lista u «otro». Se guarda junto a la fecha del ROLL y las comparaciones usan solo sesiones del mismo gimnasio.", "Los descansos se calculan con la fecha de cada sesión guardada en la hoja.", "La pantalla inicial indica qué día y qué ROLL toca según el orden de la hoja; si se salta un día, lo propone el primero para volver al orden.", "En la lista del día, cada ejercicio muestra sus técnicas (rest pause, drop set, EMOM, mini series, parciales, cadencia) y en qué series.", "Código de colores en peso, repeticiones y RIR según el objetivo y el ROLL anterior.", "Técnicas (rest pause, drop set, mini series, parciales, EMOM, cadencia) con su explicación, su registro y su cuenta atrás.", "La sugerencia indica si toca subir, mantener o bajar, y usa la serie anterior si no hay ROLL previo.", "Pantalla de progreso y récords por ROLL, con evolución y gráfica de cada ejercicio.", "Comparar dos ROLL de un ejercicio, serie a serie.", "La sugerencia de carga propone peso y repeticiones.", "Series de aproximación antes de la primera serie.", "Calculadora de discos (20, 10, 5, 2,5 y 1,25 kg, barra de 20) y saltos de 2,5 kg con mancuernas.", "Aviso de fin de descanso con preaviso a 10 segundos.", "Botones grandes en la serie y «igual que la serie anterior».", "Lista de la compra: compra semanal y pedido de suplementación para 15 días, 1 o 2 meses.", "Total del día de la dieta con los macros en tres casillas.", "Aviso de versión nueva con botón de actualizar y esta lista de novedades.", "Cabecera de la pantalla inicial más limpia."]}, {"v": "v1.0", "f": "24/11/2026", "c": ["App instalable, con copia en el móvil y sincronización con la hoja.", "Entrada con Google.", "Dieta con alternativas por comida y día de entreno o descanso.", "Calorías y macros por línea, por comida y del día, con fruta y verdura.", "Tabla de equivalencias de hidratos y suplementación destacada.", "El cardio aparece al final de cada día de entrenamiento."]}]</script>
 <script>
 /* ============ PERFILES ============ */
 const VERSION='v1.2';
-const BUILD=9;   // sube en cada publicación dentro de la misma versión: es lo que detecta el aviso de actualización
+const BUILD=10;   // sube en cada publicación dentro de la misma versión: es lo que detecta el aviso de actualización
 
 /* Diagnóstico: cualquier fallo silencioso se pinta en pantalla. No depende
    de ningún elemento del maquetado, se crea el suyo. */
@@ -1468,8 +1472,11 @@ function goSess(){
   $('vPick').classList.add('hide'); $('vEx').classList.add('hide'); $('vDiet').classList.add('hide');
   $('vSum').classList.add('hide'); $('vSess').classList.remove('hide');
   $('back').classList.add('hide');
-  $('ttl').textContent=S.banner||S.day;
-  $('sub').textContent=`${P.name} · ${S.day} · ROLL ${S.roll}`;
+  // el título es el día que se ha tocado; el rótulo de la hoja («DIA 2 · HOMBRO…»)
+  // numera el ciclo y confundía, así que solo se usan sus grupos musculares
+  const grupos=String(S.banner||'').replace(/^\s*D[IÍ]A\s*\d+\s*[·:.\-]?\s*/i,'').trim();
+  $('ttl').textContent=S.day;
+  $('sub').textContent=(grupos&&grupos.toUpperCase()!==String(S.day).toUpperCase()?grupos+' · ':'')+'ROLL '+S.roll;
   renderSess(); window.scrollTo(0,0);
   gymAbierto=false; pintaGym();
   pintaCardio();
@@ -1756,12 +1763,15 @@ function renderEx(){
   const e=S.ex[cur], L=S.L, idx=(editIdx!==null?editIdx:nextSet(e));
   $('exProg').textContent=`${doneCount(e)} de ${e.sets.length}`;
   $('sets').innerHTML=e.sets.map((s,i)=>{
-    if(i===idx) return '';
     const logged=hasVal(s.cur.w)||hasVal(s.cur.r);
     const prev=s.prev&&hasVal(s.prev.w)
       ? `<em>ROLL ${s.prev.n||S.roll-1}</em> ${esc(s.prev.w)}×${esc(s.prev.r)}${hasVal(s.prev.rir)?' @'+esc(s.prev.rir):''}` : '';
     const tk=tecnicaDe(s), cl=colores(s,s.cur);
     const tgt=`obj. ${esc(s.reps)}${hasVal(s.rir)?' @RIR '+esc(s.rir):''}`+(tk&&tk.t?'<span class="tchip">'+esc(TEC[tk.t][0])+'</span>':'');
+    // la serie que se está registrando, resaltada en su sitio
+    if(i===idx) return `<div class="set actual tap" data-act="1"><div class="n">${i+1}</div>
+      <div class="tgt">${tgt}${prev?'<br>'+prev:''}</div>
+      <div class="val"><span class="now">${editIdx!==null?'editando':'ahora'}</span></div></div>`;
     if(logged) return `<div class="set logged tap" data-edit="${i}"><div class="n">${i+1}</div>
       <div class="tgt">${tgt}${prev?'<br>'+prev:''}
       ${hasVal(s.cur.aj)?'<div class="aj">'+esc(s.cur.aj)+'</div>':''}</div>
@@ -1772,6 +1782,8 @@ function renderEx(){
       <div class="tgt">${tgt}${prev?'<br>'+prev:''}</div>
       <div class="val" style="color:var(--dim2);font-size:12px">pendiente</div></div>`;
   }).join('');
+  [...document.querySelectorAll('[data-act]')].forEach(b=>b.onclick=()=>{
+    const a=$('activeHost'); if(a&&a.scrollIntoView) a.scrollIntoView({block:'center',behavior:'smooth'}); });
   [...document.querySelectorAll('[data-edit]')].forEach(b=>b.onclick=()=>{
     editIdx=+b.dataset.edit; draft=null; renderEx();
     const a=$('activeHost'); if(a&&a.scrollIntoView) a.scrollIntoView({block:'center',behavior:'smooth'});
