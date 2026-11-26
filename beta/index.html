@@ -360,7 +360,9 @@
   .dias .pick.hecho small,.dias .pick.hecho small b{color:var(--dim)}
   .dias .pick .tick{position:absolute;right:16px;top:50%;transform:translateY(-50%);width:30px;height:30px;border-radius:50%;background:var(--acc);color:#10140a;font-size:18px;font-weight:900;display:flex;align-items:center;justify-content:center}
   .dias .pick.on small,.dias .pick.on small b{color:var(--acc)}
-  .dias .pick.cargando{opacity:.6}
+  .dias .pick.cargando{opacity:.75}
+  .dias .pick .spin{position:absolute;left:16px;top:50%;margin-top:-8px;width:16px;height:16px;border-color:rgba(16,20,10,.25);border-top-color:#10140a}
+  .dias .pick.hecho .spin{border-color:var(--line);border-top-color:var(--acc)}
   details.mas{margin:4px 0 10px}
   details.mas summary{font-size:13px;color:var(--dim);padding:10px 4px;cursor:pointer}
   .toca{border-color:var(--acc)}
@@ -613,7 +615,7 @@
 <script>
 /* ============ PERFILES ============ */
 const VERSION='v1.2 beta';
-const BUILD=5;   // sube en cada publicación dentro de la misma versión: es lo que detecta el aviso de actualización
+const BUILD=6;   // sube en cada publicación dentro de la misma versión: es lo que detecta el aviso de actualización
 
 /* Diagnóstico: cualquier fallo silencioso se pinta en pantalla. No depende
    de ningún elemento del maquetado, se crea el suyo. */
@@ -996,12 +998,18 @@ function renderPick(){
     pickDay=+b.dataset.d; pickRoll=null;
     if(modoMano()){ renderPick(); scanRolls(); return; }      // elección manual: solo se selecciona
     // lo normal: tocar el día abre la sesión en el ROLL que le corresponde
-    b.classList.add('cargando');
-    const k=key();
-    await scanRolls();
-    if(key()!==k||enSesion()) return;
-    if(!pickRoll) pickRoll=suggest();
-    loadSession(false);
+    if(abriendoDia) return;
+    abriendoDia=true; setTimeout(()=>{ abriendoDia=false; },8000);
+    b.classList.add('cargando'); b.insertAdjacentHTML('beforeend','<span class="spin"></span>');
+    const k=key(), day=(days[P.id]||[])[pickDay];
+    try{
+      // con copia en el móvil se abre al momento; la hoja se contrasta ya dentro de la sesión
+      const loc=await dbGet(dkey(P.id,day));
+      if(!(loc&&usaRolls(k,loc.rows))) await scanRolls();
+      if(key()!==k||enSesion()) return;
+      pickRoll=suggest();
+      await loadSession(false);
+    }finally{ abriendoDia=false; }
   });
   const nR=(rollsUsed[key()]&&rollsUsed[key()].n)||12;
   const used=(rollsUsed[key()]&&rollsUsed[key()].used)||[];
@@ -1012,6 +1020,7 @@ function renderPick(){
   [...$('rollPick').children].forEach(b=>b.onclick=()=>{ pickRoll=+b.dataset.r; renderPick(); });
   $('bLoad').disabled=!pickRoll||!ds.length;
 }
+let abriendoDia=false;
 const key=()=>P.id+'|'+((days[P.id]||[])[pickDay]||'');
 
 async function loadDays(){
