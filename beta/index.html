@@ -338,6 +338,21 @@
   .gym input{width:100%;margin-top:8px;min-height:44px;border-radius:10px;border:1px solid #2a2f3a;background:#12151b;color:inherit;font-size:16px;padding:0 12px;box-sizing:border-box}
   .gym .gn{font-size:12px;color:var(--dim);margin-top:8px;line-height:1.35}
   .toca .ul{font-size:12px;color:var(--dim);margin:-4px 0 8px}
+  .hola{margin:16px 4px 14px}
+  .hola .h1{font-size:23px;font-weight:800;line-height:1.2}
+  .hola .h2{font-size:14px;color:var(--dim);margin-top:3px}
+  .pie2{display:flex;gap:9px;margin:4px 0 10px}
+  .pie2 .bigbtn{flex:1;margin:0;min-height:60px;font-size:16px;font-weight:700}
+  .pie2 .bigbtn.go{background:var(--acc);color:#10140a;border-color:var(--acc)}
+  .minibtn{display:block;width:100%;background:none;border:0;color:var(--dim);font-size:13px;padding:10px 4px;text-align:left;cursor:pointer}
+  #tocaCard{display:none!important}     /* la pantalla inicial es solo la elección de día */
+  .grid2.dias{grid-template-columns:1fr;gap:9px}
+  .dias .pick{min-height:72px;padding:12px 16px;font-size:20px;font-weight:800;letter-spacing:.3px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;text-align:left;border-radius:14px}
+  .dias .pick small{font-size:13px;font-weight:600;color:var(--dim);letter-spacing:.3px}
+  .dias .pick small b{color:var(--acc);font-weight:700}
+  .dias .pick.cargando{opacity:.6}
+  details.mas{margin:4px 0 10px}
+  details.mas summary{font-size:13px;color:var(--dim);padding:10px 4px;cursor:pointer}
   .toca{border-color:var(--acc)}
   .toca .t1{font-size:22px;font-weight:800;letter-spacing:.3px;margin:2px 0 8px}
   .toca .t1 small{font-size:14px;font-weight:600;color:var(--dim);margin-left:6px}
@@ -462,34 +477,41 @@
       <input class="inp" id="iUrl" style="margin-top:8px" placeholder="URL del script (…/exec)" autocapitalize="off" autocorrect="off" spellcheck="false">
     </details>
   </div>
-  <div class="msg" id="cfgLink">Sesión iniciada · cambiar</div>
+  <div class="hola hide" id="hola"></div>
   <div id="novBox"></div>
 
-  <div class="card">
+  <div class="card" id="cPerfil">
     <div class="lab">Perfil</div>
     <div class="prof" id="profPick"></div>
   </div>
 
   <div class="card toca hide" id="tocaCard"></div>
   <div class="card" id="cDia">
-    <div class="lab">Día</div>
-    <div class="grid2" id="dayPick"></div>
+    <div class="lab">¿Qué entrenas hoy?</div>
+    <div class="grid2 dias" id="dayPick"></div>
     <div class="errbox hide" id="dayErr">
       <b>No he podido leer la lista de pestañas.</b>
       <span id="dayErrTxt"></span>
       <button id="bDayRetry">Reintentar</button>
     </div>
   </div>
-  <div class="card" id="cRoll">
-    <div class="lab">ROLL (pasada del mesociclo)</div>
-    <div class="rolls" id="rollPick"></div>
-    <div class="msg" id="rollMsg">Los ROLL con datos aparecen en blanco.</div>
+  <div class="pie2">
+    <button class="bigbtn" id="bDieta">Dieta</button>
+    <button class="bigbtn" id="bProg">Progreso</button>
   </div>
-  <button class="go" id="bLoad">Cargar sesión</button>
-  <button class="bigbtn" id="bDieta" style="margin-top:10px">Dieta</button>
-  <button class="bigbtn" id="bProg">Progreso y récords</button>
+  <details class="mas" id="masOpc">
+    <summary>Elegir el ROLL a mano</summary>
+    <div class="msg" style="margin:8px 2px">Con esto abierto, tocar un día solo lo selecciona: elige después el ROLL y pulsa «Cargar sesión».</div>
+    <div class="card" id="cRoll">
+      <div class="lab">ROLL (pasada del mesociclo)</div>
+      <div class="rolls" id="rollPick"></div>
+      <div class="msg" id="rollMsg">Los ROLL con datos aparecen en blanco.</div>
+    </div>
+    <button class="go" id="bLoad">Cargar sesión</button>
+  </details>
   <button class="bigbtn soloAncho hide" id="bGest">Gestor · todos los usuarios</button>
-  <button class="bigbtn" id="bNov">Novedades de la app</button>
+  <button class="minibtn" id="bNov">Novedades de la app</button>
+  <div class="msg" id="cfgLink">Sesión iniciada · cambiar</div>
   <div class="msg" id="pickMsg"></div>
   <div class="msg" id="locMsg"></div>
 </div>
@@ -577,11 +599,11 @@
   <div class="bar"><i id="rBar"></i></div>
 </div>
 
-<script type="application/json" id="cambiosData">[{"v": "v1.2", "f": "26/11/2026", "c": ["Tipo de servicio por persona (Entreno, Dieta o Completo): la app enseña solo lo contratado.", "Gestor: ficha de cada asesorado con servicio, estado, objetivo y notas privadas, guardada en un libro central.", "Salto de carga propio de cada ejercicio: se recuerda y lo usa la sugerencia.", "EJ Alternativo: cambiar un ejercicio solo para la sesión de hoy, sin tocar la rutina.", "Gestor: pantalla de usuarios, con alta, baja y cambio de correo.", "Dieta: los botones del día pasan a llamarse Entreno y Rest."]}, {"v": "v1.1", "f": "25/11/2026", "c": ["Gestor (solo para quien administra, en ordenador): acceso a todos los usuarios, con la rutina de cada día en tabla y las gráficas de cada ejercicio.", "Los récords y las mejores marcas cuentan solo las sesiones del gimnasio habitual.", "Autorrellenar: copia en las series sin registrar los valores del ROLL anterior del mismo gimnasio.", "Al volver a la app se vuelve a leer la hoja, por si se ha escrito en ella a mano.", "Gimnasio de hoy: se elige entre los de tu lista u «otro». Se guarda junto a la fecha del ROLL y las comparaciones usan solo sesiones del mismo gimnasio.", "Los descansos se calculan con la fecha de cada sesión guardada en la hoja.", "La pantalla inicial indica qué día y qué ROLL toca según el orden de la hoja; si se salta un día, lo propone el primero para volver al orden.", "En la lista del día, cada ejercicio muestra sus técnicas (rest pause, drop set, EMOM, mini series, parciales, cadencia) y en qué series.", "Código de colores en peso, repeticiones y RIR según el objetivo y el ROLL anterior.", "Técnicas (rest pause, drop set, mini series, parciales, EMOM, cadencia) con su explicación, su registro y su cuenta atrás.", "La sugerencia indica si toca subir, mantener o bajar, y usa la serie anterior si no hay ROLL previo.", "Pantalla de progreso y récords por ROLL, con evolución y gráfica de cada ejercicio.", "Comparar dos ROLL de un ejercicio, serie a serie.", "La sugerencia de carga propone peso y repeticiones.", "Series de aproximación antes de la primera serie.", "Calculadora de discos (20, 10, 5, 2,5 y 1,25 kg, barra de 20) y saltos de 2,5 kg con mancuernas.", "Aviso de fin de descanso con preaviso a 10 segundos.", "Botones grandes en la serie y «igual que la serie anterior».", "Lista de la compra: compra semanal y pedido de suplementación para 15 días, 1 o 2 meses.", "Total del día de la dieta con los macros en tres casillas.", "Aviso de versión nueva con botón de actualizar y esta lista de novedades.", "Cabecera de la pantalla inicial más limpia."]}, {"v": "v1.0", "f": "24/11/2026", "c": ["App instalable, con copia en el móvil y sincronización con la hoja.", "Entrada con Google.", "Dieta con alternativas por comida y día de entreno o descanso.", "Calorías y macros por línea, por comida y del día, con fruta y verdura.", "Tabla de equivalencias de hidratos y suplementación destacada.", "El cardio aparece al final de cada día de entrenamiento."]}]</script>
+<script type="application/json" id="cambiosData">[{"v": "v1.2", "f": "26/11/2026", "c": ["Pantalla inicial nueva: un botón por día de entrenamiento; al tocarlo se abre la sesión en el ROLL que corresponde.", "Tipo de servicio por persona (Entreno, Dieta o Completo): la app enseña solo lo contratado.", "Gestor: ficha de cada asesorado con servicio, estado, objetivo y notas privadas, guardada en un libro central.", "Salto de carga propio de cada ejercicio: se recuerda y lo usa la sugerencia.", "EJ Alternativo: cambiar un ejercicio solo para la sesión de hoy, sin tocar la rutina.", "Gestor: pantalla de usuarios, con alta, baja y cambio de correo.", "Dieta: los botones del día pasan a llamarse Entreno y Rest."]}, {"v": "v1.1", "f": "25/11/2026", "c": ["Gestor (solo para quien administra, en ordenador): acceso a todos los usuarios, con la rutina de cada día en tabla y las gráficas de cada ejercicio.", "Los récords y las mejores marcas cuentan solo las sesiones del gimnasio habitual.", "Autorrellenar: copia en las series sin registrar los valores del ROLL anterior del mismo gimnasio.", "Al volver a la app se vuelve a leer la hoja, por si se ha escrito en ella a mano.", "Gimnasio de hoy: se elige entre los de tu lista u «otro». Se guarda junto a la fecha del ROLL y las comparaciones usan solo sesiones del mismo gimnasio.", "Los descansos se calculan con la fecha de cada sesión guardada en la hoja.", "La pantalla inicial indica qué día y qué ROLL toca según el orden de la hoja; si se salta un día, lo propone el primero para volver al orden.", "En la lista del día, cada ejercicio muestra sus técnicas (rest pause, drop set, EMOM, mini series, parciales, cadencia) y en qué series.", "Código de colores en peso, repeticiones y RIR según el objetivo y el ROLL anterior.", "Técnicas (rest pause, drop set, mini series, parciales, EMOM, cadencia) con su explicación, su registro y su cuenta atrás.", "La sugerencia indica si toca subir, mantener o bajar, y usa la serie anterior si no hay ROLL previo.", "Pantalla de progreso y récords por ROLL, con evolución y gráfica de cada ejercicio.", "Comparar dos ROLL de un ejercicio, serie a serie.", "La sugerencia de carga propone peso y repeticiones.", "Series de aproximación antes de la primera serie.", "Calculadora de discos (20, 10, 5, 2,5 y 1,25 kg, barra de 20) y saltos de 2,5 kg con mancuernas.", "Aviso de fin de descanso con preaviso a 10 segundos.", "Botones grandes en la serie y «igual que la serie anterior».", "Lista de la compra: compra semanal y pedido de suplementación para 15 días, 1 o 2 meses.", "Total del día de la dieta con los macros en tres casillas.", "Aviso de versión nueva con botón de actualizar y esta lista de novedades.", "Cabecera de la pantalla inicial más limpia."]}, {"v": "v1.0", "f": "24/11/2026", "c": ["App instalable, con copia en el móvil y sincronización con la hoja.", "Entrada con Google.", "Dieta con alternativas por comida y día de entreno o descanso.", "Calorías y macros por línea, por comida y del día, con fruta y verdura.", "Tabla de equivalencias de hidratos y suplementación destacada.", "El cardio aparece al final de cada día de entrenamiento."]}]</script>
 <script>
 /* ============ PERFILES ============ */
 const VERSION='v1.2 beta';
-const BUILD=2;   // sube en cada publicación dentro de la misma versión: es lo que detecta el aviso de actualización
+const BUILD=3;   // sube en cada publicación dentro de la misma versión: es lo que detecta el aviso de actualización
 
 /* Diagnóstico: cualquier fallo silencioso se pinta en pantalla. No depende
    de ningún elemento del maquetado, se crea el suyo. */
@@ -906,20 +928,43 @@ function renderProf(){
 const servicioDe=p=>(p&&(p.servicio==='entreno'||p.servicio==='dieta'))?p.servicio:'completo';
 function aplicaServicio(){
   const sv=servicioDe(P), sinEntreno=sv==='dieta', sinDieta=sv==='entreno';
-  ['cDia','cRoll','bLoad','bProg'].forEach(i=>{ const e=$(i); if(e) e.classList.toggle('hide',sinEntreno); });
+  ['cDia','masOpc','bProg'].forEach(i=>{ const e=$(i); if(e) e.classList.toggle('hide',sinEntreno); });
   if(sinEntreno) $('tocaCard').classList.add('hide');
   ['bDieta','bDieta2'].forEach(i=>{ const e=$(i); if(e) e.classList.toggle('hide',sinDieta); });
-  const b=$('bDieta'); if(b){ b.classList.toggle('go',sinEntreno); b.classList.toggle('bigbtn',!sinEntreno); b.textContent=sinEntreno?'Ver mi dieta':'Dieta'; }
+  const b=$('bDieta'); if(b){ b.classList.toggle('go',sinEntreno); b.textContent=sinEntreno?'Ver mi dieta':'Dieta'; }
+}
+const modoMano=()=>{ const m=document.getElementById('masOpc'); return !!(m&&m.open); };
+function pintaHola(){
+  const h=$('hola'); if(!h) return;
+  if(!P.id||!CFG.token){ h.classList.add('hide'); return; }
+  let f=''; try{ f=new Date(Date.now()).toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'}); }catch(e){}
+  h.innerHTML='<div class="h1">Bienvenido/a, '+esc(P.name)+'</div><div class="h2">'+esc(f.charAt(0).toUpperCase()+f.slice(1))+'</div>';
+  h.classList.remove('hide');
+  const c=$('cPerfil'); if(c) c.classList.toggle('hide',visibles().length<2);
 }
 function renderPick(){
-  aplicaServicio();
+  aplicaServicio(); pintaHola();
   const ds=days[P.id]||[];
   const sd=ds.length?sugDia():-1;
   $('dayPick').innerHTML = ds.length
-    ? ds.map((d,i)=>`<button class="pick ${pickDay===i?'on':''}" data-d="${i}">${esc(d)}${i===sd?'<span class="hoy">TOCA</span>':''}</button>`).join('')
+    ? ds.map((d,i)=>{ const r=rollsUsed[P.id+'|'+d];
+        let sub='';
+        if(r&&r.lleno){ const n=suggest(P.id+'|'+d), med=r.lleno[n]>0&&r.lleno[n]<r.filas;
+          let ult=''; for(let x=r.n;x>=1&&!ult;x--) if(r.lleno[x]&&r.fecha&&r.fecha[x]) ult=gymDe(r.fecha[x]).f;
+          sub='<small><b>ROLL '+n+'</b>'+(med?' · a medias':'')+(ult?' · último '+esc(ult):'')+'</small>'; }
+        return `<button class="pick ${modoMano()&&pickDay===i?'on':''}" data-d="${i}">${esc(d)}${sub}</button>`; }).join('')
     : '<div class="msg">'+(CFG.url&&CFG.token?'Cargando pestañas…':'Pega tu código de acceso en el recuadro de arriba.')+'</div>';
-  [...$('dayPick').querySelectorAll('button')].forEach(b=>b.onclick=()=>{
-    pickDay=+b.dataset.d; pickRoll=null; renderPick(); scanRolls(); });
+  [...$('dayPick').querySelectorAll('button')].forEach(b=>b.onclick=async()=>{
+    pickDay=+b.dataset.d; pickRoll=null;
+    if(modoMano()){ renderPick(); scanRolls(); return; }      // elección manual: solo se selecciona
+    // lo normal: tocar el día abre la sesión en el ROLL que le corresponde
+    b.classList.add('cargando');
+    const k=key();
+    await scanRolls();
+    if(key()!==k||enSesion()) return;
+    if(!pickRoll) pickRoll=suggest();
+    loadSession(false);
+  });
   const nR=(rollsUsed[key()]&&rollsUsed[key()].n)||12;
   const used=(rollsUsed[key()]&&rollsUsed[key()].used)||[];
   $('rollPick').innerHTML=Array.from({length:nR},(_,k)=>{
@@ -1026,9 +1071,8 @@ async function scanRolls(){
   }
   renderPick();
 }
-function suggest(){
-  const r=rollsUsed[key()]; if(!r) return 1;
-  if(toca&&toca.pid===P.id&&(days[P.id]||[])[pickDay]===toca.day) return toca.roll;
+function suggest(k){
+  const r=rollsUsed[k||key()]; if(!r) return 1;
   if(!r.used.length) return 1;
   const max=Math.max.apply(null,r.used);
   for(let n=1;n<max;n++){ if(!r.lleno[n]) return n; }      // un ROLL saltado se rellena antes
@@ -1095,7 +1139,8 @@ function ponSust(e,nombre){
   const vals=new Array(L.stride).fill(null); vals[L.f.aj]=aj;
   s0.cur=Object.assign({},s0.cur,{aj:aj.trim()?aj:undefined});
   s0.hist[S.roll-1]=Object.assign({n:S.roll},s0.cur);
-  const it={ pid:P.id, day:S.day, row:s0.row, c0:S.cc, c1:S.cc+L.stride-1, values:vals, dateCol:S.cc+1, date:fechaCelda() };
+  // sin fecha: el día solo queda apuntado al registrar una serie
+  const it={ pid:P.id, day:S.day, row:s0.row, c0:S.cc, c1:S.cc+L.stride-1, values:vals };
   guardaLocal(it); const q=queue(); q.push(it); setQueue(q); flush();
   fijaPrev(S); sustAbierto=false; draft=null;
   const i=cur; openEx(i);
@@ -1350,6 +1395,7 @@ async function calculaToca(){
     inf.push({d:d,di:ds.indexOf(d),r:r});
   }
   if(P.id!==p.id) return;
+  if(!enSesion()&&!$('vPick').classList.contains('hide')) renderPick();     // etiquetas de ROLL de cada día
   if(faltan||!inf.length){ toca=null; pintaToca(faltan); return; }
   let u=null; try{ u=JSON.parse(localStorage.getItem(ULTK)||'null'); }catch(e){}
   if(u&&u.p!==p.id) u=null;
@@ -1403,7 +1449,7 @@ async function calculaToca(){
   const cambia=!toca||toca.pid!==t.pid||toca.day!==t.day||toca.roll!==t.roll;
   toca=t;
   pintaToca();
-  if(cambia&&!$('vPick').classList.contains('hide')&&!enSesion()){
+  if(cambia&&modoMano()&&!$('vPick').classList.contains('hide')&&!enSesion()){
     pickDay=t.di; pickRoll=null; renderPick(); scanRolls();
   }
 }
