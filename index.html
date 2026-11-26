@@ -115,6 +115,12 @@
     font-variant-numeric:tabular-nums}
   .field input:focus{outline:none;color:var(--acc)}
   .field .u{font-size:9.5px;color:var(--dim2);margin-top:1px}
+  .row3 .field.vf{display:flex;flex-direction:column;align-items:stretch;gap:5px;padding:8px 6px}
+  .vf>button{height:42px;border-radius:10px;background:var(--panel2);font-size:24px;font-weight:600;display:grid;place-items:center;line-height:1}
+  .vf>button:active{background:#2b303a}
+  .vf input{font-size:26px;padding:2px 0}
+  body.grande .vf>button{height:52px;font-size:28px}
+  body.grande .vf input{font-size:30px}
   .steps{display:flex;gap:4px;justify-content:center;margin-bottom:9px}
   .steps button{padding:5px 9px;border-radius:8px;background:var(--panel);border:1px solid var(--line);
     font-size:10.5px;color:var(--dim);font-weight:650}
@@ -606,11 +612,11 @@
   <div class="bar"><i id="rBar"></i></div>
 </div>
 
-<script type="application/json" id="cambiosData">[{"v": "v1.2", "f": "26/11/2026", "c": ["Fuera la tarjeta «Toca ahora» y su cálculo: la pantalla inicial es solo la elección de día.", "La rutina entera se pone al día con una sola llamada y solo baja los días que han cambiado.", "Si alguien cambió la hoja mientras registrabas, la serie no se pierde ni se escribe en otro sitio: aparece un aviso para ver, sobrescribir o descartar.", "El salto de carga de cada ejercicio y el gimnasio se guardan en el servidor: sirven en cualquier móvil.", "Autorrellenar pregunta qué día fue el entreno (hoy por defecto).", "Elegir el ROLL a mano: no deja saltarse ROLL vacíos y pide un segundo toque para abrir uno ya hecho.", "Gestor: las altas quedan en pausa hasta pulsar «Activar», que antes comprueba su hoja; botón «Comprobar su hoja» en la ficha.", "Pantalla inicial nueva: un botón por día de entrenamiento; al tocarlo se abre la sesión en el ROLL que corresponde.", "Los días se agrupan en bloques separados por el descanso, y el día ya completado en el ROLL en curso lleva un tick.", "Tipo de servicio por persona (Entreno, Dieta o Completo): la app enseña solo lo contratado.", "Gestor: ficha de cada asesorado con servicio, estado, objetivo y notas privadas, guardada en un libro central.", "Salto de carga propio de cada ejercicio: se recuerda y lo usa la sugerencia.", "EJ Alternativo: cambiar un ejercicio solo para la sesión de hoy, sin tocar la rutina.", "Gestor: pantalla de usuarios, con alta, baja y cambio de correo.", "Dieta: los botones del día pasan a llamarse Entreno y Rest."]}, {"v": "v1.1", "f": "25/11/2026", "c": ["Gestor (solo para quien administra, en ordenador): acceso a todos los usuarios, con la rutina de cada día en tabla y las gráficas de cada ejercicio.", "Los récords y las mejores marcas cuentan solo las sesiones del gimnasio habitual.", "Autorrellenar: copia en las series sin registrar los valores del ROLL anterior del mismo gimnasio.", "Al volver a la app se vuelve a leer la hoja, por si se ha escrito en ella a mano.", "Gimnasio de hoy: se elige entre los de tu lista u «otro». Se guarda junto a la fecha del ROLL y las comparaciones usan solo sesiones del mismo gimnasio.", "Los descansos se calculan con la fecha de cada sesión guardada en la hoja.", "La pantalla inicial indica qué día y qué ROLL toca según el orden de la hoja; si se salta un día, lo propone el primero para volver al orden.", "En la lista del día, cada ejercicio muestra sus técnicas (rest pause, drop set, EMOM, mini series, parciales, cadencia) y en qué series.", "Código de colores en peso, repeticiones y RIR según el objetivo y el ROLL anterior.", "Técnicas (rest pause, drop set, mini series, parciales, EMOM, cadencia) con su explicación, su registro y su cuenta atrás.", "La sugerencia indica si toca subir, mantener o bajar, y usa la serie anterior si no hay ROLL previo.", "Pantalla de progreso y récords por ROLL, con evolución y gráfica de cada ejercicio.", "Comparar dos ROLL de un ejercicio, serie a serie.", "La sugerencia de carga propone peso y repeticiones.", "Series de aproximación antes de la primera serie.", "Calculadora de discos (20, 10, 5, 2,5 y 1,25 kg, barra de 20) y saltos de 2,5 kg con mancuernas.", "Aviso de fin de descanso con preaviso a 10 segundos.", "Botones grandes en la serie y «igual que la serie anterior».", "Lista de la compra: compra semanal y pedido de suplementación para 15 días, 1 o 2 meses.", "Total del día de la dieta con los macros en tres casillas.", "Aviso de versión nueva con botón de actualizar y esta lista de novedades.", "Cabecera de la pantalla inicial más limpia."]}, {"v": "v1.0", "f": "24/11/2026", "c": ["App instalable, con copia en el móvil y sincronización con la hoja.", "Entrada con Google.", "Dieta con alternativas por comida y día de entreno o descanso.", "Calorías y macros por línea, por comida y del día, con fruta y verdura.", "Tabla de equivalencias de hidratos y suplementación destacada.", "El cardio aparece al final de cada día de entrenamiento."]}]</script>
+<script type="application/json" id="cambiosData">[{"v": "v1.2", "f": "26/11/2026", "c": ["Serie: peso, reps y RIR en la misma fila, con + encima y − debajo de cada uno. El RIR también se puede escribir (número, «RP» o «Fallo»).", "Fuera la tarjeta «Toca ahora» y su cálculo: la pantalla inicial es solo la elección de día.", "La rutina entera se pone al día con una sola llamada y solo baja los días que han cambiado.", "Si alguien cambió la hoja mientras registrabas, la serie no se pierde ni se escribe en otro sitio: aparece un aviso para ver, sobrescribir o descartar.", "El salto de carga de cada ejercicio y el gimnasio se guardan en el servidor: sirven en cualquier móvil.", "Autorrellenar pregunta qué día fue el entreno (hoy por defecto).", "Elegir el ROLL a mano: no deja saltarse ROLL vacíos y pide un segundo toque para abrir uno ya hecho.", "Gestor: las altas quedan en pausa hasta pulsar «Activar», que antes comprueba su hoja; botón «Comprobar su hoja» en la ficha.", "Pantalla inicial nueva: un botón por día de entrenamiento; al tocarlo se abre la sesión en el ROLL que corresponde.", "Los días se agrupan en bloques separados por el descanso, y el día ya completado en el ROLL en curso lleva un tick.", "Tipo de servicio por persona (Entreno, Dieta o Completo): la app enseña solo lo contratado.", "Gestor: ficha de cada asesorado con servicio, estado, objetivo y notas privadas, guardada en un libro central.", "Salto de carga propio de cada ejercicio: se recuerda y lo usa la sugerencia.", "EJ Alternativo: cambiar un ejercicio solo para la sesión de hoy, sin tocar la rutina.", "Gestor: pantalla de usuarios, con alta, baja y cambio de correo.", "Dieta: los botones del día pasan a llamarse Entreno y Rest."]}, {"v": "v1.1", "f": "25/11/2026", "c": ["Gestor (solo para quien administra, en ordenador): acceso a todos los usuarios, con la rutina de cada día en tabla y las gráficas de cada ejercicio.", "Los récords y las mejores marcas cuentan solo las sesiones del gimnasio habitual.", "Autorrellenar: copia en las series sin registrar los valores del ROLL anterior del mismo gimnasio.", "Al volver a la app se vuelve a leer la hoja, por si se ha escrito en ella a mano.", "Gimnasio de hoy: se elige entre los de tu lista u «otro». Se guarda junto a la fecha del ROLL y las comparaciones usan solo sesiones del mismo gimnasio.", "Los descansos se calculan con la fecha de cada sesión guardada en la hoja.", "La pantalla inicial indica qué día y qué ROLL toca según el orden de la hoja; si se salta un día, lo propone el primero para volver al orden.", "En la lista del día, cada ejercicio muestra sus técnicas (rest pause, drop set, EMOM, mini series, parciales, cadencia) y en qué series.", "Código de colores en peso, repeticiones y RIR según el objetivo y el ROLL anterior.", "Técnicas (rest pause, drop set, mini series, parciales, EMOM, cadencia) con su explicación, su registro y su cuenta atrás.", "La sugerencia indica si toca subir, mantener o bajar, y usa la serie anterior si no hay ROLL previo.", "Pantalla de progreso y récords por ROLL, con evolución y gráfica de cada ejercicio.", "Comparar dos ROLL de un ejercicio, serie a serie.", "La sugerencia de carga propone peso y repeticiones.", "Series de aproximación antes de la primera serie.", "Calculadora de discos (20, 10, 5, 2,5 y 1,25 kg, barra de 20) y saltos de 2,5 kg con mancuernas.", "Aviso de fin de descanso con preaviso a 10 segundos.", "Botones grandes en la serie y «igual que la serie anterior».", "Lista de la compra: compra semanal y pedido de suplementación para 15 días, 1 o 2 meses.", "Total del día de la dieta con los macros en tres casillas.", "Aviso de versión nueva con botón de actualizar y esta lista de novedades.", "Cabecera de la pantalla inicial más limpia."]}, {"v": "v1.0", "f": "24/11/2026", "c": ["App instalable, con copia en el móvil y sincronización con la hoja.", "Entrada con Google.", "Dieta con alternativas por comida y día de entreno o descanso.", "Calorías y macros por línea, por comida y del día, con fruta y verdura.", "Tabla de equivalencias de hidratos y suplementación destacada.", "El cardio aparece al final de cada día de entrenamiento."]}]</script>
 <script>
 /* ============ PERFILES ============ */
 const VERSION='v1.2';
-const BUILD=8;   // sube en cada publicación dentro de la misma versión: es lo que detecta el aviso de actualización
+const BUILD=9;   // sube en cada publicación dentro de la misma versión: es lo que detecta el aviso de actualización
 
 /* Diagnóstico: cualquier fallo silencioso se pinta en pantalla. No depende
    de ningún elemento del maquetado, se crea el suyo. */
@@ -1784,21 +1790,21 @@ function renderEx(){
   const pv=s.prev&&hasVal(s.prev.w)
     ? `ROLL ${s.prev.n||S.roll-1}: ${esc(s.prev.w)} kg × ${esc(s.prev.r)}${hasVal(s.prev.rir)?' @RIR '+esc(s.prev.rir):''}`
     : 'sin ROLL anterior';
-  const rirBlock = L.f.rir!==null ? `<div class="rirrow wide">${
-    [0,1,2,3,4,'RP','Fallo'].map(v=>`<button data-rir="${esc(v)}" class="${String(draft.rir)===String(v)?'on':''}">${typeof v==='number'?'RIR '+v:v}</button>`).join('')
-  }</div>` : '';
   const ajBlock = L.f.aj!==null
     ? `<input class="ajin" id="iA" placeholder="Ajuste — RP 12+4 · drop 8/8/7 · molestia…" value="${esc(draft.aj)}">` : '';
   $('activeHost').innerHTML=`<div class="active">
     <div class="hd"><div class="t">${editando?'Editando serie':'Serie'} <b>${idx+1}</b>/${e.sets.length} · fila ${s.row}</div>
       <div class="prev">obj. ${esc(s.reps)}${hasVal(s.rir)?' @RIR '+esc(s.rir):''}<br>${pv}</div></div>
-    <div class="row">
-      <div class="field"><div class="k">Peso</div><div class="ctl">
-        <button data-a="w-">−</button><input id="iW" inputmode="decimal" value="${esc(wNum)}"><button data-a="w+">+</button></div>
+    <div class="row row3">
+      <div class="field vf"><div class="k">Peso</div>
+        <button data-a="w+">+</button><input id="iW" inputmode="decimal" value="${esc(wNum)}"><button data-a="w-">−</button>
         <div class="u">kg</div></div>
-      <div class="field"><div class="k">Reps</div><div class="ctl">
-        <button data-a="r-">−</button><input id="iR" inputmode="text" value="${esc(draft.r)}"><button data-a="r+">+</button></div>
+      <div class="field vf"><div class="k">Reps</div>
+        <button data-a="r+">+</button><input id="iR" inputmode="text" value="${esc(draft.r)}"><button data-a="r-">−</button>
         <div class="u">obj. ${esc(s.reps)}</div></div>
+      ${L.f.rir!==null?`<div class="field vf"><div class="k">RIR</div>
+        <button data-a="i+">+</button><input id="iRir" inputmode="text" autocapitalize="none" autocorrect="off" spellcheck="false" value="${esc(draft.rir==null?'':draft.rir)}"><button data-a="i-">−</button>
+        <div class="u">${hasVal(s.rir)?'obj. '+esc(s.rir):'RIR'}</div></div>`:''}
     </div>
     <input class="wtxt" id="iWT" type="text" inputmode="text" autocapitalize="none" autocorrect="off"
       spellcheck="false" placeholder="o peso en texto — goma roja, peso corporal…" value="${esc(wTxt)}">
@@ -1811,7 +1817,7 @@ function renderEx(){
     <div id="discosBox">${discosHtml(draft.w)}</div>
     <div class="steps"><button data-st="0" class="${saltoDe(e)?'':'on'}">Auto</button>${[1,1.25,2.5,5,10].map(v=>`<button data-st="${v}" class="${saltoDe(e)===v?'on':''}">±${numfmt(v)}</button>`).join('')}</div>
     <div class="stn">Salto de carga de este ejercicio${saltoDe(e)?': se recuerda y lo usa la sugerencia':' (automático)'}</div>
-    ${rirBlock}${ajBlock}
+    ${ajBlock}
     ${draft.aviso
       ? `<div class="avis"><b>¿Seguro? Se sale de lo esperado</b>${esc(draft.aviso)}</div>
          <button class="logbtn" id="bAvSi">Sí, registrar así</button>
@@ -1823,8 +1829,16 @@ function renderEx(){
       : `<button class="logbtn" id="bLog">${(tecnicaDe(s)||{}).t==='EMOM'?'Registrar · siguiente minuto':'Registrar y descansar '+s.rest+'s'}</button>
          <button class="logbtn sec" id="bLogNo">Registrar sin temporizador</button>`}
   </div>`;
-  [...document.querySelectorAll('.ctl button')].forEach(b=>b.onclick=()=>{
+  [...document.querySelectorAll('.vf button[data-a]')].forEach(b=>b.onclick=()=>{
     const a=b.dataset.a;
+    if(a==='i+'||a==='i-'){
+      // RIR: + es más margen, − menos; por debajo de 0, «Fallo» y después «RP»
+      readInputs();
+      let i=RIRS.findIndex(x=>String(x).toLowerCase()===String(draft.rir).toLowerCase());
+      if(i<0){ const t=numRir(s.rir); i=RIRS.indexOf(t!==null&&t>=0&&t<=5?t:2); }
+      else i=Math.max(0,Math.min(RIRS.length-1,i+(a==='i+'?1:-1)));
+      draft.rir=RIRS[i]; const ir=$('iRir'); if(ir) ir.value=draft.rir; pintaColores(); return;
+    }
     if(a==='w+'||a==='w-'){ const t=$('iWT'); if(t) t.value=''; }   // ± = kilos
     readInputs();
     const r=parseInt(draft.r);
@@ -1838,8 +1852,8 @@ function renderEx(){
     if(wi) wi.value=typeof draft.w==='number'?numfmt(draft.w):draft.w;
     if(ri) ri.value=draft.r; pintaDiscos(); });
   // Al tocar un campo se selecciona todo: escribir reemplaza, no concatena
-  ['iW','iR','iWT'].forEach(id=>{ const el=$(id); if(!el) return;
-    el.onfocus=()=>{ try{ el.select(); }catch(e){} }; el.oninput=()=>{ readInputs(); pintaDiscos(); }; });
+  ['iW','iR','iWT','iRir'].forEach(id=>{ const el=$(id); if(!el) return;
+    el.onfocus=()=>{ try{ el.select(); }catch(e){} }; el.oninput=()=>{ readInputs(); pintaDiscos(); pintaColores(); }; });
   [...document.querySelectorAll('[data-prev]')].forEach(b=>b.onclick=()=>{
     readInputs(); draft.w=parseFloat(b.dataset.prev); if(b.dataset.prevr) draft.r=String(b.dataset.prevr); draft.sug=null; renderEx(); });
   cableaMini(e,idx);
@@ -1847,8 +1861,6 @@ function renderEx(){
     readInputs(); const v=parseFloat(b.dataset.st); ponSalto(e,v); wStep=v>0?v:2.5;
     if(draft&&draft.sug) draft=null;      // la sugerencia se recalcula con el salto nuevo
     renderEx(); });
-  [...document.querySelectorAll('[data-rir]')].forEach(b=>b.onclick=()=>{
-    readInputs(); const v=b.dataset.rir; draft.rir=/^\d+$/.test(v)?+v:v; renderEx(); });
   if(draft.aviso){
     $('bAvSi').onclick=()=>{ draft.avisoOk=draft.aviso; doLog(!!draft.avisoT); };
     $('bAvNo').onclick=()=>{ draft.aviso=null; renderEx(); const i=$('iW'); if(i) i.focus(); };
@@ -1862,6 +1874,7 @@ function renderEx(){
   }
 }
 function esNum(t){ return /^\d+([.,]\d+)?$/.test(t); }
+const RIRS=['RP','Fallo',0,1,2,3,4,5];
 function readInputs(){
   const w=$('iW'), r=$('iR'), a=$('iA');
   const wt=$('iWT'), txt=wt?wt.value.trim():'';
@@ -1873,6 +1886,9 @@ function readInputs(){
     draft.w = (t!==''&&esNum(t)) ? parseFloat(t.replace(',','.')) : raw;
   }
   if(r) draft.r=r.value.trim();
+  const ir=$('iRir');
+  if(ir){ const t=ir.value.trim();
+    draft.rir = t==='' ? '' : /^\d+$/.test(t) ? +t : /^rp/i.test(t) ? 'RP' : /^f/i.test(t) ? 'Fallo' : t; }
   if(a) draft.aj=a.value.trim();
   const tx=$('iTec'); if(tx) draft.tec=tx.value.trim();
 }
@@ -1914,8 +1930,7 @@ function pintaColores(){
   const e=S.ex[cur], idx=(editIdx!==null?editIdx:nextSet(e)); if(idx<0) return;
   const c=colores(e.sets[idx],draft), w=$('iW'), r=$('iR');
   if(w) w.className=c.w; if(r) r.className=c.r;
-  const b=document.querySelector('.rirrow button.on');
-  if(b){ b.classList.remove('c-ok','c-mas','c-menos','c-tec'); if(c.rir) b.classList.add(c.rir); }
+  const ir=$('iRir'); if(ir) ir.className=c.rir;
 }
 /* Técnicas: se leen de la columna Notas de la fila */
 const TEC={
