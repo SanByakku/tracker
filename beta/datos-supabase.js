@@ -244,15 +244,22 @@
   };
 })();
 
+
 /* ============================================================
-   Enganche: sustituye la llamada a Apps Script por la base.
-   Solo para los perfiles de PERFILES_SB; el resto siguen igual.
+   Enganche: intercepta las peticiones a Apps Script.
+   Se hace sobre fetch y NO sobre la función llama() de la app, porque la
+   app dispara la entrada con Google en su última línea, antes de que este
+   fichero pudiera sustituir nada. Interceptando la red da igual el orden.
+
+   Solo actúa para los perfiles de PERFILES_SB. Para el resto deja pasar la
+   petición original y la app funciona exactamente como siempre.
    ============================================================ */
 (function(){
   'use strict';
   var SB = window.TRACKER_SB;
   if (!SB) return;
 
+  var ES_SCRIPT = /^https:\/\/script\.google\.com\/macros\//;
   var MODO = 'trackerb.sb.modo.v1';
   var usaSB = false;
   try { usaSB = localStorage.getItem(MODO) === '1'; } catch (e) {}
@@ -261,14 +268,14 @@
     try { if (v) localStorage.setItem(MODO, '1'); else localStorage.removeItem(MODO); } catch (e) {}
   }
 
-  function correoDe(idt){
+  function cargaUtil(idt, campo){
     try {
       var p = idt.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
-      return String((JSON.parse(decodeURIComponent(escape(atob(p)))) || {}).email || '').toLowerCase();
+      return String((JSON.parse(decodeURIComponent(escape(atob(p)))) || {})[campo] || '');
     } catch (e) { return ''; }
   }
 
-  var PERFIL = null;                       // {id, nombre, correo, sexo, servicio, gestor}
+  var PERFIL = null;
 
   async function perfilActivo(){
     if (PERFIL) return PERFIL;
@@ -286,14 +293,11 @@
     if (a === 'perfiles') {
       var p = await perfilActivo();
       var c = await SB.cargaRutina(p.id);
-      return {
-        profiles: [{
+      return { profiles: [{
           id: p.id, name: p.nombre,
           dias: c.dias.filter(function(d){ return !d.es_descanso; }).map(function(d){ return d.nombre; }),
           servicio: p.servicio, sexo: p.sexo || ''
-        }],
-        gestor: !!p.gestor
-      };
+        }], gestor: !!p.gestor };
     }
 
     if (a === 'load') {
@@ -309,12 +313,9 @@
       var p3 = await perfilActivo();
       SB.limpia();
       var c3 = await SB.cargaRutina(p3.id);
-      return {
-        pestanas: c3.dias.filter(function(x){ return !x.es_descanso; }).map(function(d2){
-          var r = SB.rejilla(c3, d2);
-          return { nombre: d2.nombre, filas: r.filas, huella: String(Date.now()) };
-        })
-      };
+      return { pestanas: c3.dias.filter(function(x){ return !x.es_descanso; }).map(function(d2){
+          return { nombre: d2.nombre, filas: SB.rejilla(c3, d2).filas, huella: String(Date.now()) };
+        }) };
     }
 
     if (a === 'dieta') {
@@ -322,13 +323,12 @@
       var sel = 'grupo,orden,etiqueta,texto,tipo_dia,comidas!inner(nombre,orden,hora)';
       var it = await SB.rest('/rest/v1/items?select=' + encodeURIComponent(sel)
                            + '&perfil_id=eq.' + p4.id
-                           + '&order=comidas(orden).asc,grupo.asc,orden.asc');
-      var rows = (it || []).map(function(x){
+                           + '&order=' + encodeURIComponent('comidas(orden).asc,grupo.asc,orden.asc'));
+      return { rows: (it || []).map(function(x){
         return [x.comidas.nombre, x.comidas.hora || '',
                 (x.etiqueta ? x.etiqueta + ' = ' : '') + x.texto,
                 x.tipo_dia === 'ambos' ? '' : x.tipo_dia];
-      });
-      return { rows: rows };
+      }) };
     }
 
     if (a === 'write') {
@@ -336,63 +336,53 @@
       var c5 = await SB.cargaRutina(p5.id);
       var dia = c5.dias.filter(function(x){ return x.nombre === body.day; })[0];
       if (!dia) throw new Error('no existe el día ' + body.day);
-      var rej = SB.rejilla(c5, dia);
-      var ref = rej.mapa[body.row - 1];
+      var ref = SB.rejilla(c5, dia).mapa[body.row - 1];
       if (!ref) throw new Error('fila fuera de la rutina (' + body.row + ')');
       var ciclo = cicloDeCol(body.col);
       if (ciclo < 1 || ciclo > SB.NROLLS) throw new Error('ROLL fuera de rango');
 
-      // 1) la sesión, con su fecha y su gimnasio
-      var gimNom = '', fechaIso = null;
+      var gimNom = '', fIso = null;
       if (body.date) {
         var pr = String(body.date).split('·');
-        fechaIso = SB.fechaIso(pr[0]);
-        gimNom = (pr[1] || '').trim();
+        fIso = SB.fechaIso(pr[0]); gimNom = (pr[1] || '').trim();
       }
       var gim = c5.gimnasios.filter(function(g){
         return gimNom && g.nombre.toLowerCase() === gimNom.toLowerCase(); })[0];
-      var ses = { perfil_id: p5.id, dia_id: dia.id, ciclo: ciclo };
-      if (fechaIso) ses.fecha = fechaIso;
-      if (gim) ses.gimnasio_id = gim.id;
-      else if (gimNom) ses.gimnasio_libre = gimNom;
-      var hechas = await SB.rest('/rest/v1/sesiones?on_conflict=perfil_id,dia_id,ciclo', {
-        method: 'POST', body: [ses],
-        headers: { 'Prefer': 'resolution=merge-duplicates,return=representation' }
-      });
-      var sid = (hechas && hechas[0] && hechas[0].id);
+      var fila = { perfil_id: p5.id, dia_id: dia.id, ciclo: ciclo };
+      if (fIso) fila.fecha = fIso;
+      if (gim) fila.gimnasio_id = gim.id;
+      else if (gimNom) fila.gimnasio_libre = gimNom;
+
+      var hechas = await SB.rest('/rest/v1/sesiones?on_conflict=' +
+          encodeURIComponent('perfil_id,dia_id,ciclo'), {
+        method: 'POST', body: [fila],
+        headers: { 'Prefer': 'resolution=merge-duplicates,return=representation' } });
+      var sid = hechas && hechas[0] && hechas[0].id;
       if (!sid) {
-        var busca = await SB.rest('/rest/v1/sesiones?select=id&perfil_id=eq.' + p5.id
-                                + '&dia_id=eq.' + dia.id + '&ciclo=eq.' + ciclo);
-        sid = busca && busca[0] && busca[0].id;
+        var q = await SB.rest('/rest/v1/sesiones?select=id&perfil_id=eq.' + p5.id
+                            + '&dia_id=eq.' + dia.id + '&ciclo=eq.' + ciclo);
+        sid = q && q[0] && q[0].id;
       }
       if (!sid) throw new Error('no se pudo crear la sesión');
 
-      // 2) borrar o guardar la serie
       if (body.clear) {
         await SB.rest('/rest/v1/series?sesion_id=eq.' + sid
                     + '&serie_prescrita_id=eq.' + ref.id, { method: 'DELETE' });
-        SB.limpia();
-        return { ok: true };
+        SB.limpia(); return { ok: true };
       }
-      var v = body.values || [];
-      var pesoBruto = v[0];
-      var esNum = pesoBruto !== '' && pesoBruto != null
-                && !isNaN(Number(String(pesoBruto).replace(',', '.')));
-      var fila = {
-        sesion_id: sid, serie_prescrita_id: ref.id, perfil_id: p5.id,
-        orden: ref.orden,
-        peso: esNum ? Number(String(pesoBruto).replace(',', '.')) : null,
-        peso_texto: esNum ? null : (pesoBruto == null || pesoBruto === '' ? null : String(pesoBruto)),
-        reps: v[1] == null || v[1] === '' ? null : String(v[1]),
-        rir: v[2] == null || v[2] === '' ? null : String(v[2]),
-        ajuste: v[3] == null || v[3] === '' ? null : String(v[3])
-      };
-      await SB.rest('/rest/v1/series?on_conflict=sesion_id,serie_prescrita_id', {
-        method: 'POST', body: [fila],
-        headers: { 'Prefer': 'resolution=merge-duplicates' }
-      });
-      SB.limpia();
-      return { ok: true };
+      var v = body.values || [], pb = v[0];
+      var esNum = pb !== '' && pb != null && !isNaN(Number(String(pb).replace(',', '.')));
+      await SB.rest('/rest/v1/series?on_conflict=' +
+          encodeURIComponent('sesion_id,serie_prescrita_id'), {
+        method: 'POST',
+        body: [{ sesion_id: sid, serie_prescrita_id: ref.id, perfil_id: p5.id, orden: ref.orden,
+                 peso: esNum ? Number(String(pb).replace(',', '.')) : null,
+                 peso_texto: esNum ? null : (pb == null || pb === '' ? null : String(pb)),
+                 reps: v[1] == null || v[1] === '' ? null : String(v[1]),
+                 rir:  v[2] == null || v[2] === '' ? null : String(v[2]),
+                 ajuste: v[3] == null || v[3] === '' ? null : String(v[3]) }],
+        headers: { 'Prefer': 'resolution=merge-duplicates' } });
+      SB.limpia(); return { ok: true };
     }
 
     if (a === 'salir') { SB.salir(); ponModo(false); PERFIL = null; return { ok: true }; }
@@ -400,18 +390,32 @@
     throw new Error('acción no disponible todavía en la base: ' + a);
   }
 
-  /* Sustitución de llama(): si no toca Supabase, cae al original. */
-  var original = window.llama;
-  window.llama = async function(body, ms){
-    body = body || {};
-    if (body.action === 'google' && body.id_token) {
-      var correo = correoDe(body.id_token);
-      if (!SB.activo(correo)) { ponModo(false); return original(body, ms); }
-      var r = await SB.entraGoogle(body.id_token);
-      ponModo(true); PERFIL = null; SB.limpia();
-      return r;
+  function respuesta(obj){
+    return new Response(JSON.stringify(obj),
+      { status: 200, headers: { 'Content-Type': 'application/json' } });
+  }
+
+  var fetchOriginal = window.fetch.bind(window);
+  window.fetch = async function(entrada, opciones){
+    var url = typeof entrada === 'string' ? entrada : (entrada && entrada.url) || '';
+    if (!ES_SCRIPT.test(url) || !opciones || !opciones.body) {
+      return fetchOriginal(entrada, opciones);
     }
-    if (!usaSB || !SB.haySesion()) return original(body, ms);
-    return accion(body);
+    var body;
+    try { body = JSON.parse(opciones.body); } catch (e) { return fetchOriginal(entrada, opciones); }
+
+    try {
+      if (body.action === 'google' && body.id_token) {
+        var correo = cargaUtil(body.id_token, 'email').toLowerCase();
+        if (!SB.activo(correo)) { ponModo(false); return fetchOriginal(entrada, opciones); }
+        var r = await SB.entraGoogle(body.id_token);
+        ponModo(true); PERFIL = null; SB.limpia();
+        return respuesta(r);
+      }
+      if (!usaSB || !SB.haySesion()) return fetchOriginal(entrada, opciones);
+      return respuesta(await accion(body));
+    } catch (e) {
+      return respuesta({ error: (e && e.message) || String(e) });
+    }
   };
 })();
